@@ -2,6 +2,13 @@
 #define TOKENIZER_H
 
 #include <stdlib.h>
+#include "../lib/vector/vector.h"
+
+//================================================================================================================================
+// TOKENIZER
+//================================================================================================================================
+
+vector *tokenizer(buffer *const source);
 
 //================================================================================================================================
 // TOKEN
@@ -13,18 +20,18 @@
 
 enum KEY_TYPE
 {
-    KEY_WORD_UNDEF = -1 ,
+    KEY_UNDEF = -1  ,
 
-    KEY_WORD_INT        ,
+    KEY_INT         ,
 
-    KEY_WORD_IF         ,
-    KEY_WORD_ELSE       ,
-    KEY_WORD_WHILE      ,
+    KEY_IF          ,
+    KEY_ELSE        ,
+    KEY_WHILE       ,
 
-    KEY_WORD_RETURN     ,
+    KEY_RETURN      ,
 
-    KEY_WORD_INPUT      ,
-    KEY_WORD_OUTPUT     ,
+    KEY_INPUT       ,
+    KEY_OUTPUT      ,
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -78,6 +85,7 @@ enum TOKEN_TYPE
 struct token
 {
     TOKEN_TYPE type;
+    size_t     size;
     size_t     line;
 
     union
