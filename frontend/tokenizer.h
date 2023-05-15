@@ -91,6 +91,79 @@ struct token
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// token define
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define $type       (tkn->type)
+#define $size       (tkn->size)
+#define $line       (tkn->line)
+
+#define $name       (tkn->value.name)
+#define $imm_int    (tkn->value.imm_int)
+#define $key        (tkn->value.key)
+#define $op         (tkn->value.op)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define     token_type_is_smth(token_type, TOKEN_TYPE_name)                                                                 \
+inline bool token_type_is_ ##  token_type ## (const token *const tkn);                                                      \
+inline bool token_type_is_ ##  token_type ## (const token *const tkn) { return $type == TOKEN_TYPE_name; }
+
+token_type_is_smth(name, TOKEN_NAME    )
+token_type_is_smth(int , TOKEN_INT     )
+token_type_is_smth(key , TOKEN_KEY     )
+token_type_is_smth(op  , TOKEN_OPERATOR)
+
+#undef token_type_is_smth
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define     token_op_is_smth(op_type, OP_TYPE_name)                                                                         \
+inline bool token_op_is_ ##  op_type ## (const token *const tkn);                                                           \
+inline bool token_op_is_ ##  op_type ## (const token *const tkn) { return token_type_is_op(tkn) && $op == OP_TYPE_name; }
+
+token_op_is_smth(log_and        , OPERATOR_LOG_AND       )
+token_op_is_smth(log_or         , OPERATOR_LOG_OR        )
+
+token_op_is_smth(are_equal      , OPERATOR_ARE_EQUAL     )
+token_op_is_smth(not_equal      , OPERATOR_NOT_EQUAL     )
+token_op_is_smth(not            , OPERATOR_NOT           )
+
+token_op_is_smth(more_equal     , OPERATOR_MORE_EQUAL    )
+token_op_is_smth(less_equal     , OPERATOR_LESS_EQUAL    )
+token_op_is_smth(more           , OPERATOR_MORE          )
+token_op_is_smth(less           , OPERATOR_LESS          )
+
+token_op_is_smth(add            , OPERATOR_ADD           )
+token_op_is_smth(sub            , OPERATOR_SUB           )
+token_op_is_smth(mul            , OPERATOR_MUL           )
+token_op_is_smth(div            , OPERATOR_DIV           )
+token_op_is_smth(pow            , OPERATOR_POW           )
+
+token_op_is_smth(assignment     , OPERATOR_ASSIGNMENT    )
+
+token_op_is_smth(comma_point    , OPERATOR_COMMA_POINT   )
+token_op_is_smth(comma          , OPERATOR_COMMA         )
+
+token_op_is_smth(l_scope_figure , OPERATOR_L_SCOPE_FIGURE)
+token_op_is_smth(r_scope_figure , OPERATOR_R_SCOPE_FIGURE)
+token_op_is_smth(l_scope_circle , OPERATOR_L_SCOPE_CIRCLE)
+token_op_is_smth(r_scope_circle , OPERATOR_R_SCOPE_CIRCLE)
+
+#undef token_op_is_smth
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#undef $type
+#undef $size
+#undef $line
+
+#undef $name
+#undef $imm_int
+#undef $key
+#undef $op
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
