@@ -19,17 +19,15 @@
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool ast_node_ctor(AST_node *const node, AST_node *const l,
-                                                AST_node *const r,
-                                                AST_node *const p, AST_NODE_TYPE type, va_list value)
+static bool AST_node_ctor(AST_node *const node, AST_NODE_TYPE type, va_list value)
 {
     log_assert(node != nullptr);
 
     $type = type;
 
-    $L = l;
-    $R = r;
-    $P = p;
+    $L = nullptr;
+    $R = nullptr;
+    $P = nullptr;
 
     switch (type)
     {
@@ -59,23 +57,19 @@ static bool ast_node_ctor(AST_node *const node, AST_node *const l,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool ast_node_ctor(AST_node *const node, AST_node *const l,
-                                         AST_node *const r,
-                                         AST_node *const p, AST_NODE_TYPE type, ...)
+bool AST_node_ctor(AST_node *const node, AST_NODE_TYPE type, ...)
 {
     log_verify(node != nullptr, false);
 
     va_list  value;
     va_start(value, type);
 
-    return ast_node_ctor(node, l, r, p, type, value);
+    return AST_node_ctor(node, type, value);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-AST_node *ast_node_new(AST_node *const l,
-                       AST_node *const r,
-                       AST_node *const p, AST_NODE_TYPE type, ...)
+AST_node *AST_node_new(AST_NODE_TYPE type, ...)
 {
     AST_node  *node_new = (AST_node *) log_calloc(1, sizeof(AST_node));
     log_verify(node_new != nullptr, nullptr);
@@ -83,7 +77,7 @@ AST_node *ast_node_new(AST_node *const l,
     va_list  value;
     va_start(value, type);
 
-    if (!ast_node_ctor(node_new, l, r, p, type, value)) { log_free(node_new); return nullptr; }
+    if (!AST_node_ctor(node_new, type, value)) { log_free(node_new); return nullptr; }
     return node_new;
 }
 
@@ -99,6 +93,55 @@ void AST_tree_delete(AST_node *const node)
     AST_tree_delete($R);
 
     log_free(node);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// hang
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool AST_node_hang_left(AST_node *const tree, AST_node *const node)
+{
+    log_verify(tree != nullptr, false);
+    log_verify(node != nullptr, false);
+
+    tree->left = node;
+    node->prev = tree;
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool AST_node_hang_right(AST_node *const tree, AST_node *const node)
+{
+    log_verify(tree != nullptr, false);
+    log_verify(node != nullptr, false);
+
+    tree->right = node;
+    node-> prev = tree;
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool AST_tree_hang(AST_node *const tree, AST_node *const node)
+{
+    log_verify(tree != nullptr, false);
+    if        (node == nullptr) return false;
+
+    if (tree->left  == nullptr) return AST_node_hang_left(tree, node);
+    if (tree->right == nullptr)
+    {
+        AST_node *adapter = AST_node_new(AST_NODE_FICTIONAL);
+
+        AST_node_hang_right(tree, adapter);
+        AST_node_hang_left (adapter, node);
+
+        return true;
+    }
+
+    return AST_tree_hang(tree->right, node);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -124,8 +167,8 @@ static void AST_tree_static_dump(const AST_node *const node)
     char dump_filename_txt[100] = "";
     char dump_filename_png[100] = "";
 
-    sprintf(dump_filename_txt, "ast/graphviz_dump_txt/%.10lu.txt", dump_num);
-    sprintf(dump_filename_png, "ast/graphviz_dump_png/%.10lu.png", dump_num);
+    sprintf(dump_filename_txt, "AST/graphviz_dump_txt/%.10lu.txt", dump_num);
+    sprintf(dump_filename_png, "AST/graphviz_dump_png/%.10lu.png", dump_num);
 
     FILE *stream = fopen(dump_filename_txt, "w");
     log_verify(stream != nullptr, (void) 0);
