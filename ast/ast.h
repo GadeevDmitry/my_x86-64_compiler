@@ -47,12 +47,6 @@ enum AST_OPERATOR_TYPE
     AST_OPERATOR_ASSIGNMENT ,
 };
 
-enum AST_CHILD
-{
-    AST_CHILD_LEFT ,
-    AST_CHILD_RIGHT,
-};
-
 //--------------------------------------------------------------------------------------------------------------------------------
 
 struct AST_node
@@ -74,17 +68,20 @@ struct AST_node
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// ctor
+// ctor, dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool      ast_node_ctor(AST_node *const node, AST_node *const left, AST_node *const right, AST_node *const prev, AST_NODE_TYPE type, ...);
-AST_node *ast_node_new (                      AST_node *const left, AST_node *const right, AST_node *const prev, AST_NODE_TYPE type, ...);
+bool      AST_node_ctor  (AST_node *const node, AST_NODE_TYPE type, ...);
+AST_node *AST_node_new   (                      AST_NODE_TYPE type, ...);
+void      AST_tree_delete(AST_node *const node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// dtor
+// hang
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void AST_tree_delete(AST_node *const node);
+bool AST_node_hang_left (AST_node *const tree, AST_node *const node);
+bool AST_node_hang_right(AST_node *const tree, AST_node *const node);
+bool AST_tree_hang      (AST_node *const tree, AST_node *const node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
