@@ -41,8 +41,9 @@ static bool ast_node_ctor(AST_node *const node, AST_node *const l,
         case AST_NODE_DECL_FUNC:
         case AST_NODE_CALL_FUNC: $func = va_arg(value, size_t); break;
 
-        case AST_NODE_OPERATOR : $op   = va_arg(value, AST_OPERATOR_TYPE); break;
+        case AST_NODE_OPERATOR : $op   = (AST_OPERATOR_TYPE) va_arg(value, int); break;
 
+        case AST_NODE_FICTIONAL         :
         case AST_NODE_OPERATOR_IF       :
         case AST_NODE_OPERATOR_THEN_ELSE:
         case AST_NODE_OPERATOR_WHILE    :
@@ -222,8 +223,9 @@ static void AST_node_get_dump_color(const AST_node *const node, GRAPHVIZ_COLOR *
                                   *color_fill = GRAPHVIZ_COLOR_LIGHT_GREEN;
                                   return;
 
-        case AST_NODE_VARIABLE  : *color      = GRAPHVIZ_COLOR_DARK_BLUE;
-        case AST_NODE_IMM_INT   : *color_fill = GRAPHVIZ_COLOR_LIGHT_BLUE;
+        case AST_NODE_VARIABLE  :
+        case AST_NODE_IMM_INT   : *color      = GRAPHVIZ_COLOR_DARK_BLUE;
+                                  *color_fill = GRAPHVIZ_COLOR_LIGHT_BLUE;
                                   break;
 
         case AST_NODE_CALL_FUNC         :
@@ -282,5 +284,5 @@ static inline void AST_edge_dump(const size_t src, const size_t dst, FILE *const
 {
     log_assert(stream != nullptr);
 
-    fprintf(stream, "node%d->node%d[color=\"black\"]\n", src, dst);
+    fprintf(stream, "node%lu->node%lu[color=\"black\"]\n", src, dst);
 }
