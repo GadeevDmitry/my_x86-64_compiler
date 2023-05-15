@@ -73,6 +73,7 @@ struct AST_node
 
 bool      AST_node_ctor  (AST_node *const node, AST_NODE_TYPE type, ...);
 AST_node *AST_node_new   (                      AST_NODE_TYPE type, ...);
+void      AST_node_delete(AST_node *const node);
 void      AST_tree_delete(AST_node *const node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
