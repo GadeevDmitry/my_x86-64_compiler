@@ -26,7 +26,7 @@ vector *tokenizer(buffer *const source)
     vector    *token_arr = vector_new(sizeof(token), nullptr, nullptr, token_dump);
     log_verify(token_arr != nullptr, nullptr);
 
-    size_t source_line = 0;
+    size_t source_line = 1;
     token_name_fill_all();
 
     for (buffer_skip_spaces(source, &source_line); !buffer_is_end(source); buffer_skip_spaces(source, &source_line))
