@@ -10,8 +10,10 @@
 
 static bool try_tokenize_type_key     (buffer *const source, KEY_TYPE      *const key);
 static bool try_tokenize_type_int     (buffer *const source, int           *const imm);
-static bool tokenize_type_name        (buffer *const source, const char    **    name);
 static bool try_tokenize_type_operator(buffer *const source, OPERATOR_TYPE *const op );
+static bool     tokenize_type_name    (buffer *const source, const char    **    name);
+
+static bool tokenize_last(vector *const tkn_arr, const size_t source_line);
 
 //================================================================================================================================
 // TOKEN_NAME

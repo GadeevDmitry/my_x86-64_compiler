@@ -44,6 +44,8 @@ vector *tokenizer(buffer *const source)
         vector_push_back(token_arr, &cur_token);
     }
 
+    tokenize_last(token_arr, source_line);
+
     return token_arr;
 }
 
@@ -123,6 +125,20 @@ static bool tokenize_type_name(buffer *const source, const char **name)
     return true;
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool tokenize_last(vector *const tkn_arr, const size_t source_line)
+{
+    log_verify(tkn_arr != nullptr, false);
+
+    token last = {};
+    token_init_common(&last, TOKEN_FICTIONAL, 0, source_line);
+
+    vector_push_back(tkn_arr, &last);
+
+    return true;
+}
+
 //================================================================================================================================
 // TOKEN
 //================================================================================================================================
@@ -162,12 +178,13 @@ void token_dump(const void *const _tkn)
 
     switch ($type)
     {
-        case TOKEN_NAME    : log_tab_default_message("name    = %.*s", "\n", $size, $name);            break;
-        case TOKEN_INT     : usual_field_dump       ("imm_int", "%d", $imm_int);                       break;
-        case TOKEN_KEY     : usual_field_dump       ("key    ", "%s", KEY_NAMES     [$key].name_dump); break;
-        case TOKEN_OPERATOR: usual_field_dump       ("op     ", "%s", OPERATOR_NAMES[$op ].name_dump); break;
+        case TOKEN_NAME     : log_tab_default_message("name     = %.*s", "\n", $size, $name);            break;
+        case TOKEN_INT      : usual_field_dump       ("imm_int ", "%d", $imm_int);                       break;
+        case TOKEN_KEY      : usual_field_dump       ("key     ", "%s", KEY_NAMES     [$key].name_dump); break;
+        case TOKEN_OPERATOR : usual_field_dump       ("op      ", "%s", OPERATOR_NAMES[$op ].name_dump); break;
+        case TOKEN_FICTIONAL: log_tab_default_message("no value", "\n");                                 break;
 
-        default            : log_assert(false); break;
+        default             : log_assert(false); break;
     }
 
     LOG_TAB--;
