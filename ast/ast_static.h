@@ -63,7 +63,7 @@ static const char *AST_OPERATOR_NAMES[] =
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool AST_node_ctor(AST_node *const node, AST_NODE_TYPE type, va_list value);
+static bool AST_node_set_value(AST_node *const node, AST_NODE_TYPE type, va_list value);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump

@@ -19,15 +19,9 @@
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool AST_node_ctor(AST_node *const node, AST_NODE_TYPE type, va_list value)
+static bool AST_node_set_value(AST_node *const node, AST_NODE_TYPE type, va_list value)
 {
     log_assert(node != nullptr);
-
-    $type = type;
-
-    $L = nullptr;
-    $R = nullptr;
-    $P = nullptr;
 
     switch (type)
     {
@@ -61,10 +55,16 @@ bool AST_node_ctor(AST_node *const node, AST_NODE_TYPE type, ...)
 {
     log_verify(node != nullptr, false);
 
+    $type = type;
+
+    $L = nullptr;
+    $R = nullptr;
+    $P = nullptr;
+
     va_list  value;
     va_start(value, type);
 
-    return AST_node_ctor(node, type, value);
+    return AST_node_set_value(node, type, value);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -79,6 +79,18 @@ AST_node *AST_node_new(AST_NODE_TYPE type, ...)
 
     if (!AST_node_ctor(node_new, type, value)) { log_free(node_new); return nullptr; }
     return node_new;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool AST_node_set_value(AST_node *const node, AST_NODE_TYPE type, ...)
+{
+    log_verify(node != nullptr, false);
+
+    va_list  value;
+    va_start(value, type);
+
+    return AST_node_set_value(node, type, value);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -108,7 +120,8 @@ void AST_tree_delete(AST_node *const node)
 bool AST_node_hang_left(AST_node *const tree, AST_node *const node)
 {
     log_verify(tree != nullptr, false);
-    log_verify(node != nullptr, false);
+
+    if (node == nullptr) return;
 
     tree->left = node;
     node->prev = tree;
@@ -121,7 +134,8 @@ bool AST_node_hang_left(AST_node *const tree, AST_node *const node)
 bool AST_node_hang_right(AST_node *const tree, AST_node *const node)
 {
     log_verify(tree != nullptr, false);
-    log_verify(node != nullptr, false);
+
+    if (node == nullptr) return;
 
     tree->right = node;
     node-> prev = tree;
@@ -131,12 +145,12 @@ bool AST_node_hang_right(AST_node *const tree, AST_node *const node)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool AST_tree_hang(AST_node *const tree, AST_node *const node)
+AST_node *AST_tree_hang(AST_node *const tree, AST_node *const node)
 {
-    log_verify(tree != nullptr, false);
-    if        (node == nullptr) return false;
+    log_verify(tree != nullptr, nullptr);
+    if (node        == nullptr) return tree;
 
-    if (tree->left  == nullptr) return AST_node_hang_left(tree, node);
+    if (tree->left  == nullptr) { AST_node_hang_left(tree, node); return tree; }
     if (tree->right == nullptr)
     {
         AST_node *adapter = AST_node_new(AST_NODE_FICTIONAL);
@@ -144,7 +158,7 @@ bool AST_tree_hang(AST_node *const tree, AST_node *const node)
         AST_node_hang_right(tree, adapter);
         AST_node_hang_left (adapter, node);
 
-        return true;
+        return adapter;
     }
 
     return AST_tree_hang(tree->right, node);

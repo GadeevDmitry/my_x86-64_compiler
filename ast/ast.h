@@ -71,8 +71,10 @@ struct AST_node
 // ctor, dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool      AST_node_ctor  (AST_node *const node, AST_NODE_TYPE type, ...);
-AST_node *AST_node_new   (                      AST_NODE_TYPE type, ...);
+bool      AST_node_ctor     (AST_node *const node, AST_NODE_TYPE type, ...);
+bool      AST_node_set_value(AST_node *const node, AST_NODE_TYPE type, ...);
+AST_node *AST_node_new      (                      AST_NODE_TYPE type, ...);
+
 void      AST_node_delete(AST_node *const node);
 void      AST_tree_delete(AST_node *const node);
 
@@ -80,9 +82,9 @@ void      AST_tree_delete(AST_node *const node);
 // hang
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool AST_node_hang_left (AST_node *const tree, AST_node *const node);
-bool AST_node_hang_right(AST_node *const tree, AST_node *const node);
-bool AST_tree_hang      (AST_node *const tree, AST_node *const node);
+bool      AST_node_hang_left (AST_node *const tree, AST_node *const node);
+bool      AST_node_hang_right(AST_node *const tree, AST_node *const node);
+AST_node *AST_tree_hang      (AST_node *const tree, AST_node *const node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
