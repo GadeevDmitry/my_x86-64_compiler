@@ -19,7 +19,7 @@
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool AST_node_set_value(AST_node *const node, AST_NODE_TYPE type, va_list value)
+static bool AST_node_set_value(AST_node *const node, const AST_NODE_TYPE type, va_list value)
 {
     log_assert(node != nullptr);
 
@@ -51,9 +51,9 @@ static bool AST_node_set_value(AST_node *const node, AST_NODE_TYPE type, va_list
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool AST_node_ctor(AST_node *const node, AST_NODE_TYPE type, ...)
+static inline bool AST_node_ctor(AST_node *const node, const AST_NODE_TYPE type, va_list value)
 {
-    log_verify(node != nullptr, false);
+    log_assert(node != nullptr);
 
     $type = type;
 
@@ -61,15 +61,24 @@ bool AST_node_ctor(AST_node *const node, AST_NODE_TYPE type, ...)
     $R = nullptr;
     $P = nullptr;
 
-    va_list  value;
-    va_start(value, type);
-
     return AST_node_set_value(node, type, value);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-AST_node *AST_node_new(AST_NODE_TYPE type, ...)
+bool AST_node_ctor(AST_node *const node, const AST_NODE_TYPE type, ...)
+{
+    log_verify(node != nullptr, false);
+
+    va_list  value;
+    va_start(value, type);
+
+    return AST_node_ctor(node, type, value);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+AST_node *AST_node_new(const AST_NODE_TYPE type, ...)
 {
     AST_node  *node_new = (AST_node *) log_calloc(1, sizeof(AST_node));
     log_verify(node_new != nullptr, nullptr);
@@ -83,7 +92,7 @@ AST_node *AST_node_new(AST_NODE_TYPE type, ...)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool AST_node_set_value(AST_node *const node, AST_NODE_TYPE type, ...)
+bool AST_node_set_value(AST_node *const node, const AST_NODE_TYPE type, ...)
 {
     log_verify(node != nullptr, false);
 
