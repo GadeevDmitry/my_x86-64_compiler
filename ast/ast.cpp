@@ -307,20 +307,23 @@ static void AST_node_get_dump_color(const AST_node *const node, GRAPHVIZ_COLOR *
     switch ($type)
     {
         case AST_NODE_FICTIONAL : *color      = GRAPHVIZ_COLOR_BLACK;
-                                  *color_fill = GRAPHVIZ_COLOR_LIGHT_GREEN;
+                                  *color_fill = GRAPHVIZ_COLOR_LIGHT_GREY;
                                   return;
 
         case AST_NODE_VARIABLE  :
         case AST_NODE_IMM_INT   : *color      = GRAPHVIZ_COLOR_DARK_BLUE;
                                   *color_fill = GRAPHVIZ_COLOR_LIGHT_BLUE;
-                                  break;
+                                  return;
 
         case AST_NODE_CALL_FUNC         :
-        case AST_NODE_OPERATOR          :
         case AST_NODE_OPERATOR_IF       :
         case AST_NODE_OPERATOR_WHILE    :
         case AST_NODE_OPERATOR_RETURN   :
-        case AST_NODE_OPERATOR_THEN_ELSE: *color      = GRAPHVIZ_COLOR_DARK_GREEN;
+        case AST_NODE_OPERATOR_THEN_ELSE: *color      = GRAPHVIZ_COLOR_DARK_ORANGE;
+                                          *color_fill = GRAPHVIZ_COLOR_LIGHT_ORANGE;
+                                          return;
+
+        case AST_NODE_OPERATOR          : *color      = GRAPHVIZ_COLOR_DARK_GREEN;
                                           *color_fill = GRAPHVIZ_COLOR_LIGHT_GREEN;
                                           return;
 
