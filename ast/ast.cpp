@@ -185,11 +185,15 @@ static void AST_tree_static_dump(const AST_node *const node)
     char dump_filename_txt[100] = "";
     char dump_filename_png[100] = "";
 
-    sprintf(dump_filename_txt, "AST/graphviz_dump_txt/%.10lu.txt", dump_num);
-    sprintf(dump_filename_png, "AST/graphviz_dump_png/%.10lu.png", dump_num);
+    system("mkdir -p ast/graphviz_dump_txt");
+    system("mkdir -p ast/graphviz_dump_png");
+
+    sprintf(dump_filename_txt, "ast/graphviz_dump_txt/ast_%.5lu.txt", dump_num);
+    sprintf(dump_filename_png, "ast/graphviz_dump_png/ast_%.5lu.png", dump_num);
 
     FILE *stream = fopen(dump_filename_txt, "w");
-    log_verify(stream != nullptr, (void) 0);
+    log_verify(stream != nullptr,  (void) 0);
+    setvbuf   (stream,   nullptr, _IONBF, 0);
 
     dump_num++;
 
