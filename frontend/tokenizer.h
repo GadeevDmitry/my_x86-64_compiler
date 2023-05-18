@@ -108,8 +108,8 @@ struct token
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #define     token_type_is_smth(token_type, TOKEN_TYPE_name)                                                                     \
-inline bool token_type_is_ ##  token_type ## (const token *const tkn);                                                          \
-inline bool token_type_is_ ##  token_type ## (const token *const tkn) { return $type == TOKEN_TYPE_name; }
+inline bool token_type_is_ ##  token_type(const token *const tkn);                                                              \
+inline bool token_type_is_ ##  token_type(const token *const tkn) { return $type == TOKEN_TYPE_name; }
 
 token_type_is_smth(name, TOKEN_NAME    )
 token_type_is_smth(int , TOKEN_INT     )
@@ -121,8 +121,8 @@ token_type_is_smth(op  , TOKEN_OPERATOR)
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #define     token_op_is_smth(op_type, OP_TYPE_name)                                                                             \
-inline bool token_op_is_ ##  op_type ## (const token *const tkn);                                                               \
-inline bool token_op_is_ ##  op_type ## (const token *const tkn) { return token_type_is_op(tkn) && $op == OP_TYPE_name; }
+inline bool token_op_is_ ##  op_type(const token *const tkn);                                                                   \
+inline bool token_op_is_ ##  op_type(const token *const tkn) { return token_type_is_op(tkn) && $op == OP_TYPE_name; }
 
 token_op_is_smth(log_and        , OPERATOR_LOG_AND       )
 token_op_is_smth(log_or         , OPERATOR_LOG_OR        )
@@ -157,8 +157,8 @@ token_op_is_smth(r_scope_circle , OPERATOR_R_SCOPE_CIRCLE)
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #define     token_key_is_smth(token_key, KEY_TYPE_name)                                                                         \
-inline bool token_key_is_  ## token_key ## (const token *const tkn);                                                            \
-inline bool token_key_is_  ## token_key ## (const token *const tkn) { return token_type_is_key(tkn) && $key == KEY_TYPE_name; }
+inline bool token_key_is_  ## token_key(const token *const tkn);                                                                \
+inline bool token_key_is_  ## token_key(const token *const tkn) { return token_type_is_key(tkn) && $key == KEY_TYPE_name; }
 
 token_key_is_smth(int   , KEY_INT   )
 

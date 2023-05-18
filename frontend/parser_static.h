@@ -113,8 +113,8 @@ struct prog_info
     vector *func_storage;
 
     size_t scope;
-    bool is_main_func;
-    bool is_return_op;
+    size_t main_func_id;
+    bool   is_return_op;
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -168,11 +168,11 @@ static inline void prog_info_scope_open (prog_info *const prog);
 static        void prog_info_scope_close(prog_info *const prog);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// meet
+// other
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static inline void prog_info_meet_return            (prog_info *const prog);
-static inline void prog_info_meet_possible_main_func(prog_info *const prog, const token *const tkn);
+static inline void prog_info_meet_return(prog_info *const prog);
+static inline bool prog_info_func_exit  (prog_info *const prog, const token *const tkn, const size_t func_id);
 
 //================================================================================================================================
 // PARSER

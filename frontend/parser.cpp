@@ -13,8 +13,16 @@ AST_node *parser(vector *token_arr)
     AST_node       *result   = nullptr;
 
     parse_general(program, tkn_pass, &result);
+    AST_tree_graphviz_dump           (result);
 
+          AST_tree_delete(result);
+         prog_info_delete(program);
+    token_arr_pass_delete(tkn_pass);
+
+    return nullptr;
 }
+
+//================================================================================================================================
 
 #define $tkn_pos (tkn_pass->arr_pos)
 #define $tkn_end (tkn_pass->arr_end)
@@ -45,14 +53,14 @@ AST_node *parser(vector *token_arr)
 *   Параметр op_type должен быть равен соответствующему параметру op_type в макросе token_op_is_smth в файле tokenizer.h.
 */
 #define try_token_op(op_type)                                                                                       \
-        if (!is_passed() && token_op_is_##op_type##($tkn_pos)) next();                                              \
+        if (!is_passed() && token_op_is_##op_type($tkn_pos)) next();                                                \
         else parse_fail
 
 /**
 *   Параметр token_key должен быть равен соответствующему параметру token_key в макросе token_key_is_smth в файле tokenizer.h.
 */
 #define try_token_key(token_key)                                                                                    \
-        if (!is_passed() && token_key_is_##token_key##($tkn_pos)) next();                                           \
+        if (!is_passed() && token_key_is_##token_key($tkn_pos)) next();                                             \
         else parse_fail
 
 #define try_name_decl                                                                                               \
@@ -137,13 +145,17 @@ static bool parse_func_decl(prog_info *const program, token_arr_pass *const tkn_
     const token *tkn_entry = $tkn_pos;
     const token *name      =  nullptr;
     AST_node    *child     =  nullptr;
+    size_t       func_id   =        0;
 
     try_token_key(int)
     try_name_decl
     try_token_op(l_scope_circle)
 
-    *subtree = AST_node_new(AST_NODE_DECL_FUNC, prog_info_func_push_back(program, name));
+    func_id  = prog_info_func_push_back(program, name);
+    *subtree = AST_node_new(AST_NODE_DECL_FUNC, func_id);
     prog_info_scope_open(program);
+
+    #undef  parse_fail_cmd
     #define parse_fail_cmd prog_info_func_pop_back(program); prog_info_scope_close(program);
 
     parse_args(program, tkn_pass, &child);
@@ -157,12 +169,13 @@ static bool parse_func_decl(prog_info *const program, token_arr_pass *const tkn_
 
     try_token_op(r_scope_figure)
 
-    prog_info_meet_possible_main_func(program, name);
-    prog_info_scope_close(program);
+    if (!prog_info_func_exit(program, name, func_id)) parse_fail
+    prog_info_scope_close   (program);
 
     parse_success
 }
 
+#undef  parse_fail_cmd
 #define parse_fail_cmd
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -339,6 +352,8 @@ static bool parse_scope(prog_info *const program, token_arr_pass *const tkn_pass
     try_token_op(l_scope_figure)
 
     prog_info_scope_open(program);
+
+    #undef  parse_fail_cmd
     #define parse_fail_cmd prog_info_scope_close(program);
 
     if (!parse_operators(program, tkn_pass, subtree)) parse_fail
@@ -350,6 +365,7 @@ static bool parse_scope(prog_info *const program, token_arr_pass *const tkn_pass
     parse_success
 }
 
+#undef  parse_fail_cmd
 #define parse_fail_cmd
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -557,6 +573,8 @@ static bool parse_single_assignment(prog_info *const program, token_arr_pass *co
         AST_node_hang_right(node_op_lower->prev, node_op);                  \
         AST_node_hang_left (node_op,       node_op_lower);
 
+#define try_op
+
 #define parse_op_body(parse_op_lower)                                       \
         parse_verify();                                                     \
         parse_op_prepare                                                    \
@@ -577,6 +595,7 @@ static bool parse_single_assignment(prog_info *const program, token_arr_pass *co
 // parse_log_or
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#undef  try_op
 #define try_op                                                                                                          \
         if (is_passed() || !token_op_is_log_or($tkn_pos)) parse_success                                                 \
         next();                                                                                                         \
@@ -591,6 +610,7 @@ static bool parse_log_or(prog_info *const program, token_arr_pass *const tkn_pas
 // parse_log_and
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#undef  try_op
 #define try_op                                                                                                          \
         if (is_passed() || !token_op_is_log_and($tkn_pos)) parse_success                                                \
         next();                                                                                                         \
@@ -606,6 +626,7 @@ static bool parse_log_and(prog_info *const program, token_arr_pass *const tkn_pa
 // parse_equal
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#undef  try_op
 #define try_op                                                                                                          \
         if      (is_passed()) parse_success                                                                             \
         if      (token_op_is_are_equal($tkn_pos)) node_op = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_ARE_EQUAL);    \
@@ -622,6 +643,7 @@ static bool parse_equal(prog_info *const program, token_arr_pass *const tkn_pass
 // parse_cmp
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#undef  try_op
 #define try_op                                                                                                          \
         if     (is_passed() || !token_type_is_op($tkn_pos)) parse_success                                          \
         switch ($tkn_pos->value.op)                                                                                     \
@@ -636,13 +658,17 @@ static bool parse_equal(prog_info *const program, token_arr_pass *const tkn_pass
 
 static bool parse_cmp(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree)
 {
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wswitch-enum"
     parse_op_body(parse_add_sub)
+    #pragma GCC diagnostic pop
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // parse_add_sub
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#undef  try_op
 #define try_op                                                                                                          \
         if      (is_passed()) parse_success                                                                             \
         else if (token_op_is_add($tkn_pos)) node_op = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_ADD);                \
@@ -659,6 +685,7 @@ static bool parse_add_sub(prog_info *const program, token_arr_pass *const tkn_pa
 // parse_mul_div
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#undef  try_op
 #define try_op                                                                                                          \
         if      (is_passed()) parse_success                                                                             \
         else if (token_op_is_mul($tkn_pos)) node_op = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_MUL);                \
@@ -675,6 +702,7 @@ static bool parse_mul_div(prog_info *const program, token_arr_pass *const tkn_pa
 // parse_pow
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#undef  try_op
 #define try_op                                                                                                          \
         if (is_passed() || !token_op_is_pow($tkn_pos)) parse_success                                                    \
         next();                                                                                                         \
@@ -692,6 +720,7 @@ static bool parse_pow(prog_info *const program, token_arr_pass *const tkn_pass, 
 #undef create_op_node_first
 #undef try_op_lower_cycle
 #undef op_nodes_rehang
+#undef try_op
 #undef parse_op_body
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -980,6 +1009,9 @@ static bool var_info_ctor(var_info *const var, const char *name, const size_t si
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 static var_info *var_info_new(const char *name, const size_t size, const size_t scope)
 {
     log_verify(name != nullptr, nullptr);
@@ -990,6 +1022,8 @@ static var_info *var_info_new(const char *name, const size_t size, const size_t 
     if (!var_info_ctor(var_new, name, size, scope)) { log_free(var_new); return nullptr; }
     return var_new;
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
@@ -1005,11 +1039,16 @@ static void var_info_dtor(void *const _var)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 static void var_info_delete(void *const _var)
 {
     var_info_dtor(_var);
     log_free     (_var);
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // scope
@@ -1108,6 +1147,9 @@ static bool func_info_ctor(func_info *const func, const char *name, const size_t
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 static func_info *func_info_new(const char *name, const size_t size)
 {
     log_verify(name != nullptr, nullptr);
@@ -1118,6 +1160,8 @@ static func_info *func_info_new(const char *name, const size_t size)
     if (!func_info_ctor(func_new, name, size)) { log_free(func_new); return nullptr; }
     return func_new;
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
@@ -1133,11 +1177,16 @@ static void func_info_dtor(void *const _func)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 static void func_info_delete(void *const _func)
 {
     func_info_dtor(_func);
     log_free      (_func);
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // query
@@ -1177,7 +1226,7 @@ static bool func_info_is_equal(const func_info *const func, const token *const t
 #define $v_store    (prog->var_storage)
 #define $f_store    (prog->func_storage)
 #define $scope      (prog->scope)
-#define $is_main    (prog->is_main_func)
+#define $main_id    (prog->main_func_id)
 #define $is_ret     (prog->is_return_op)
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -1194,8 +1243,8 @@ static bool prog_info_ctor(prog_info *const prog)
     if ($v_store == nullptr) { vector_free($f_store); return false; }
     if ($f_store == nullptr) { vector_free($v_store); return false; }
 
-    $scope   = 0;
-    $is_main = false;
+    $scope   =     0;
+    $main_id =  -1UL;
     $is_ret  = false;
 
     return true;
@@ -1372,7 +1421,11 @@ static size_t prog_info_var_push(prog_info *const prog, const token *const tkn)
     }
 
     var_index = $v_store->size;
-    vector_push_back($v_store, var_info_new($tkn_name, tkn->size, $scope));
+
+    var_info       var_new = {};
+    var_info_ctor(&var_new, $tkn_name, tkn->size, $scope);
+
+    vector_push_back($v_store, &var_new);
 
     return var_index;
 }
@@ -1390,7 +1443,11 @@ static size_t prog_info_func_push_back(prog_info *const prog, const token *const
     if    (func_index != -1UL) return func_index;
 
     func_index = $f_store->size;
-    vector_push_back($f_store, func_info_new($tkn_name, tkn->size));
+
+    func_info       func_new = {};
+    func_info_ctor(&func_new, $tkn_name, tkn->size);
+
+    vector_push_back($f_store, &func_new);
 
     return func_index;
 }
@@ -1432,7 +1489,7 @@ static void prog_info_scope_close(prog_info *const prog)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// meet
+// other
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static inline void prog_info_meet_return(prog_info *const prog)
@@ -1444,12 +1501,13 @@ static inline void prog_info_meet_return(prog_info *const prog)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static inline void prog_info_meet_possible_main_func(prog_info *const prog, const token *const tkn)
+static inline bool prog_info_func_exit(prog_info *const prog, const token *const tkn, const size_t func_id)
 {
     log_assert(prog != nullptr);
     log_assert(tkn  != nullptr);
 
     log_assert(tkn->type == TOKEN_NAME);
 
-    $is_main = (strcmp(tkn->value.name, MAIN_FUNC_NAME) == 0);
+    $main_id = (strcmp(tkn->value.name, MAIN_FUNC_NAME) == 0) ? func_id : -1UL;
+    return $is_ret;
 }
