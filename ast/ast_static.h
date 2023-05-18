@@ -36,6 +36,7 @@ static const char *AST_NODE_TYPE_NAMES[] =
 
 static const char *AST_OPERATOR_NAMES[] =
 {
+    "UNDEF" ,
     "ADD"   ,
     "SUB"   ,
     "MUL"   ,

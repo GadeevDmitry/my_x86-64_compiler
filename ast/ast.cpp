@@ -152,7 +152,20 @@ bool AST_node_hang_right(AST_node *const tree, AST_node *const node)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-AST_node *AST_tree_hang(AST_node *const tree, AST_node *const node)
+bool AST_tree_hang(AST_node *const tree, AST_node *const node)
+{
+    log_verify(tree != nullptr, false);
+    if (node == nullptr) return false;
+
+    if (tree->left  == nullptr) { AST_node_hang_left (tree, node); return true; }
+    if (tree->right == nullptr) { AST_node_hang_right(tree, node); return true; }
+
+    return AST_tree_hang(tree->right, node);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+AST_node *AST_tree_hang_by_adapter(AST_node *const tree, AST_node *const node)
 {
     log_verify(tree != nullptr, nullptr);
     if (node        == nullptr) return tree;
@@ -168,7 +181,7 @@ AST_node *AST_tree_hang(AST_node *const tree, AST_node *const node)
         return adapter;
     }
 
-    return AST_tree_hang(tree->right, node);
+    return AST_tree_hang_by_adapter(tree->right, node);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

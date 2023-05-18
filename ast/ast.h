@@ -82,9 +82,10 @@ void      AST_tree_delete(AST_node *const node);
 // hang
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool      AST_node_hang_left (AST_node *const tree, AST_node *const node);
-bool      AST_node_hang_right(AST_node *const tree, AST_node *const node);
-AST_node *AST_tree_hang      (AST_node *const tree, AST_node *const node);
+bool      AST_node_hang_left      (AST_node *const tree, AST_node *const node);
+bool      AST_node_hang_right     (AST_node *const tree, AST_node *const node);
+bool      AST_tree_hang           (AST_node *const tree, AST_node *const node);
+AST_node *AST_tree_hang_by_adapter(AST_node *const tree, AST_node *const node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
