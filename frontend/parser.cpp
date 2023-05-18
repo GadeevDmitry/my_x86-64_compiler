@@ -31,20 +31,20 @@ AST_node *parser(vector *token_arr)
 #define reset()     token_arr_pass_reset    (tkn_pass, tkn_entry)
 #define is_passed() token_arr_pass_is_passed(tkn_pass)
 
-#define parse_verify()                                                      \
-          log_verify(tkn_pass != nullptr, false);                           \
-          log_verify( program != nullptr, false);                           \
-          log_verify( subtree != nullptr, false);                           \
-          log_verify(*subtree == nullptr, false);
+#define parse_verify()                                                                                                      \
+          log_verify(tkn_pass != nullptr, false);                                                                           \
+          log_verify( program != nullptr, false);                                                                           \
+          log_verify( subtree != nullptr, false);                                                                           \
+          *subtree = nullptr;
 
 
 #define parse_fail_cmd
-#define parse_fail                                                          \
-        {                                                                   \
-            parse_fail_cmd                                                  \
-            AST_tree_delete(*subtree);                                      \
-            reset();                                                        \
-            return false;                                                   \
+#define parse_fail                                                                                                          \
+        {                                                                                                                   \
+            parse_fail_cmd                                                                                                  \
+            AST_tree_delete(*subtree); *subtree = nullptr;                                                                  \
+            reset();                                                                                                        \
+            return false;                                                                                                   \
         }
 
 #define parse_success return true;
@@ -52,42 +52,42 @@ AST_node *parser(vector *token_arr)
 /**
 *   Параметр op_type должен быть равен соответствующему параметру op_type в макросе token_op_is_smth в файле tokenizer.h.
 */
-#define try_token_op(op_type)                                                                                       \
-        if (!is_passed() && token_op_is_##op_type($tkn_pos)) next();                                                \
+#define try_token_op(op_type)                                                                                               \
+        if (!is_passed() && token_op_is_##op_type($tkn_pos)) next();                                                        \
         else parse_fail
 
 /**
 *   Параметр token_key должен быть равен соответствующему параметру token_key в макросе token_key_is_smth в файле tokenizer.h.
 */
-#define try_token_key(token_key)                                                                                    \
-        if (!is_passed() && token_key_is_##token_key($tkn_pos)) next();                                             \
+#define try_token_key(token_key)                                                                                            \
+        if (!is_passed() && token_key_is_##token_key($tkn_pos)) next();                                                     \
         else parse_fail
 
-#define try_name_decl                                                                                               \
-        if (!is_passed() && token_type_is_name($tkn_pos) && prog_info_is_name_decl_possible(program, $tkn_pos))     \
-        {                                                                                                           \
-            name = $tkn_pos;                                                                                        \
-            next();                                                                                                 \
-        }                                                                                                           \
+#define try_name_decl                                                                                                       \
+        if (!is_passed() && token_type_is_name($tkn_pos) && prog_info_is_name_decl_possible(program, $tkn_pos))             \
+        {                                                                                                                   \
+            name = $tkn_pos;                                                                                                \
+            next();                                                                                                         \
+        }                                                                                                                   \
         else parse_fail
 
-#define try_func_access                                                                                             \
-        if (!is_passed() && token_type_is_name($tkn_pos) && prog_info_is_func_exist(program, $tkn_pos))             \
-        {                                                                                                           \
-            func_id = prog_info_get_func_index(program, $tkn_pos);                                                  \
-            next();                                                                                                 \
-        }                                                                                                           \
+#define try_func_access                                                                                                     \
+        if (!is_passed() && token_type_is_name($tkn_pos) && prog_info_is_func_exist(program, $tkn_pos))                     \
+        {                                                                                                                   \
+            func_id = prog_info_get_func_index(program, $tkn_pos);                                                          \
+            next();                                                                                                         \
+        }                                                                                                                   \
         else parse_fail
 
-#define try_var_access                                                                                              \
-        if (!is_passed() && token_type_is_name($tkn_pos) && prog_info_is_var_exist_global(program, $tkn_pos))       \
-        {                                                                                                           \
-            var_id = prog_info_get_var_index(program, $tkn_pos);                                                    \
-            next();                                                                                                 \
-        }                                                                                                           \
+#define try_var_access                                                                                                      \
+        if (!is_passed() && token_type_is_name($tkn_pos) && prog_info_is_var_exist_global(program, $tkn_pos))               \
+        {                                                                                                                   \
+            var_id = prog_info_get_var_index(program, $tkn_pos);                                                            \
+            next();                                                                                                         \
+        }                                                                                                                   \
         else parse_fail
 
-#define try_parse_adapter(parse_func)                                                                               \
+#define try_parse_adapter(parse_func)                                                                                       \
         if (parse_func(program, tkn_pass, &child)) { adapter = AST_tree_hang(adapter, child); continue; }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -876,7 +876,7 @@ static bool parse_rvalue_elem(prog_info *const program, token_arr_pass *const tk
 
     const token *tkn_entry = $tkn_pos;
 
-    if (token_key_is_int($tkn_pos)) { *subtree = AST_node_new(AST_NODE_IMM_INT, $tkn_pos->value.imm_int); next(); parse_success }
+    if (token_type_is_int($tkn_pos)) { *subtree = AST_node_new(AST_NODE_IMM_INT, $tkn_pos->value.imm_int); next(); parse_success }
     if (parse_lvalue(program, tkn_pass, subtree)) parse_success
 
     parse_fail
@@ -1509,5 +1509,7 @@ static inline bool prog_info_func_exit(prog_info *const prog, const token *const
     log_assert(tkn->type == TOKEN_NAME);
 
     $main_id = (strcmp(tkn->value.name, MAIN_FUNC_NAME) == 0) ? func_id : -1UL;
-    return $is_ret;
+
+    bool   result = $is_ret; $is_ret = false;
+    return result;
 }

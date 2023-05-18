@@ -172,9 +172,9 @@ void token_dump(const void *const _tkn)
 
     if (!token_header_dump(tkn)) return;
 
-    usual_field_dump("type   ", "%d", $type);
-    usual_field_dump("size   ", "%d", $size);
-    usual_field_dump("line   ", "%d", $line);
+    usual_field_dump("type    ", "%d", $type);
+    usual_field_dump("size    ", "%d", $size);
+    usual_field_dump("line    ", "%d", $line);
 
     switch ($type)
     {
