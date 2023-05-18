@@ -32,49 +32,49 @@ struct token_name
 
 static token_name KEY_NAMES[] =
 {
-    {"BARCELONA"        , "int"     , 0},
+    {"int"   , "int"     , 0},
 
-    {"MESSI"            , "if"      , 0},
-    {"SUAREZ"           , "else"    , 0},
-    {"NEYMAR"           , "while"   , 0},
+    {"if"    , "if"      , 0},
+    {"else"  , "else"    , 0},
+    {"while" , "while"   , 0},
 
-    {"CHAMPIONS_LEAGUE" , "return"  , 0},
+    {"return", "return"  , 0},
 
-    {"CHECK_BEGIN"      , "input"   , 0},
-    {"CHECK_OVER"       , "output"  , 0},
+    {"input" , "input"   , 0},
+    {"output", "output"  , 0},
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static token_name OPERATOR_NAMES[] =
 {
-    {"OFFSIDE"  , "||", 0},
-    {"INSIDE"   , "&&", 0},
+    {"LOG_OR"        , "||", 0},
+    {"LOG_AND"       , "&&", 0},
 
-    {"GOAL"     , "==", 0},
-    {"NO_GOAL"  , "!=", 0},
-    {"NO"       , "!" , 0},
+    {"ARE_EQUAL"     , "==", 0},
+    {"NOT_EQUAL"     , "!=", 0},
+    {"NOT"           , "!" , 0},
 
-    {"R_CORNER" , ">=", 0},
-    {"L_CORNER" , "<=", 0},
-    {"R"        , ">" , 0},
-    {"L"        , "<" , 0},
+    {"MORE_EQUAL"    , ">=", 0},
+    {"LESS_EQUAL"    , "<=", 0},
+    {"MORE"          , ">" , 0},
+    {"LESS"          , "<" , 0},
 
-    {"PLUS"     , "+" , 0},
-    {"KEEP"     , "-" , 0},
-    {"IN"       , "*" , 0},
-    {"OUT"      , "/" , 0},
-    {"UP"       , "^" , 0},
+    {"ADD"           , "+" , 0},
+    {"SUB"           , "-" , 0},
+    {"MUL"           , "*" , 0},
+    {"DIV"           , "/" , 0},
+    {"POW"           , "^" , 0},
 
-    {"PENALTY"  , "=" , 0},
+    {"ASSIGN"        , "=" , 0},
 
-    {"TIME"     , ";" , 0},
-    {"KICK"     , "," , 0},
+    {"COMMA_POINT"   , ";" , 0},
+    {"COMMA"         , "," , 0},
 
-    {"RUN"      , "{" , 0},
-    {"JMP"      , "}" , 0},
-    {"CUP"      , "(" , 0},
-    {"WIN"      , ")" , 0},
+    {"L_SCOPE_FIGURE", "{" , 0},
+    {"R_SCOPE_FIGURE", "}" , 0},
+    {"L_SCOPE_CIRCLE", "(" , 0},
+    {"R_SCOPE_CIRCLE", ")" , 0},
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
