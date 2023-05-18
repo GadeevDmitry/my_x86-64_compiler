@@ -120,8 +120,7 @@ void AST_tree_delete(AST_node *const node)
 bool AST_node_hang_left(AST_node *const tree, AST_node *const node)
 {
     log_verify(tree != nullptr, false);
-
-    if (node == nullptr) return;
+    if (node == nullptr) return false;
 
     tree->left = node;
     node->prev = tree;
@@ -134,8 +133,7 @@ bool AST_node_hang_left(AST_node *const tree, AST_node *const node)
 bool AST_node_hang_right(AST_node *const tree, AST_node *const node)
 {
     log_verify(tree != nullptr, false);
-
-    if (node == nullptr) return;
+    if (node == nullptr) return false;
 
     tree->right = node;
     node-> prev = tree;
