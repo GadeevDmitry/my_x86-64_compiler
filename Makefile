@@ -41,6 +41,12 @@ lib:
 
 COMMON_H = frontend/common.h $(LOG_H) $(ALG_H) $(STK_H) $(VEC_H)
 
+frontend:
+	make $(TOKENIZER_O)
+	make $(PARSER_O)
+
+.PHONY: frontend
+
 #--------------------------------------------------------------------------------------------------------------------------------
 # TOKENIZER
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -53,6 +59,21 @@ TOKENIZER_STAT_H = $(TOKENIZER)_static.h $(TOKENIZER_H) $(COMMON_H)
 TOKENIZER_SRC    = $(TOKENIZER).cpp      $(TOKENIZER_STAT_H)
 
 $(TOKENIZER_O): $(TOKENIZER_SRC)
+	mkdir -p $(OBJ_DIR)
+	g++ -c $(CFLAGS) $< -o $@
+
+#--------------------------------------------------------------------------------------------------------------------------------
+# PARSER
+#--------------------------------------------------------------------------------------------------------------------------------
+
+PARSER   = frontend/parser
+PARSER_O = $(OBJ_DIR)/parser.o
+
+PARSER_H      = $(PARSER).h        $(AST_H)
+PARSER_STAT_H = $(PARSER)_static.h $(COMMON_H) $(PARSER_H) $(TOKENIZER_H)
+PARSER_SRC    = $(PARSER).cpp      $(PARSER_STAT_H)
+
+$(PARSER_O): $(PARSER_SRC)
 	mkdir -p $(OBJ_DIR)
 	g++ -c $(CFLAGS) $< -o $@
 
