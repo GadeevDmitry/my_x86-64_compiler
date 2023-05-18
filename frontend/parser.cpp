@@ -1116,9 +1116,10 @@ static bool var_info_scope_pop(var_info *const var, const size_t scope)
 $i
     log_verify(var != nullptr, false);
 
-    size_t scope_top = 0;
+$   if (stack_is_empty($scope)) { $o return true; }
 
-$   if (!stack_front($scope, &scope_top)) { $o return false; }
+    size_t scope_top = 0;
+    stack_front($scope, &scope_top);
 
 $   if (scope_top == scope) { $o return stack_pop($scope); }
 $o  return true;
