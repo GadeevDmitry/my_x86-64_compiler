@@ -1,7 +1,7 @@
 #ifndef TOKENIZER_STATIC_H
 #define TOKENIZER_STATIC_H
 
-#include "common.h"
+#include "../common.h"
 #include "tokenizer.h"
 
 //================================================================================================================================

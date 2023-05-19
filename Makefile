@@ -51,7 +51,7 @@ frontend:
 # TOKENIZER
 #--------------------------------------------------------------------------------------------------------------------------------
 
-TOKENIZER   = frontend/tokenizer
+TOKENIZER   = frontend/tokenizer/tokenizer
 TOKENIZER_O = $(OBJ_DIR)/tokenizer.o
 
 TOKENIZER_H      = $(TOKENIZER).h        $(VEC_H)
@@ -66,7 +66,7 @@ $(TOKENIZER_O): $(TOKENIZER_SRC)
 # PARSER
 #--------------------------------------------------------------------------------------------------------------------------------
 
-PARSER   = frontend/parser
+PARSER   = frontend/parser/parser
 PARSER_O = $(OBJ_DIR)/parser.o
 
 PARSER_H      = $(PARSER).h        $(AST_H)

@@ -1,8 +1,8 @@
 #ifndef PARSER_STATIC_H
 #define PARSER_STATIC_H
 
-#include "common.h"
-#include "tokenizer.h"
+#include "../common.h"
+#include "../tokenizer/tokenizer.h"
 #include "parser.h"
 
 //================================================================================================================================
