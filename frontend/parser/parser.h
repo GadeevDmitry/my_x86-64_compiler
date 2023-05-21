@@ -7,6 +7,6 @@
 // PARSER
 //================================================================================================================================
 
-AST_node *parser(vector *token_arr);
+AST_node *parser(vector *token_arr, size_t *const func_quantity);
 
 #endif //PARSER_H

@@ -156,9 +156,10 @@ static size_t prog_info_get_func_index(const prog_info *const prog, const token 
 // push
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static      size_t prog_info_var_push      (prog_info *const prog, const token *const tkn);
-static      size_t prog_info_func_push_back(prog_info *const prog, const token *const tkn);
-static inline void prog_info_func_pop_back (prog_info *const prog);
+static      size_t prog_info_var_push          (prog_info *const prog, const token *const tkn);
+static      size_t prog_info_func_push_back    (prog_info *const prog, const token *const tkn);
+static inline void prog_info_func_pop_back     (prog_info *const prog);
+static inline void prog_info_func_arg_push_back(prog_info *const prog, const size_t func_index, const size_t arg_index);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // scope
@@ -171,8 +172,9 @@ static        void prog_info_scope_close(prog_info *const prog);
 // other
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static inline void prog_info_meet_return(prog_info *const prog);
-static inline bool prog_info_func_exit  (prog_info *const prog, const token *const tkn, const size_t func_id);
+static inline void prog_info_meet_return               (prog_info *const prog);
+static inline bool prog_info_func_exit                 (prog_info *const prog, const token *const tkn, const size_t func_id);
+static inline bool prog_info_verify_func_param_quantity(prog_info *const prog, const size_t func_index, const size_t param_quantity);
 
 //================================================================================================================================
 // PARSER
@@ -191,10 +193,10 @@ static const char MAIN_FUNC_NAME[] = "CAMP_NOU";
 static bool parse_general           (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_var_decl          (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_func_decl         (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_args              (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_args              (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree, const size_t func_id);
 //--------------------------------------------------------------------------------------------------------------------------------
-static bool parse_first_arg         (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_other_arg         (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_first_arg         (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree, const size_t func_id);
+static bool parse_other_arg         (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree, const size_t func_id);
 //--------------------------------------------------------------------------------------------------------------------------------
 static bool parse_operators         (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_assignment_op     (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
@@ -236,7 +238,7 @@ static bool parse_operand           (prog_info *const program, token_arr_pass *c
 static bool parse_rvalue_scope      (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_func_call_op      (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_func_call         (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_params            (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_params            (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree, size_t *const param_quantity);
 //--------------------------------------------------------------------------------------------------------------------------------
 static bool parse_first_param       (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
 static bool parse_other_param       (prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree);

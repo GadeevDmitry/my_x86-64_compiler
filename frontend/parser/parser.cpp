@@ -4,23 +4,25 @@
 // PARSER
 //================================================================================================================================
 
-AST_node *parser(vector *token_arr)
+AST_node *parser(vector *token_arr, size_t *const func_quantity)
 {
 $i
 $   vec_verify(token_arr, nullptr);
+    log_verify(func_quantity != nullptr, nullptr);
 
 $   prog_info      *program  = prog_info_new();
 $   token_arr_pass *tkn_pass = token_arr_pass_new(token_arr);
 $   AST_node       *result   = nullptr;
 
 $   parse_general(program, tkn_pass, &result);
-$   AST_tree_graphviz_dump           (result);
 
-$         AST_tree_delete(result);
+    *func_quantity = program->main_func_id;
+
 $        prog_info_delete(program);
 $   token_arr_pass_delete(tkn_pass);
 
-$o  return nullptr;
+$   if (*func_quantity == -1UL) { AST_tree_delete(result); $o return nullptr; }
+$o  return result;
 }
 
 //================================================================================================================================
@@ -162,7 +164,7 @@ $   prog_info_scope_open(program);
     #undef  parse_fail_cmd
     #define parse_fail_cmd prog_info_func_pop_back(program); prog_info_scope_close(program);
 
-$   parse_args(program, tkn_pass, &child);
+$   parse_args(program, tkn_pass, &child, func_id);
 $   AST_node_hang_left (*subtree,  child);
 
     try_token_op(r_scope_circle)
@@ -186,7 +188,7 @@ $   prog_info_scope_close   (program);
 // parse_args
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool parse_args(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree)
+static bool parse_args(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree, const size_t func_id)
 {
 $i
     parse_verify()
@@ -195,12 +197,12 @@ $i
     AST_node    *arg_cur   =  nullptr;
     AST_node    *arg_next  =  nullptr;
 
-$   if (!parse_first_arg(program, tkn_pass, &arg_cur)) parse_fail
+$   if (!parse_first_arg(program, tkn_pass, &arg_cur, func_id)) parse_fail
     *subtree = arg_cur;
 
 $   while (true)
     {
-        if (!parse_other_arg(program, tkn_pass, &arg_next)) break;
+        if (!parse_other_arg(program, tkn_pass, &arg_next, func_id)) break;
         AST_node_hang_left(arg_cur, arg_next);
 
         arg_cur = arg_next;
@@ -211,7 +213,7 @@ $   while (true)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool parse_first_arg(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree)
+static bool parse_first_arg(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree, const size_t func_id)
 {
 $i
     parse_verify()
@@ -222,13 +224,16 @@ $i
     try_token_key(int)
     try_name_decl
 
-$   *subtree = AST_node_new(AST_NODE_DECL_VAR, prog_info_var_push(program, name));
+$   size_t arg_index = prog_info_var_push(program, name);
+$   prog_info_func_arg_push_back(program, func_id, arg_index);
+
+$   *subtree = AST_node_new(AST_NODE_DECL_VAR, arg_index);
     parse_success
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool parse_other_arg(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree)
+static bool parse_other_arg(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree, const size_t func_id)
 {
 $i
     parse_verify()
@@ -237,8 +242,8 @@ $i
 
     try_token_op(comma)
 
-$   if (parse_first_arg(program, tkn_pass, subtree)) parse_success
-    /* else */                                       parse_fail
+$   if (parse_first_arg(program, tkn_pass, subtree, func_id)) parse_success
+    /* else */                                                parse_fail
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -885,15 +890,18 @@ $i
 
     const token *tkn_entry = $tkn_pos;
     AST_node    *child     =  nullptr;
-    size_t func_id = 0;
+    size_t       func_id   = 0;
 
     try_func_access
     try_token_op(l_scope_circle)
 
 $   *subtree = AST_node_new(AST_NODE_CALL_FUNC, func_id);
 
-$   parse_params(program, tkn_pass, &child);
+    size_t param_quantity = 0;
+$   parse_params(program, tkn_pass, &child, &param_quantity);
 $   AST_node_hang_left(*subtree   ,  child);
+
+$   if (!prog_info_verify_func_param_quantity(program, func_id, param_quantity)) parse_fail
 
     try_token_op(r_scope_circle)
 
@@ -902,25 +910,29 @@ $   AST_node_hang_left(*subtree   ,  child);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool parse_params(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree)
+static bool parse_params(prog_info *const program, token_arr_pass *const tkn_pass, AST_node **const subtree, size_t *const param_quantity)
 {
 $i
     parse_verify()
+    log_verify(param_quantity != nullptr, false);
 
     const token *tkn_entry  = $tkn_pos;
     AST_node    *param_cur  =  nullptr;
     AST_node    *param_next =  nullptr;
+    size_t       param_cnt  =        0;
 
-$   if (parse_first_param(program, tkn_pass, &param_cur)) *subtree = param_cur;
+$   if (parse_first_param(program, tkn_pass, &param_cur)) { *subtree = param_cur; param_cnt++; }
     else parse_fail
 
 $   while (true)
     {
-        if (parse_other_param(program, tkn_pass, &param_next)) AST_node_hang_left(param_cur, param_next);
-        else parse_success
+        if (parse_other_param(program, tkn_pass, &param_next)) { param_cnt++; AST_node_hang_left(param_cur, param_next); }
+        else { *param_quantity = param_cnt; parse_success }
 
         param_cur = param_next;
     }
+
+    *param_quantity = param_cnt;
     parse_success
 }
 
@@ -1589,6 +1601,19 @@ $o
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
+
+static inline void prog_info_func_arg_push_back(prog_info *const prog, const size_t func_index, const size_t arg_index)
+{
+$i
+    log_verify(prog != nullptr, (void) 0);
+    log_verify(func_index < $f_store->size, (void) 0);
+    log_verify(arg_index  < $v_store->size, (void) 0);
+
+$   func_info_arg_push((func_info *) vector_begin($f_store) + func_index, arg_index);
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // scope handler
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -1637,8 +1662,23 @@ $i
 
     log_assert(tkn->type == TOKEN_NAME);
 
-$   $main_id = (strcmp(tkn->value.name, MAIN_FUNC_NAME) == 0) ? func_id : -1UL;
+    static size_t MAIN_FUNC_NAME_len = strlen(MAIN_FUNC_NAME);
+
+$   $main_id = (tkn->size == MAIN_FUNC_NAME_len &&
+                strncmp(tkn->value.name, MAIN_FUNC_NAME, tkn->size) == 0) ? func_id : -1UL;
 
     bool   result = $is_ret; $is_ret = false;
+$o  return result;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static inline bool prog_info_verify_func_param_quantity(prog_info *const prog, const size_t func_index, const size_t param_quantity)
+{
+$i
+    log_verify(prog != nullptr, false);
+    log_verify(func_index < $f_store->size, false);
+
+$   bool   result = param_quantity == ((func_info *) vector_begin($f_store))[func_index].args->size;
 $o  return result;
 }
