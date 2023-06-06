@@ -4,10 +4,14 @@
 // PARSER
 //================================================================================================================================
 
-AST_node *parser(vector *token_arr, size_t *const func_quantity)
+AST_node *parser(vector *token_arr, size_t *const main_func_id,
+                                    size_t *const var_quantity,
+                                    size_t *const func_quantity)
 {
 $i
 $   vec_verify(token_arr, nullptr);
+    log_verify(main_func_id  != nullptr, nullptr);
+    log_verify(var_quantity  != nullptr, nullptr);
     log_verify(func_quantity != nullptr, nullptr);
 
 $   prog_info      *program  = prog_info_new();
@@ -16,12 +20,13 @@ $   AST_node       *result   = nullptr;
 
 $   parse_general(program, tkn_pass, &result);
 
-    *func_quantity = program->main_func_id;
+    *main_func_id  = program->main_func_id;
+    *var_quantity  = program->var_storage->size;
+    *func_quantity = program->func_storage->size;
 
 $        prog_info_delete(program);
 $   token_arr_pass_delete(tkn_pass);
 
-$   if (*func_quantity == -1UL) { AST_tree_delete(result); $o return nullptr; }
 $o  return result;
 }
 
@@ -55,14 +60,14 @@ $o  return result;
 /**
 *   Параметр op_type должен быть равен соответствующему параметру op_type в макросе token_op_is_smth в файле tokenizer.h.
 */
-#define try_token_op(op_type)                                                                                               \
+#define try_skip_separator(op_type)                                                                                         \
     $   if (!is_passed() && token_op_is_##op_type($tkn_pos)) next()                                                         \
         else parse_fail
 
 /**
 *   Параметр token_key должен быть равен соответствующему параметру token_key в макросе token_key_is_smth в файле tokenizer.h.
 */
-#define try_token_key(token_key)                                                                                            \
+#define try_key_word(token_key)                                                                                             \
     $   if (!is_passed() && token_key_is_##token_key($tkn_pos)) next()                                                      \
         else parse_fail
 
@@ -116,6 +121,8 @@ $   while (!is_passed())
 
         parse_fail
     }
+
+    if (program->main_func_id == -1UL) parse_fail
     parse_success
 }
 
@@ -131,9 +138,9 @@ $i
     const token *tkn_entry = $tkn_pos;
     const token *name      =  nullptr;
 
-    try_token_key(int)
+    try_key_word(int)
     try_name_decl
-    try_token_op(comma_point)
+    try_skip_separator(comma_point)
 
 $   *subtree = AST_node_new(AST_NODE_DECL_VAR, prog_info_var_push(program, name));
     parse_success
@@ -153,9 +160,9 @@ $i
     AST_node    *child     =  nullptr;
     size_t       func_id   =        0;
 
-    try_token_key(int)
+    try_key_word(int)
     try_name_decl
-    try_token_op(l_scope_circle)
+    try_skip_separator(l_scope_circle)
 
 $   func_id  = prog_info_func_push_back(program, name);
 $   *subtree = AST_node_new(AST_NODE_DECL_FUNC, func_id);
@@ -167,13 +174,13 @@ $   prog_info_scope_open(program);
 $   parse_args(program, tkn_pass, &child, func_id);
 $   AST_node_hang_left (*subtree,  child);
 
-    try_token_op(r_scope_circle)
-    try_token_op(l_scope_figure)
+    try_skip_separator(r_scope_circle)
+    try_skip_separator(l_scope_figure)
 
 $   parse_operators(program, tkn_pass, &child);
 $   AST_node_hang_right     (*subtree,  child);
 
-    try_token_op(r_scope_figure)
+    try_skip_separator(r_scope_figure)
 
 $   if (!prog_info_func_exit(program, name, func_id)) parse_fail
 $   prog_info_scope_close   (program);
@@ -221,7 +228,7 @@ $i
     const token *tkn_entry = $tkn_pos;
     const token *name      =  nullptr;
 
-    try_token_key(int)
+    try_key_word(int)
     try_name_decl
 
 $   size_t arg_index = prog_info_var_push(program, name);
@@ -240,7 +247,7 @@ $i
 
     const token *tkn_entry = $tkn_pos;
 
-    try_token_op(comma)
+    try_skip_separator(comma)
 
 $   if (parse_first_arg(program, tkn_pass, subtree, func_id)) parse_success
     /* else */                                                parse_fail
@@ -297,12 +304,12 @@ $   *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_ASSIGNMENT);
 $   if (!parse_lvalue(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_left(*subtree, child);
 
-    try_token_op(assignment)
+    try_skip_separator(assignment)
 
 $   if (!parse_rvalue(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_right(*subtree, child);
 
-    try_token_op(comma_point)
+    try_skip_separator(comma_point)
 
     parse_success
 }
@@ -319,14 +326,14 @@ $i
     const token *tkn_entry = $tkn_pos;
     AST_node    *child     =  nullptr;
 
-    try_token_key(input)
+    try_key_word(input)
 
 $   *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_INPUT);
 
 $   if (!parse_lvalue(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_left(*subtree, child);
 
-    try_token_op(comma_point)
+    try_skip_separator(comma_point)
 
     parse_success
 }
@@ -343,14 +350,14 @@ $i
     const token *tkn_entry = $tkn_pos;
     AST_node    *child     =  nullptr;
 
-    try_token_key(output)
+    try_key_word(output)
 
 $   *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_OUTPUT);
 
 $   if (!parse_rvalue(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_left(*subtree, child);
 
-    try_token_op(comma_point)
+    try_skip_separator(comma_point)
 
     parse_success
 }
@@ -366,7 +373,7 @@ $i
 
     const token *const tkn_entry = $tkn_pos;
 
-    try_token_op(l_scope_figure)
+    try_skip_separator(l_scope_figure)
 
 $   prog_info_scope_open(program);
 
@@ -375,7 +382,7 @@ $   prog_info_scope_open(program);
 
 $   if (!parse_operators(program, tkn_pass, subtree)) parse_fail
 
-    try_token_op(r_scope_figure)
+    try_skip_separator(r_scope_figure)
 
 $   prog_info_scope_close(program);
 
@@ -397,15 +404,15 @@ $i
     const token *tkn_entry = $tkn_pos;
     AST_node    *child     =  nullptr;
 
-    try_token_key(if)
-    try_token_op(l_scope_circle)
+    try_key_word(if)
+    try_skip_separator(l_scope_circle)
 
 $   *subtree = AST_node_new(AST_NODE_OPERATOR_IF);
 
 $   if (!parse_rvalue(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_left(*subtree, child);
 
-    try_token_op(r_scope_circle)
+    try_skip_separator(r_scope_circle)
 
 $   if (!parse_then_else(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_right(*subtree, child);
@@ -443,7 +450,7 @@ $i
 
     const token *tkn_entry = $tkn_pos;
 
-    try_token_key(else)
+    try_key_word(else)
 
 $   if (parse_scope(program, tkn_pass, subtree)) parse_success
     /* else */                                   parse_fail
@@ -461,15 +468,15 @@ $i
     const token *tkn_entry = $tkn_pos;
     AST_node    *child     =  nullptr;
 
-    try_token_key(while)
-    try_token_op(l_scope_circle)
+    try_key_word(while)
+    try_skip_separator(l_scope_circle)
 
 $   *subtree = AST_node_new(AST_NODE_OPERATOR_WHILE);
 
 $   if (!parse_rvalue(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_left(*subtree, child);
 
-    try_token_op(r_scope_circle)
+    try_skip_separator(r_scope_circle)
 
 $   if (!parse_scope(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_right(*subtree, child);
@@ -489,14 +496,14 @@ $i
     const token *tkn_entry = $tkn_pos;
     AST_node    *child     =  nullptr;
 
-    try_token_key(return)
+    try_key_word(return)
 
 $   *subtree = AST_node_new(AST_NODE_OPERATOR_RETURN);
 
 $   if (!parse_rvalue(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_left(*subtree, child);
 
-    try_token_op(comma_point)
+    try_skip_separator(comma_point)
 
 $   prog_info_meet_return(program);
 
@@ -568,7 +575,7 @@ $   *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_ASSIGNMENT);
 $   if (!parse_lvalue(program, tkn_pass, &child)) parse_fail
 $   AST_node_hang_left(*subtree, child);
 
-    try_token_op(assignment)
+    try_skip_separator(assignment)
 
     parse_success
 }
@@ -854,9 +861,9 @@ $i
 
     const token *tkn_entry = $tkn_pos;
 
-    try_token_op(l_scope_circle)
+    try_skip_separator(l_scope_circle)
 $   if (!parse_rvalue(program, tkn_pass, subtree)) parse_fail
-    try_token_op(r_scope_circle)
+    try_skip_separator(r_scope_circle)
 
     parse_success
 }
@@ -874,7 +881,7 @@ $i
 
 $   if (!parse_func_call(program, tkn_pass, subtree)) parse_fail
 
-    try_token_op(comma_point)
+    try_skip_separator(comma_point)
 
     parse_success
 }
@@ -893,7 +900,7 @@ $i
     size_t       func_id   = 0;
 
     try_func_access
-    try_token_op(l_scope_circle)
+    try_skip_separator(l_scope_circle)
 
 $   *subtree = AST_node_new(AST_NODE_CALL_FUNC, func_id);
 
@@ -903,7 +910,7 @@ $   AST_node_hang_left(*subtree   ,  child);
 
 $   if (!prog_info_verify_func_param_quantity(program, func_id, param_quantity)) parse_fail
 
-    try_token_op(r_scope_circle)
+    try_skip_separator(r_scope_circle)
 
     parse_success
 }
@@ -916,20 +923,21 @@ $i
     parse_verify()
     log_verify(param_quantity != nullptr, false);
 
-    const token *tkn_entry  = $tkn_pos;
-    AST_node    *param_cur  =  nullptr;
-    AST_node    *param_next =  nullptr;
-    size_t       param_cnt  =        0;
+    const token *tkn_entry = $tkn_pos;
+    AST_node    *adapter   = nullptr;
+    AST_node    *child     = nullptr;
+    size_t       param_cnt = 0;
 
-$   if (parse_first_param(program, tkn_pass, &param_cur)) { *subtree = param_cur; param_cnt++; }
+   *subtree = AST_node_new(AST_NODE_FICTIONAL);
+    adapter = *subtree;
+
+$   if (parse_first_param(program, tkn_pass, &child)) { adapter = AST_tree_hang_by_adapter(adapter, child); param_cnt++; }
     else parse_fail
 
 $   while (true)
     {
-        if (parse_other_param(program, tkn_pass, &param_next)) { param_cnt++; AST_node_hang_left(param_cur, param_next); }
+        if (parse_other_param(program, tkn_pass, &child)) { param_cnt++; adapter = AST_tree_hang_by_adapter(adapter, child); }
         else { *param_quantity = param_cnt; parse_success }
-
-        param_cur = param_next;
     }
 
     *param_quantity = param_cnt;
@@ -952,7 +960,7 @@ $i
 
     const token *tkn_entry = $tkn_pos;
 
-    try_token_op(comma)
+    try_skip_separator(comma)
 
 $   if (parse_first_param(program, tkn_pass, subtree)) parse_success
     /* else */                                         parse_fail
@@ -993,6 +1001,10 @@ $   *subtree = AST_node_new(AST_NODE_VARIABLE, var_id);
 
     parse_success
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+
 
 //================================================================================================================================
 // TOKEN_ARR_PASS
@@ -1682,3 +1694,11 @@ $i
 $   bool   result = param_quantity == ((func_info *) vector_begin($f_store))[func_index].args->size;
 $o  return result;
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#undef $v_store
+#undef $f_store
+#undef $scope
+#undef $main_id
+#undef $is_ret

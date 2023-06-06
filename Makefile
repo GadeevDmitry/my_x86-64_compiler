@@ -14,12 +14,14 @@ LOG   = lib/logs/log
 ALG   = lib/algorithm/algorithm
 STK   = lib/stack/stack
 VEC   = lib/vector/vector
+ARR   = lib/array/array
 
-TRC_H = $(TRC).h $(TRC)_settings.h
-LOG_H = $(LOG).h $(LOG)_settings.h $(LOG)_def.h $(LOG)_undef.h
-ALG_H = $(ALG).h $(ALG)_settings.h
-STK_H = $(STK).h $(STK)_settings.h
-VEC_H = $(VEC).h
+TRC_H = $(TRC).h
+LOG_H = $(LOG).h $(LOG)_settings.h $(LOG)_def.h
+ALG_H = $(ALG).h $(LOG_H)
+STK_H = $(STK).h $(LOG_H) $(ALG_H)
+VEC_H = $(VEC).h $(STK_H)
+ARR_H = $(ARR).h $(LOG_H) $(ALG_H)
 
 TRC_O = $(TRC).o
 LOG_O = $(LOG).o
@@ -44,8 +46,21 @@ COMMON_H = frontend/common.h $(LOG_H) $(ALG_H) $(STK_H) $(VEC_H)
 frontend:
 	make $(TOKENIZER_O)
 	make $(PARSER_O)
+	make $(FRONTEND_O)
 
 .PHONY: frontend
+
+#--------------------------------------------------------------------------------------------------------------------------------
+
+FRONTEND   = frontend/frontend
+FRONTEND_O = $(OBJ_DIR)/frontend.o
+
+FRONTEND_H   = $(FRONTEND).h $(AST_H)
+FRONTEND_SRC = $(FRONTEND).cpp $(FRONTEND_H) $(LOG_H) $(ALG_H) $(VEC_H) $(TOKENIZER_H) $(PARSER_H) $(AST_H)
+
+$(FRONTEND_O): $(FRONTEND_SRC)
+	mkdir -p $(OBJ_DIR)
+	g++ -c $(CFLAGS) $< -o $@
 
 #--------------------------------------------------------------------------------------------------------------------------------
 # TOKENIZER
