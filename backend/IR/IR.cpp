@@ -17,9 +17,9 @@
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool IR_node_ctor(IR_node *const node, const IR_INSTRUCTION type, const bool is_reg,
-                                                                         const bool is_mem,
-                                                                         const bool is_imm, va_list ap)
+static bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_reg,
+                                                                 const bool is_mem,
+                                                                 const bool is_imm, va_list ap)
 {
     log_assert(node != nullptr);
 
@@ -39,9 +39,9 @@ static bool IR_node_ctor(IR_node *const node, const IR_INSTRUCTION type, const b
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool IR_node_ctor(IR_node *const node, const IR_INSTRUCTION type, const bool is_reg,
-                                                                  const bool is_mem,
-                                                                  const bool is_imm, ...)
+bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_reg,
+                                                          const bool is_mem,
+                                                          const bool is_imm, ...)
 {
     log_verify(node != nullptr, false);
 
@@ -64,9 +64,9 @@ bool IR_node_ctor(IR_node *const node, const IR_INSTRUCTION type, const bool is_
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-IR_node *IR_node_new(const IR_INSTRUCTION type, const bool is_reg,
-                                                const bool is_mem,
-                                                const bool is_imm, ...)
+IR_node *IR_node_new(const IR_CMD type, const bool is_reg,
+                                        const bool is_mem,
+                                        const bool is_imm, ...)
 {
     IR_node   *node_new = (IR_node *) log_calloc(1, sizeof(IR_node));
     log_verify(node_new != nullptr, nullptr);
@@ -85,6 +85,30 @@ IR_node *IR_node_new(const IR_INSTRUCTION type, const bool is_reg,
 void IR_node_delete(void *const _node)
 {
     log_free(_node);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// set
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool IR_node_set_imm_val(IR_node *const node, const int imm_val)
+{
+    log_verify(node != nullptr, false);
+
+    $imm_val = imm_val;
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool IR_node_set_reg_num(IR_node *const node, const int reg_num)
+{
+    log_verify(node != nullptr, false);
+
+    $reg_num = reg_num;
+
+    return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -119,7 +143,7 @@ static void IR_node_fields_dump(const IR_node *const node)
 {
     log_assert(node != nullptr);
 
-    usual_field_dump("type", "%s", IR_INSTRUCTION_NAMES[$type]);
+    usual_field_dump("type", "%s", IR_CMD_NAMES[$type]);
 
     log_tab_service_message("\n"
                             "is_arg\n"

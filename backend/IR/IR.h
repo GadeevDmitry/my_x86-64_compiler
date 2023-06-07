@@ -7,36 +7,47 @@
 // IR_node
 //================================================================================================================================
 
-enum IR_INSTRUCTION
+enum IR_CMD
 {
-    IR_INSTRUCTION_PUSH ,
-    IR_INSTRUCTION_POP  ,
+    IR_CMD_ADD          ,
+    IR_CMD_SUB          ,
+    IR_CMD_MUL          ,
+    IR_CMD_DIV          ,
 
-    IR_INSTRUCTION_ADD  ,
-    IR_INSTRUCTION_SUB  ,
-    IR_INSTRUCTION_MUL  ,
-    IR_INSTRUCTION_DIV  ,
+    IR_CMD_ARE_EQUAL    ,
+    IR_CMD_MORE         ,
+    IR_CMD_LESS         ,
+    IR_CMD_MORE_EQUAL   ,
+    IR_CMD_LESS_EQUAL   ,
+    IR_CMD_NOT_EQUAL    ,
+    IR_CMD_NOT          ,
 
-    IR_INSTRUCTION_JMP  ,
-    IR_INSTRUCTION_JA   ,
-    IR_INSTRUCTION_JB   ,
-    IR_INSTRUCTION_JE   ,
-    IR_INSTRUCTION_JAE  ,
-    IR_INSTRUCTION_JBE  ,
-    IR_INSTRUCTION_JNE  ,
+    IR_CMD_LOG_OR       ,
+    IR_CMD_LOG_AND      ,
 
-    IR_INSTRUCTION_CALL ,
-    IR_INSTRUCTION_RET  ,
+    IR_CMD_JMP          ,
+    IR_CMD_JA           ,
+    IR_CMD_JB           ,
+    IR_CMD_JE           ,
+    IR_CMD_JAE          ,
+    IR_CMD_JBE          ,
+    IR_CMD_JNE          ,
 
-    IR_INSTRUCTION_IN   ,
-    IR_INSTRUCTION_OUT  ,
+    IR_CMD_PUSH         ,
+    IR_CMD_POP          ,
+
+    IR_CMD_CALL         ,
+    IR_CMD_RET          ,
+
+    IR_CMD_IN           ,
+    IR_CMD_OUT          ,
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 struct IR_node
 {
-    IR_INSTRUCTION type;
+    IR_CMD type;
 
     struct
     {
@@ -54,9 +65,16 @@ struct IR_node
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool     IR_node_ctor  (IR_node *const  node, const IR_INSTRUCTION type, const bool is_reg, const bool is_mem, const bool is_imm, ...);
-IR_node *IR_node_new   (                      const IR_INSTRUCTION type, const bool is_reg, const bool is_mem, const bool is_imm, ...);
+bool     IR_node_ctor  (IR_node *const  node, const IR_CMD type, const bool is_reg, const bool is_mem, const bool is_imm, ...);
+IR_node *IR_node_new   (                      const IR_CMD type, const bool is_reg, const bool is_mem, const bool is_imm, ...);
 void     IR_node_delete(void    *const _node);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// set
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool IR_node_set_imm_val(IR_node *const node, const int imm_val) __attribute__((always_inline));
+bool IR_node_set_reg_num(IR_node *const node, const int reg_num) __attribute__((always_inline));
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump

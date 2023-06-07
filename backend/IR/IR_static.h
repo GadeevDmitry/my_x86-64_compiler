@@ -15,38 +15,49 @@
 // IR_NODE
 //================================================================================================================================
 
-static const char *IR_INSTRUCTION_NAMES[] =
+static const char *IR_CMD_NAMES[] =
 {
-    "PUSH"  ,
-    "POP"   ,
+    "ADD"           ,
+    "SUB"           ,
+    "MUL"           ,
+    "DIV"           ,
 
-    "ADD"   ,
-    "SUB"   ,
-    "MUL"   ,
-    "DIV"   ,
+    "ARE_EQUAL"     ,
+    "MORE"          ,
+    "LESS"          ,
+    "MORE_EQUAL"    ,
+    "LESS_EQUAL"    ,
+    "NOT_EQUAL"     ,
+    "NOT"           ,
 
-    "JMP"   ,
-    "JA"    ,
-    "JB"    ,
-    "JE"    ,
-    "JAE"   ,
-    "JBE"   ,
-    "JNE"   ,
+    "LOG_OR"        ,
+    "LOG_AND"       ,
 
-    "CALL"  ,
-    "RET"   ,
+    "JMP"           ,
+    "JA"            ,
+    "JB"            ,
+    "JE"            ,
+    "JAE"           ,
+    "JBE"           ,
+    "JNE"           ,
 
-    "IN"    ,
-    "OUT"   ,
+    "PUSH"          ,
+    "POP"           ,
+
+    "CALL"          ,
+    "RET"           ,
+
+    "IN"            ,
+    "OUT"           ,
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool IR_node_ctor(IR_node *const node, const IR_INSTRUCTION type, const bool is_reg,
-                                                                         const bool is_mem,
-                                                                         const bool is_imm, va_list ap);
+static bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_reg,
+                                                                 const bool is_mem,
+                                                                 const bool is_imm, va_list ap);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
