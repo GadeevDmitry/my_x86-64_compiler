@@ -8,7 +8,6 @@
 #define LOG_NLEAK
 #include "../../../lib/logs/log.h"
 #include "../../../lib/algorithm/algorithm.h"
-#include "../../../lib/stack/stack.h"
 
 #include "../../IR/IR.h"
 #include "prog_info.h"

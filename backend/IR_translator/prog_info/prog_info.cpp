@@ -61,19 +61,41 @@ static bool loc_addr_ctor(array *const loc_addr)
 // dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void prog_info_dtor(void *const _prog)
+vector *prog_info_dtor_no_IR(void *const _prog)
 {
-    if (_prog == nullptr) return;
+    if (_prog == nullptr) return nullptr;
 
     prog_info *const prog = (prog_info *) _prog;
-
-    vector_free($IR);
 
     array_free($func);
     array_free($glob);
     array_free($loc);
 
     stack_free($scope);
+
+    return $IR;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void prog_info_dtor(void *const _prog)
+{
+    if (_prog == nullptr) return;
+
+    prog_info_dtor_no_IR(_prog);
+    prog_info *const prog = (prog_info *) _prog;
+
+    vector_free($IR);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+vector *prog_info_delete_no_IR(void *const _prog)
+{
+    vector *IR = prog_info_dtor_no_IR(_prog);
+    log_free(_prog);
+
+    return IR;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

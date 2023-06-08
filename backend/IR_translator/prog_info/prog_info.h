@@ -37,8 +37,11 @@ prog_info *prog_info_new (                       const size_t var_quantity, cons
 // dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void prog_info_dtor  (void *const _prog);
-void prog_info_delete(void *const _prog);
+void    prog_info_dtor        (void *const _prog);
+void    prog_info_delete      (void *const _prog);
+
+vector *prog_info_dtor_no_IR  (void *const _prog);
+vector *prog_info_delete_no_IR(void *const _prog);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // var declaration
@@ -71,7 +74,7 @@ bool prog_info_get_func_addr(prog_info *const prog, const size_t func_ind, size_
 // scope
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool prog_info_scope_in (prog_info *const prog) __attribute__((always_inline));
+bool prog_info_scope_in (prog_info *const prog);
 bool prog_info_scope_out(prog_info *const prog);
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -79,7 +82,7 @@ bool prog_info_scope_out(prog_info *const prog);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 size_t prog_info_create_command      (      prog_info *const prog, const IR_node *const cmd);
-size_t prog_info_get_next_command_num(const prog_info *const prog) __attribute__((always_inline));
+size_t prog_info_get_next_command_num(const prog_info *const prog);
 bool   prog_info_fixup_jmp_addr      (      prog_info *const prog, const size_t jmp_cmd_num, const size_t label_num);
 
 #endif //PROG_INFO_H

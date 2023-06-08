@@ -6,19 +6,20 @@
 #include <string.h>
 
 #define LOG_NTRACE
+#define LOG_NLEAK
 #include "../../lib/logs/log.h"
-#include "../../lib/stack/stack.h"
-#include "../../lib/vector/vector.h"
-#include "../../lib/array/array.h"
 
 #include "../../ast/ast.h"
 #include "../IR/IR.h"
 
 #include "prog_info/prog_info.h"
+#include "IR_translator.h"
 
 //================================================================================================================================
 // GLOBAL
 //================================================================================================================================
+
+#pragma GCC diagnostic ignored "-Wswitch-enum"
 
 enum GPR
 {

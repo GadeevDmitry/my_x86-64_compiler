@@ -4,6 +4,23 @@
 // IR_TRANSLATOR
 //================================================================================================================================
 
+vector *IR_translator(const AST_node *const subtree, const size_t  var_quantity,
+                                                     const size_t func_quantity)
+{
+    log_verify(subtree != nullptr, nullptr);
+
+    prog_info *prog = prog_info_new(var_quantity, func_quantity);
+
+    translate_general(prog, subtree);
+
+    vector *IR = prog_info_delete_no_IR(prog);
+    vector_dump(IR);
+
+    return IR;
+}
+
+//================================================================================================================================
+
 //--------------------------------------------------------------------------------------------------------------------------------
 // AST_node DSL
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -291,12 +308,14 @@ static size_t translate_params(prog_info *const prog, const AST_node *const subt
 
     switch ($type)
     {
-        case AST_NODE_FICTIONAL: size_t param_quantity = 0UL;
+        case AST_NODE_FICTIONAL: {
+                                 size_t param_quantity = 0UL;
 
                                  if ($R != nullptr) param_quantity += translate_params(prog, $R); // обработка параметров в обратном порядке
                                  if ($L != nullptr) param_quantity += translate_params(prog, $L); // в стеке параметры будут в прямом порядке
 
                                  return param_quantity;
+                                 }
 
         default                : translate_expretion(prog, subtree);
                                  return 1UL;
