@@ -38,6 +38,7 @@ AST_H = ../ast/ast.h
 backend:
 	make $(IR_O)
 	make $(IR_TRANSLATOR_O)
+	make $(IR_TRANSLATOR_PROG_O)
 
 clean:
 	rm -r -f $(OBJ_DIR)/
@@ -67,9 +68,22 @@ IR_TRANSLATOR   = IR_translator/IR_translator
 IR_TRANSLATOR_O = $(OBJ_DIR)/ir_translator.o
 
 IR_TRANSLATOR_H        = $(IR_TRANSLATOR).h $(AST_H) $(VEC_H)
-IR_TRANSLATOR_STATIC_H = $(IR_TRANSLATOR)_static.h $(LOG_H) $(STK_H) $(VEC_H) $(ARR_H) $(AST_H) $(IR_H)
+IR_TRANSLATOR_STATIC_H = $(IR_TRANSLATOR)_static.h $(LOG_H) $(AST_H) $(IR_H) $(IR_TRANSLATOR_H) $(IR_TRANSLATOR_PROG_H)
 IR_TRANSLATOR_SRC      = $(IR_TRANSLATOR).cpp $(IR_TRANSLATOR_STATIC_H)
 
 $(IR_TRANSLATOR_O): $(IR_TRANSLATOR_SRC)
+	mkdir -p $(OBJ_DIR)
+	g++ -c $(CFLAGS) $< -o $@
+
+#--------------------------------------------------------------------------------------------------------------------------------
+
+IR_TRANSLATOR_PROG   = IR_translator/prog_info/prog_info
+IR_TRANSLATOR_PROG_O = $(OBJ_DIR)/ir_translator_prog.o
+
+IR_TRANSLATOR_PROG_H      = $(IR_TRANSLATOR_PROG).h $(VEC_H) $(ARR_H)
+IR_TRANSLATOR_PROG_STAT_H = $(IR_TRANSLATOR_PROG)_static.h $(LOG_H) $(ALG_H) $(IR_H) $(IR_TRANSLATOR_PROG_H)
+IR_TRANSLATOR_PROG_SRC    = $(IR_TRANSLATOR_PROG).cpp $(IR_TRANSLATOR_PROG_STAT_H)
+
+$(IR_TRANSLATOR_PROG_O): $(IR_TRANSLATOR_SRC)
 	mkdir -p $(OBJ_DIR)
 	g++ -c $(CFLAGS) $< -o $@
