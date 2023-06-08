@@ -716,10 +716,11 @@ $i
 $   if     (is_passed() || !token_type_is_op($tkn_pos)) { $o return false; }
 $   switch ($tkn_pos->value.op)
     {
-        case AST_OPERATOR_LESS      : *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_LESS);       break;
-        case AST_OPERATOR_MORE      : *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_MORE);       break;
-        case AST_OPERATOR_LESS_EQUAL: *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_LESS_EQUAL); break;
-        default                     : $o return false;
+        case OPERATOR_LESS      : *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_LESS);       break;
+        case OPERATOR_MORE      : *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_MORE);       break;
+        case OPERATOR_LESS_EQUAL: *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_LESS_EQUAL); break;
+        case OPERATOR_MORE_EQUAL: *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_MORE_EQUAL); break;
+        default                 : $o return false;
     }
 
     #pragma GCC diagnostic pop

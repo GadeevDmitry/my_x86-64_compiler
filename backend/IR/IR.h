@@ -73,8 +73,8 @@ void     IR_node_delete(void    *const _node);
 // set
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool IR_node_set_imm_val(IR_node *const node, const int imm_val) __attribute__((always_inline));
-bool IR_node_set_reg_num(IR_node *const node, const int reg_num) __attribute__((always_inline));
+bool IR_node_set_imm_val(IR_node *const node, const int imm_val);
+bool IR_node_set_reg_num(IR_node *const node, const int reg_num);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump

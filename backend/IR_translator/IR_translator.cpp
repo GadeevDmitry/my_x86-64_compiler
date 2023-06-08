@@ -14,9 +14,7 @@ vector *IR_translator(const AST_node *const subtree, const size_t  var_quantity,
     translate_general(prog, subtree);
 
     vector *IR = prog_info_delete_no_IR(prog);
-    vector_dump(IR);
-
-    return IR;
+    return  IR;
 }
 
 //================================================================================================================================

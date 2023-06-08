@@ -106,7 +106,7 @@ bool IR_node_set_reg_num(IR_node *const node, const int reg_num)
 {
     log_verify(node != nullptr, false);
 
-    $reg_num = reg_num;
+    $reg_num = (unsigned char) reg_num;
 
     return true;
 }

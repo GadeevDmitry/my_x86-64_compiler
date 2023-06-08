@@ -55,6 +55,8 @@ static bool loc_addr_ctor(array *const loc_addr)
     {
         stack_ctor(loc_cur, sizeof(size_t));
     }
+
+    return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -135,6 +137,8 @@ bool prog_info_add_local_var_addr(prog_info *const prog, const size_t var_ind)
 
     stack *var_cell = ((stack *) array_begin($loc)) + var_ind;
     stack_push(var_cell, &$rel);
+
+    $rel++;
 
     return true;
 }
@@ -255,7 +259,7 @@ bool prog_info_scope_in(prog_info *const prog)
 {
     log_verify(prog != nullptr, false);
 
-    stack_push($scope, &$rel);
+    return stack_push($scope, &$rel);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -315,7 +319,7 @@ bool prog_info_fixup_jmp_addr(prog_info *const prog, const size_t jmp_cmd_num, c
     log_verify(label_num   <= $IR->size, false);
 
     IR_node *jmp_cmd = ((IR_node *) vector_begin($IR)) + jmp_cmd_num;
-    IR_node_set_imm_val(jmp_cmd, label_num);
+    IR_node_set_imm_val(jmp_cmd, (int) label_num);
 
     return true;
 }
