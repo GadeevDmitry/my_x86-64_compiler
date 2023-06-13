@@ -25,27 +25,26 @@ ARR_H = $(ARR).h $(LOG_H) $(ALG_H)
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
-AST_H = ../ast/ast.h
+AST_H       = ../ast/ast.h
+PARSER_H    = parser/parser.h $(AST_H)
+TOKENIZER_H = tokenizer/tokenizer.h $(VEC_H)
 
 #================================================================================================================================
 # FRONTEND
 #================================================================================================================================
 
-#--------------------------------------------------------------------------------------------------------------------------------
-# COMMON
-#--------------------------------------------------------------------------------------------------------------------------------
-
-COMMON_H = common.h $(LOG_H) $(ALG_H) $(STK_H) $(VEC_H)
+all:
+	cd parser    && make parser
+	cd tokenizer && make tokenizer
+	make frontend
 
 frontend:
-	make $(TOKENIZER_O)
-	make $(PARSER_O)
 	make $(FRONTEND_O)
 
 clean:
 	rm -r -f $(OBJ_DIR)/
 
-.PHONY: frontend clean
+.PHONY: all frontend clean
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
@@ -53,38 +52,8 @@ FRONTEND   = frontend
 FRONTEND_O = $(OBJ_DIR)/frontend.o
 
 FRONTEND_H   = $(FRONTEND).h $(AST_H)
-FRONTEND_SRC = $(FRONTEND).cpp $(FRONTEND_H) $(LOG_H) $(ALG_H) $(VEC_H) $(TOKENIZER_H) $(PARSER_H) $(AST_H)
+FRONTEND_SRC = $(FRONTEND).cpp $(FRONTEND_H) $(LOG_H) $(ALG_H) $(VEC_H) $(TOKENIZER_H) $(PARSER_H)
 
 $(FRONTEND_O): $(FRONTEND_SRC)
-	mkdir -p $(OBJ_DIR)
-	g++ -c $(CFLAGS) $< -o $@
-
-#--------------------------------------------------------------------------------------------------------------------------------
-# TOKENIZER
-#--------------------------------------------------------------------------------------------------------------------------------
-
-TOKENIZER   = tokenizer/tokenizer
-TOKENIZER_O = $(OBJ_DIR)/tokenizer.o
-
-TOKENIZER_H      = $(TOKENIZER).h        $(VEC_H)
-TOKENIZER_STAT_H = $(TOKENIZER)_static.h $(TOKENIZER_H) $(COMMON_H)
-TOKENIZER_SRC    = $(TOKENIZER).cpp      $(TOKENIZER_STAT_H)
-
-$(TOKENIZER_O): $(TOKENIZER_SRC)
-	mkdir -p $(OBJ_DIR)
-	g++ -c $(CFLAGS) $< -o $@
-
-#--------------------------------------------------------------------------------------------------------------------------------
-# PARSER
-#--------------------------------------------------------------------------------------------------------------------------------
-
-PARSER   = parser/parser
-PARSER_O = $(OBJ_DIR)/parser.o
-
-PARSER_H      = $(PARSER).h        $(AST_H)
-PARSER_STAT_H = $(PARSER)_static.h $(COMMON_H) $(PARSER_H) $(TOKENIZER_H)
-PARSER_SRC    = $(PARSER).cpp      $(PARSER_STAT_H)
-
-$(PARSER_O): $(PARSER_SRC)
 	mkdir -p $(OBJ_DIR)
 	g++ -c $(CFLAGS) $< -o $@

@@ -9,7 +9,6 @@
 
 #include "tokenizer/tokenizer.h"
 #include "parser/parser.h"
-#include "../ast/ast.h"
 
 #include "frontend.h"
 
