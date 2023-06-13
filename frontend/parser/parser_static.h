@@ -6,7 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#define LOG_NTRACE
+//#define LOG_NTRACE
 #define LOG_NLEAK
 
 #include "../../lib/logs/log.h"
@@ -81,13 +81,13 @@ static bool   parse_op_pattern              (prog_info *const prog, token_arr_pa
        bool (*parse_op_lower)               (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree),
        bool (*parse_op_token)               (                       token_arr_pass *const tkn_pass, AST_node **const subtree));
 
-static bool parse_log_or                    (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_log_and                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_equal                     (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_cmp                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_add_sub                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_mul_div                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_pow                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_log_or                    (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
+static bool parse_log_and                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
+static bool parse_equal                     (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
+static bool parse_cmp                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
+static bool parse_add_sub                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
+static bool parse_mul_div                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
+static bool parse_pow                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
 static bool parse_not                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 
 static bool parse_log_or_token              (                       token_arr_pass *const tkn_pass, AST_node **const subtree);

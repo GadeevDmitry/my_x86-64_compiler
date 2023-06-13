@@ -345,8 +345,10 @@ void prog_info_dtor(prog_info *const prog)
 {
     if (prog == nullptr) return;
 
-    vector_free($v_store);
-    vector_free($f_store);
+    vector_free  ($v_store);
+    vector_free  ($f_store);
+
+    var_info_dtor(&$main_info);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
