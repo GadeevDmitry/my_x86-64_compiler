@@ -46,6 +46,7 @@ static bool parse_func_body                 (prog_info *const prog, token_arr_pa
 
 static bool parse_operators                 (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_name_access_independent   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_name_access_dependent     (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_name_access               (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_syntactic_unit            (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 
@@ -72,5 +73,33 @@ static bool parse_return                    (prog_info *const prog, token_arr_pa
 
 static bool parse_lvalue                    (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_rvalue                    (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+
+static bool parse_is_assignment             (                       token_arr_pass *const tkn_pass                          );
+static bool parse_assignment_half           (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+
+static bool   parse_op_pattern              (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree ,
+       bool (*parse_op_lower)               (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree),
+       bool (*parse_op_token)               (                       token_arr_pass *const tkn_pass, AST_node **const subtree));
+
+static bool parse_log_or                    (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_log_and                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_equal                     (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_cmp                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_add_sub                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_mul_div                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_pow                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_not                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+
+static bool parse_log_or_token              (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_log_and_token             (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_equal_token               (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_cmp_token                 (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_add_sub_token             (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_mul_div_token             (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_pow_token                 (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
+
+static bool parse_operand                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_expression                (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_imm_int                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 
 #endif //PARSER_STATIC_H
