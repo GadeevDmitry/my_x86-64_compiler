@@ -9,7 +9,6 @@
 #define LOG_NLEAK
 #include "../../lib/logs/log.h"
 
-#include "../../ast/ast.h"
 #include "../IR/IR.h"
 
 #include "prog_info/prog_info.h"
@@ -65,7 +64,7 @@ static void   translate_output                   (prog_info *const prog, const A
 static void   translate_assignment_independent   (prog_info *const prog, const AST_node *const subtree);
 static void   translate_assignment_dependent     (prog_info *const prog, const AST_node *const subtree);
 
-static void   translate_expretion                (prog_info *const prog, const AST_node *const subtree);
+static void   translate_expression               (prog_info *const prog, const AST_node *const subtree);
 
 static void   translate_immediate_int_operand    (prog_info *const prog, const AST_node *const subtree);
 static void   translate_variable_operand         (prog_info *const prog, const AST_node *const subtree);

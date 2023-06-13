@@ -193,7 +193,7 @@ static void translate_if(prog_info *const prog, const AST_node *const subtree)
 
     IR_node cmd = {};
 
-    translate_expretion(prog, $L);                                          // <condition>
+    translate_expression(prog, $L);                                         // <condition>
 
                       create_command(IR_CMD_PUSH, false, false, true, 0);   // push 0
     size_t jmp_else = create_command(IR_CMD_JE  , false, false, true, 0);   // je else
@@ -235,7 +235,7 @@ static void translate_while(prog_info *const prog, const AST_node *const subtree
     IR_node cmd = {};
     size_t label_cond = next_command();                                     // cond:
 
-    translate_expretion(prog, $L);                                          // <condition>
+    translate_expression(prog, $L);                                         // <condition>
 
                      create_command(IR_CMD_PUSH, false, false, true, 0);    // push 0
     size_t jmp_end = create_command(IR_CMD_JE  , false, false, true, 0);    // je end
@@ -315,7 +315,7 @@ static size_t translate_params(prog_info *const prog, const AST_node *const subt
                                  return param_quantity;
                                  }
 
-        default                : translate_expretion(prog, subtree);
+        default                : translate_expression(prog, subtree);
                                  return 1UL;
     }
 
@@ -333,7 +333,7 @@ static void translate_return(prog_info *const prog, const AST_node *const subtre
     log_assert($type == AST_NODE_OPERATOR_RETURN);
     log_verify($L != nullptr, (void) 0);
 
-    translate_expretion(prog, $L);
+    translate_expression(prog, $L);
 
     IR_node cmd = {};
     create_command_no_args(IR_CMD_RET);
@@ -391,7 +391,7 @@ static void translate_output(prog_info *const prog, const AST_node *const subtre
     log_assert($operator == AST_OPERATOR_OUTPUT);
     log_verify($L != nullptr, (void) 0);
 
-    translate_expretion(prog, $L);
+    translate_expression(prog, $L);
 
     IR_node cmd = {};
     create_command_no_args(IR_CMD_OUT);
@@ -411,7 +411,7 @@ static void translate_assignment_independent(prog_info *const prog, const AST_no
     log_verify($L != nullptr, (void) 0);
     log_verify($R != nullptr, (void) 0);
 
-    translate_expretion(prog, $R);
+    translate_expression(prog, $R);
 
     IR_node cmd = {};
     size_t  var_addr = 0UL;
@@ -432,7 +432,7 @@ static void translate_assignment_dependent(prog_info *const prog, const AST_node
     log_verify($L != nullptr, (void) 0);
     log_verify($R != nullptr, (void) 0);
 
-    translate_expretion(prog, $R);
+    translate_expression(prog, $R);
 
     IR_node cmd = {};
     size_t  var_addr = 0UL;
@@ -443,10 +443,10 @@ static void translate_assignment_dependent(prog_info *const prog, const AST_node
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// translate_expretion
+// translate_expression
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void translate_expretion(prog_info *const prog, const AST_node *const subtree)
+static void translate_expression(prog_info *const prog, const AST_node *const subtree)
 {
     translate_verify;
 
@@ -525,7 +525,7 @@ static void translate_operator_unary(prog_info *const prog, const AST_node *cons
 
     IR_node cmd = {};
 
-    translate_expretion(prog, $L);
+    translate_expression(prog, $L);
 
     switch ($operator)
     {
@@ -548,8 +548,8 @@ static void translate_operator_binary(prog_info *const prog, const AST_node *con
 
     IR_node cmd = {};
 
-    translate_expretion(prog, $L);
-    translate_expretion(prog, $R);
+    translate_expression(prog, $L);
+    translate_expression(prog, $R);
 
     switch ($operator)
     {

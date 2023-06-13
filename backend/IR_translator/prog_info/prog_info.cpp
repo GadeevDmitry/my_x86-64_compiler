@@ -187,7 +187,6 @@ bool prog_info_get_local_var_addr(prog_info *const prog, const size_t var_ind, s
     stack *var_cell = ((stack *) array_begin($loc)) + var_ind;
 
     if (stack_is_empty(var_cell)) return false;
-
     return stack_front(var_cell, var_addr);
 }
 
@@ -231,7 +230,7 @@ bool prog_info_func_end(prog_info *const prog)
         if (stack_is_empty(var)) continue;
 
         stack_pop(var);
-        log_verify(stack_is_empty(var), false);
+        log_assert_verbose(stack_is_empty(var), "local variable is redeclared somewhere in the function");
     }
 
     return true;
