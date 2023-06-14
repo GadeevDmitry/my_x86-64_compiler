@@ -26,11 +26,11 @@ enum IR_CMD
     IR_CMD_LOG_AND      ,
 
     IR_CMD_JMP          ,
-    IR_CMD_JA           ,
-    IR_CMD_JB           ,
+    IR_CMD_JG           ,
+    IR_CMD_JL           ,
     IR_CMD_JE           ,
-    IR_CMD_JAE          ,
-    IR_CMD_JBE          ,
+    IR_CMD_JGE          ,
+    IR_CMD_JLE          ,
     IR_CMD_JNE          ,
 
     IR_CMD_PUSH         ,

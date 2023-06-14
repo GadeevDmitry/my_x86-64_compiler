@@ -34,11 +34,11 @@ static const char *IR_CMD_NAMES[] =
     "LOG_AND"       ,
 
     "JMP"           ,
-    "JA"            ,
-    "JB"            ,
+    "JG"            ,
+    "JL"            ,
     "JE"            ,
-    "JAE"           ,
-    "JBE"           ,
+    "JGE"           ,
+    "JLE"           ,
     "JNE"           ,
 
     "PUSH"          ,
