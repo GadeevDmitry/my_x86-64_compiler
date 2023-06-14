@@ -292,9 +292,10 @@ static void translate_func_call_ret_val_used(prog_info *const prog, const AST_no
             create_command(IR_CMD_POP, true, true, true, RBP, (int) ($rel + param));
     }
 
-    memory_frame_in;                                            // RBP += relative
-    create_command(IR_CMD_CALL, false, false, true, func_addr); // call func_addr
-    memory_frame_out;                                           // RBP -= relative
+    memory_frame_in;                                            // RBP += relative  : RBP -> фрейм новой функции
+    create_command(IR_CMD_CALL, false, false, true, func_addr); // call func_addr   :
+    memory_frame_out;                                           // RBP -= relative  : RBP -> фрейм нашей функции
+    create_command(IR_CMD_PUSH, true, false, false, RAX);       // push RAX         : возвращаемое значение в стек
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -336,6 +337,7 @@ static void translate_return(prog_info *const prog, const AST_node *const subtre
     translate_expression(prog, $L);
 
     IR_node cmd = {};
+    create_command(IR_CMD_POP, true, false, false, RAX); // возвращаемое значение из стека в RAX
     create_command_no_args(IR_CMD_RET);
 }
 
@@ -474,7 +476,8 @@ static void translate_immediate_int_operand(prog_info *const prog, const AST_nod
     log_verify($R    == nullptr, (void) 0);
 
     IR_node cmd = {};
-    create_command(IR_CMD_PUSH, false, false, true, $imm_int);
+    create_command(IR_CMD_PUSH, false, false, true, SCALE * $imm_int);  // все переменные и промежуточные значения храняться, умноженными
+                                                                        // на SCALE = 10^n, чтобы сымитировать десятичные дроби
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
