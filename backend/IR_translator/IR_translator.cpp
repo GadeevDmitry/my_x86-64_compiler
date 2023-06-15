@@ -4,14 +4,17 @@
 // IR_TRANSLATOR
 //================================================================================================================================
 
-vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
-                                                  const size_t func_quantity)
+vector *IR_translator(const AST_node *const tree, const size_t  main_func_id,
+                                                  const size_t  var_quantity,
+                                                  const size_t func_quantity, size_t *const main_func_addr)
 {
     log_verify(tree != nullptr, nullptr);
+    log_verify(main_func_addr != nullptr, nullptr);
 
     prog_info *prog = prog_info_new(var_quantity, func_quantity);
 
     translate_general(prog, tree);
+    prog_info_get_func_addr(prog, main_func_id, main_func_addr);
 
     vector *IR = prog_info_delete_no_IR(prog);
     return  IR;
@@ -78,29 +81,29 @@ vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
 
 #define memory_frame_in                                                     \
         {                                                                   \
-        create_command(IR_CMD_PUSH, true , false, false, RBP);              \
+        create_command(IR_CMD_PUSH, true , false, false, 5 /* RBP */);      \
         create_command(IR_CMD_PUSH, false, false, true , (int) $rel);       \
         create_command(IR_CMD_ADD , false, false, false);                   \
-        create_command(IR_CMD_POP , true , false, false, RBP);              \
+        create_command(IR_CMD_POP , true , false, false, 5 /* RBP */);      \
         } /* RBP += relative */
 
 #define memory_frame_out                                                    \
         {                                                                   \
-        create_command(IR_CMD_PUSH, true , false, false, RBP);              \
+        create_command(IR_CMD_PUSH, true , false, false, 5 /* RBP */);      \
         create_command(IR_CMD_PUSH, false, false, true , (int) $rel);       \
         create_command(IR_CMD_SUB , false, false, false);                   \
-        create_command(IR_CMD_POP , true , false, false, RBP);              \
+        create_command(IR_CMD_POP , true , false, false, 5 /* RBP */);      \
         } /* RBP -= relative */
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define in_out_variable(var_ind, var_addr, ir_cmd)                                                                                      \
-    if      (prog_info_get_local_var_addr (prog, var_ind, &(var_addr))) create_command(ir_cmd, true , true, true, RBP, (int) var_addr); \
-    else if (prog_info_get_global_var_addr(prog, var_ind, &(var_addr))) create_command(ir_cmd, false, true, true,      (int) var_addr); \
-    else                                                                                                                                \
-    {                                                                                                                                   \
-        log_error("variable %lu is not declared yet\n", var_ind);                                                                       \
-        return;                                                                                                                         \
+#define in_out_variable(var_ind, var_addr, ir_cmd)                                                                                              \
+    if      (prog_info_get_local_var_addr (prog, var_ind, &(var_addr))) create_command(ir_cmd, true , true, true, 5 /* RBP */, (int) var_addr); \
+    else if (prog_info_get_global_var_addr(prog, var_ind, &(var_addr))) create_command(ir_cmd, false, true, true,              (int) var_addr); \
+    else                                                                                                                                        \
+    {                                                                                                                                           \
+        log_error("variable %lu is not declared yet\n", var_ind);                                                                               \
+        return;                                                                                                                                 \
     }
 
 #define push_variable(var_ind, var_addr) in_out_variable(var_ind, var_addr, IR_CMD_PUSH)
@@ -289,13 +292,13 @@ static void translate_func_call_ret_val_used(prog_info *const prog, const AST_no
         size_t param_quantity = translate_params(prog, $L);
 
         for (size_t param = 0; param < param_quantity; ++param)
-            create_command(IR_CMD_POP, true, true, true, RBP, (int) ($rel + param));
+            create_command(IR_CMD_POP, true, true, true, 5 /* RBP */, (int) ($rel + param));
     }
 
-    memory_frame_in;                                            // RBP += relative  : RBP -> фрейм новой функции
-    create_command(IR_CMD_CALL, false, false, true, func_addr); // call func_addr   :
-    memory_frame_out;                                           // RBP -= relative  : RBP -> фрейм нашей функции
-    create_command(IR_CMD_PUSH, true, false, false, RAX);       // push RAX         : возвращаемое значение в стек
+    memory_frame_in;                                                // RBP += relative  : RBP -> фрейм новой функции
+    create_command(IR_CMD_CALL, false, false, true, func_addr);     // call func_addr   :
+    memory_frame_out;                                               // RBP -= relative  : RBP -> фрейм нашей функции
+    create_command(IR_CMD_PUSH, true, false, false, 0 /* RAX */ );  // push RAX         : возвращаемое значение в стек
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -337,7 +340,7 @@ static void translate_return(prog_info *const prog, const AST_node *const subtre
     translate_expression(prog, $L);
 
     IR_node cmd = {};
-    create_command(IR_CMD_POP, true, false, false, RAX); // возвращаемое значение из стека в RAX
+    create_command(IR_CMD_POP, true, false, false, 0 /* RAX */); // возвращаемое значение из стека в RAX
     create_command_no_args(IR_CMD_RET);
 }
 

@@ -20,7 +20,7 @@
 
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 
-#include "../translator.h"
+static const int SCALE = 100;
 
 //================================================================================================================================
 // IR_TRANSLATOR
