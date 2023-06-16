@@ -25,46 +25,46 @@ ARR_H = $(ARR).h $(LOG_H) $(ALG_H)
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
-AST_H = ../../ast/ast.h
 IR_H  = ../IR/IR.h
+X64_H = ../x64/x64.h
 
 #================================================================================================================================
-# IR_TRANSLATOR
+# X64_TRANSLATOR
 #================================================================================================================================
 
-IR_translator:
-	make $(PROG_O)
-	make $(IR_TRANSLATOR_O)
+X64_translator:
+	make $(X64_INFO_O)
+	make $(X64_TRANSLATOR_O)
 
 clean:
 	clean -r -f $(OBJ_DIR)/
 
-.PHONY: IR_translator clean
+.PHONY: X64_translator clean
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
-IR_TRANSLATOR   = IR_translator
-IR_TRANSLATOR_O = $(OBJ_DIR)/ir_translator.o
+X64_TRANSLATOR   = x64_translator
+X64_TRANSLATOR_O = $(OBJ_DIR)/x64_translator.o
 
-IR_TRANSLATOR_H      = $(IR_TRANSLATOR).h $(AST_H) $(VEC_H)
-IR_TRANSLATOR_STAT_H = $(IR_TRANSLATOR)_static.h $(IR_TRANSLATOR_H) $(PROG_H) $(LOG_H) $(IR_H)
-IR_TRANSLATOR_SRC    = $(IR_TRANSLATOR).cpp $(IR_TRANSLATOR_STAT_H)
+X64_TRANSLATOR_H      = $(X64_TRANSLATOR).h $(VEC_H)
+X64_TRANSLATOR_STAT_H = $(X64_TRANSLATOR)_static.h $(X64_TRANSLATOR_H) $(X64_INFO_H) $(IR_H) $(X64_H) $(LOG_H)
+X64_TRANSLATOR_SRC    = $(X64_TRANSLATOR).cpp $(X64_TRANSLATOR_STAT_H)
 
-$(IR_TRANSLATOR_O): $(IR_TRANSLATOR_SRC)
+$(X64_TRANSLATOR_O): $(X64_TRANSLATOR_SRC)
 	mkdir -p $(OBJ_DIR)
 	g++ -c $(CFLAGS) $< -o $@
 
 #--------------------------------------------------------------------------------------------------------------------------------
-# PROG_INFO
+# X64_INFO
 #--------------------------------------------------------------------------------------------------------------------------------
 
-PROG   = prog_info/prog_info
-PROG_O = $(OBJ_DIR)/ir_translator_prog.o
+X64_INFO   = x64_info/x64_info
+X64_INFO_O = $(OBJ_DIR)/x64_info.o
 
-PROG_H      = $(PROG).h $(VEC_H) $(ARR_H)
-PROG_STAT_H = $(PROG)_static.h $(PROG_H) $(LOG_H) $(ALG_H) $(IR_H)
-PROG_SRC    = $(PROG).cpp $(PROG_STAT_H)
+X64_INFO_H      = $(X64_INFO).h $(X64_H) $(ARR_H) $(VEC_H)
+X64_INFO_STAT_H = $(X64_INFO)_static.h $(X64_INFO_H) $(LOG_H)
+X64_INFO_SRC    = $(X64_INFO).cpp $(X64_INFO_STAT_H)
 
-$(PROG_O): $(PROG_SRC)
+$(X64_INFO_O): $(X64_INFO_SRC)
 	mkdir -p $(OBJ_DIR)
 	g++ -c $(CFLAGS) $< -o $@
