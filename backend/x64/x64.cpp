@@ -249,15 +249,17 @@ static void x64_node_fields_dump(const x64_node *const node)
     {
         switch ($cc)
         {
-            case X64_cc_G : usual_field_dump("cc  ", "%s", X64_cc_names[0]);
-            case X64_cc_L : usual_field_dump("cc  ", "%s", X64_cc_names[1]);
-            case X64_cc_E : usual_field_dump("cc  ", "%s", X64_cc_names[2]);
+            case X64_cc_G : usual_field_dump("cc  ", "%s", X64_cc_names[0]); break;
+            case X64_cc_L : usual_field_dump("cc  ", "%s", X64_cc_names[1]); break;
+            case X64_cc_E : usual_field_dump("cc  ", "%s", X64_cc_names[2]); break;
 
-            case X64_cc_GE: usual_field_dump("cc  ", "%s", X64_cc_names[3]);
-            case X64_cc_LE: usual_field_dump("cc  ", "%s", X64_cc_names[4]);
-            case X64_cc_NE: usual_field_dump("cc  ", "%s", X64_cc_names[5]);
+            case X64_cc_GE: usual_field_dump("cc  ", "%s", X64_cc_names[3]); break;
+            case X64_cc_LE: usual_field_dump("cc  ", "%s", X64_cc_names[4]); break;
+            case X64_cc_NE: usual_field_dump("cc  ", "%s", X64_cc_names[5]); break;
 
+            case X64_cc_no:
             default       : log_assert_verbose(false, "undefined X64_cc value");
+                            break;
         }
     }
 
@@ -274,6 +276,8 @@ static void x64_node_fields_dump(const x64_node *const node)
 
         case X64_CMD_CMP :
         case X64_CMD_TEST: x64_operand_dump(&$op_2);
+                           break;
+        default          : break;
     }
 }
 

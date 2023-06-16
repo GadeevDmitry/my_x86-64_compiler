@@ -15,6 +15,9 @@
 // GLOBAL
 //================================================================================================================================
 
+#pragma GCC diagnostic ignored "-Wswitch"
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+
 const char *X64_CMD_names[] =
 {
     "ADD"   ,
@@ -84,9 +87,9 @@ const char *GPR_names[] =
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool x64_operand_ctor(x64_operand *const operand, const bool is_reg,
-                                                  const bool is_mem,
-                                                  const bool is_imm, ...);
+static bool x64_operand_ctor(x64_operand *const operand, const bool is_reg,
+                                                         const bool is_mem,
+                                                         const bool is_imm, va_list ap);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump

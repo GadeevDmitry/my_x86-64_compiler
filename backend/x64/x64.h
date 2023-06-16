@@ -64,6 +64,8 @@ enum GPR
     R13 ,
     R14 ,
     R15 ,
+
+    GPR_UNDEF = -1  ,
 };
 
 //================================================================================================================================
@@ -149,7 +151,7 @@ static __always_inline bool x64_operand_set_imm(x64_operand *const operand, cons
 
 static __always_inline GPR x64_operand_get_reg(const x64_operand *const operand)
 {
-    log_verify(operand != nullptr, (GPR) -1);
+    log_verify(operand != nullptr, GPR_UNDEF);
 
     return $reg;
 }
