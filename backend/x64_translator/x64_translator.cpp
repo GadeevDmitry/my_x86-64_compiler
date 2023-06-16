@@ -7,6 +7,7 @@
 vector *x64_translator(const vector *const IR, size_t *const main_func_ir_addr)
 {
     vec_verify(IR, nullptr);
+    log_verify(main_func_ir_addr != nullptr, nullptr);
 
     x64_info *x64 = x64_info_new(IR->size, *main_func_ir_addr);
 
@@ -355,6 +356,7 @@ static void translate_push_pop(x64_info *const x64, const IR_node *const IR_cmd)
             IR_cmd->is_arg.is_imm_arg, 0, 0);
 
     if (IR_cmd->is_arg.is_reg_arg) x64_operand_set_reg(&(cmd.op_1), (GPR) IR_cmd->reg_num);
+    if (IR_cmd->is_arg.is_mem_arg) x64_operand_set_scl(&(cmd.op_1), (char) sizeof(type_t));
     if (IR_cmd->is_arg.is_imm_arg) x64_operand_set_imm(&(cmd.op_1),       IR_cmd->imm_val);
 
     cmd_push;
