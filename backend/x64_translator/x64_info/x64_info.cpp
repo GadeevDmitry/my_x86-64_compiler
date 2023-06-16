@@ -53,6 +53,28 @@ void x64_info_dtor(void *const _x64)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
+
+vector *x64_info_delete_no_cmds(void *const _x64)
+{
+    vector *cmds = x64_info_dtor_no_cmds(_x64);
+    log_free(_x64);
+
+    return cmds;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+vector *x64_info_dtor_no_cmds(void *const _x64)
+{
+    if (_x64 == nullptr) return;
+
+    x64_info *const x64 = (x64_info *) _x64;
+
+    array_free($IR_node_addr);
+    return $cmds;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // query
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -112,6 +134,8 @@ static void x64_info_fixup_cmd_addr(x64_info *const x64, x64_node *const node)
     if ((node->type != X64_CMD_Jcc ) &&
         (node->type != X64_CMD_JMP ) &&
         (node->type != X64_CMD_CALL)) return;
+
+    if (node->op_1.is_imm == false) return;
 
     int  IR_node_target = x64_operand_get_imm(&(node->op_1));
     int x64_node_target = x64_info_get_ir_node_addr(x64, IR_node_target);

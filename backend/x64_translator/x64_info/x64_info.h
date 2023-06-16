@@ -6,6 +6,8 @@
 #include "../../../lib/array/array.h"
 #include "../../../lib/vector/vector.h"
 
+#include "../../x64/x64.h"
+
 //================================================================================================================================
 // STRUCT
 //================================================================================================================================
@@ -21,10 +23,12 @@ struct x64_info
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-x64_info *x64_info_new   (                      const size_t IR_size, const size_t main_func_ir_addr);
-bool      x64_info_ctor  (x64_info *const  x64, const size_t IR_size, const size_t main_func_ir_addr);
-void      x64_info_delete(void     *const _x64);
-void      x64_info_dtor  (void     *const _x64);
+x64_info *x64_info_new           (                      const size_t IR_size, const size_t main_func_ir_addr);
+bool      x64_info_ctor          (x64_info *const  x64, const size_t IR_size, const size_t main_func_ir_addr);
+void      x64_info_delete        (void     *const _x64);
+void      x64_info_dtor          (void     *const _x64);
+vector   *x64_info_delete_no_cmds(void     *const _x64);
+vector   *x64_info_dtor_no_cmds  (void     *const _x64);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // query
