@@ -296,9 +296,9 @@ static void translate_func_call_ret_val_used(prog_info *const prog, const AST_no
     }
 
     memory_frame_in;                                                // RBP += relative  : RBP -> фрейм новой функции
-    create_command(IR_CMD_CALL, false, false, true, func_addr);     // call func_addr   :
+    create_command(IR_CMD_CALL, false, false, true , func_addr);    // call func_addr   :
+    create_command(IR_CMD_PUSH,  true, false, false, 0 /* RAX */);  // push RAX         : возвращаемое значение в стек
     memory_frame_out;                                               // RBP -= relative  : RBP -> фрейм нашей функции
-    create_command(IR_CMD_PUSH, true, false, false, 0 /* RAX */ );  // push RAX         : возвращаемое значение в стек
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

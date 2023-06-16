@@ -401,4 +401,6 @@ static void translate_in_out(x64_info *const x64, const IR_node *const IR_cmd)
 
     if (IR_cmd->type == IR_CMD_IN) op1_reg(R8); // R8 := адрес функции input
     else                           op1_reg(R9); // R9 := адрес функции output
+
+    cmd_push;
 }
