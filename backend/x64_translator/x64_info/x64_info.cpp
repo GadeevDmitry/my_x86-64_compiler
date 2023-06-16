@@ -66,7 +66,7 @@ vector *x64_info_delete_no_cmds(void *const _x64)
 
 vector *x64_info_dtor_no_cmds(void *const _x64)
 {
-    if (_x64 == nullptr) return;
+    if (_x64 == nullptr) return nullptr;
 
     x64_info *const x64 = (x64_info *) _x64;
 
@@ -122,6 +122,8 @@ bool x64_info_fixup_addr(x64_info *const x64)
         x64_info_fixup_cmd_addr(x64, node_cur);
 
     x64_info_fixup_main_func_addr(x64);
+
+    return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -138,7 +140,7 @@ static void x64_info_fixup_cmd_addr(x64_info *const x64, x64_node *const node)
     if (node->op_1.is_imm == false) return;
 
     int  IR_node_target = x64_operand_get_imm(&(node->op_1));
-    int x64_node_target = x64_info_get_ir_node_addr(x64, IR_node_target);
+    int x64_node_target = x64_info_get_ir_node_addr(x64, (size_t) IR_node_target);
 
     x64_operand_set_imm(&(node->op_1), x64_node_target);
 }
@@ -149,5 +151,5 @@ static void x64_info_fixup_main_func_addr(x64_info *const x64)
 {
     log_assert(x64 != nullptr);
 
-    $main_addr = x64_info_get_ir_node_addr(x64, $main_addr);
+    $main_addr = (size_t) x64_info_get_ir_node_addr(x64, $main_addr);
 }

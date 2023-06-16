@@ -129,6 +129,9 @@ static void translate_IR_node(x64_info *const x64, const IR_node *const IR_cmd)
 
         case IR_CMD_IN        :
         case IR_CMD_OUT       : translate_in_out     (x64, IR_cmd); break;
+
+        default               : log_assert_verbose(false, "undefined IR_CMD");
+                                break;
     }
 }
 
