@@ -40,7 +40,7 @@ clean:
 X64   = x64
 X64_O = $(OBJ_DIR)/x64.o
 
-X64_H      = $(X64).h
+X64_H      = $(X64).h $(LOG_H)
 X64_STAT_H = $(X64)_static.h $(X64_H) $(LOG_H) $(ALG_H)
 X64_SRC    = $(X64).cpp $(X64_STAT_H)
 

@@ -10,6 +10,7 @@
 
 #define $reg    (operand->reg)
 #define $imm    (operand->imm)
+#define $scl    (operand->scale_factor)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // ctor dtor
@@ -54,6 +55,8 @@ static bool x64_operand_ctor(x64_operand *const operand, const bool is_reg,
     $is_reg = is_reg;
     $is_mem = is_mem;
     $is_imm = is_imm;
+
+    $scl    =      1;
 
     if (is_reg) $reg = (GPR) va_arg(ap, int);
     if (is_imm) $imm =       va_arg(ap, int);
@@ -113,6 +116,7 @@ static void x64_operand_fields_dump(const x64_operand *const operand)
     log_tab_service_message("}", "\n\n");
 
     if ($is_reg) log_tab_message("reg = %s\n", GPR_names[$reg]);
+    if ($is_mem) log_tab_message("scl = %d\n", $scl);
     if ($is_imm) log_tab_message("imm = %d\n", $imm);
 }
 
@@ -132,6 +136,7 @@ static __always_inline void x64_operand_ending_dump()
 
 #undef $reg
 #undef $imm
+#undef $scl
 
 //================================================================================================================================
 // X64_node

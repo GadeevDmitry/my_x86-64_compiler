@@ -1,6 +1,8 @@
 #ifndef X64_H
 #define X64_H
 
+#include "../../lib/logs/log.h"
+
 //================================================================================================================================
 // GLOBAL
 //================================================================================================================================
@@ -81,9 +83,10 @@ struct x64_operand
         bool is_imm;
     };
 
-    GPR reg;
-    int imm;
-};
+    GPR  reg;
+    int  imm;
+    char scale_factor; // addr = scale_factor * (reg + imm)
+};                     // addr - адрес относительно начала блока данных
 
 //================================================================================================================================
 // HEADERS
@@ -101,10 +104,12 @@ void         x64_operand_delete(void        *const _operand);
 // set get
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool x64_operand_set_reg(      x64_operand *const operand, const GPR reg) __attribute__((always_inline));
-static bool x64_operand_set_imm(      x64_operand *const operand, const int imm) __attribute__((always_inline));
-static GPR  x64_operand_get_reg(const x64_operand *const operand)                __attribute__((always_inline));
-static int  x64_operand_get_imm(const x64_operand *const operand)                __attribute__((always_inline));
+static bool x64_operand_set_reg(      x64_operand *const operand, const GPR           reg) __attribute__((always_inline));
+static bool x64_operand_set_imm(      x64_operand *const operand, const int           imm) __attribute__((always_inline));
+static bool x64_operand_set_scl(      x64_operand *const operand, const char scale_factor) __attribute__((always_inline));
+static GPR  x64_operand_get_reg(const x64_operand *const operand)                          __attribute__((always_inline));
+static int  x64_operand_get_imm(const x64_operand *const operand)                          __attribute__((always_inline));
+static char x64_operand_get_scl(const x64_operand *const operand)                          __attribute__((always_inline));
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
@@ -122,6 +127,7 @@ void x64_operand_dump(const void *const _operand);
 
 #define $reg    (operand->reg)
 #define $imm    (operand->imm)
+#define $scl    (operand->scale_factor)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // set get
@@ -149,6 +155,21 @@ static __always_inline bool x64_operand_set_imm(x64_operand *const operand, cons
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+static __always_inline bool x64_operand_set_scl(x64_operand *const operand, const char scale_factor)
+{
+    log_verify(operand != nullptr, false);
+    log_verify_verbose((scale_factor == 1) ||
+                       (scale_factor == 2) ||
+                       (scale_factor == 4) ||
+                       (scale_factor == 8), "wrong scale factor", false);
+
+    $scl = scale_factor;
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 static __always_inline GPR x64_operand_get_reg(const x64_operand *const operand)
 {
     log_verify(operand != nullptr, GPR_UNDEF);
@@ -167,18 +188,28 @@ static __always_inline int x64_operand_get_imm(const x64_operand *const operand)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+static __always_inline char x64_operand_get_scl(const x64_operand *const operand)
+{
+    log_verify(operand != nullptr, -1);
+
+    return $scl;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 #undef $is_reg
 #undef $is_mem
 #undef $is_imm
 
 #undef $reg
 #undef $imm
+#undef $scl
 
 // } X64_operand
 //================================================================================================================================
 
 //================================================================================================================================
-// X64_node
+// { X64_node
 //================================================================================================================================
 
 struct x64_node
@@ -189,6 +220,10 @@ struct x64_node
     x64_operand op_1;   // intel syntax
     x64_operand op_2;   // intel syntax
 };
+
+//================================================================================================================================
+// HEADERS
+//================================================================================================================================
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // ctor dtor
@@ -202,13 +237,57 @@ void      x64_node_delete(void     *const _node);
 // set
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool x64_node_set_operand_1(x64_node *const node, const bool is_reg, const bool is_mem, const bool is_imm, ...);
-bool x64_node_set_operand_2(x64_node *const node, const bool is_reg, const bool is_mem, const bool is_imm, ...);
+       bool x64_node_set_operand_1    (x64_node *const node, const bool is_reg, const bool is_mem, const bool is_imm, ...);
+       bool x64_node_set_operand_2    (x64_node *const node, const bool is_reg, const bool is_mem, const bool is_imm, ...);
+static bool x64_node_set_operand_1_scl(x64_node *const node, const char scale_factor) __attribute__((always_inline));
+static bool x64_node_set_operand_2_scl(x64_node *const node, const char scale_factor) __attribute__((always_inline));
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
 void x64_node_dump(const void *const _node);
+
+//================================================================================================================================
+// BODIES
+//================================================================================================================================
+
+#define $type   (node->type)
+#define $cc     (node->cc)
+
+#define $op_1   (node->op_1)
+#define $op_2   (node->op_2)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// set
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static __always_inline bool x64_node_set_operand_1_scl(x64_node *const node, const char scale_factor)
+{
+    log_verify(node != nullptr, false);
+
+    return x64_operand_set_scl(&$op_1, scale_factor);
+}
+
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static __always_inline bool x64_node_set_operand_2_scl(x64_node *const node, const char scale_factor)
+{
+    log_verify(node != nullptr, false);
+
+    return x64_operand_set_scl(&$op_2, scale_factor);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#undef $type
+#undef $cc
+
+#undef $op_1
+#undef $op_2
+
+// } X64_node
+//================================================================================================================================
 
 #endif //X64_H
