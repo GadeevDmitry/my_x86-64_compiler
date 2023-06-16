@@ -148,7 +148,7 @@ static __always_inline void x64_operand_ending_dump()
 //--------------------------------------------------------------------------------------------------------------------------------
 
 x64_node *x64_node_new(const X64_CMD type,
-                       const X64_cc    cc)
+                       const X64_cc    cc /* = X64_cc_no */)
 {
     x64_node  *node_new = (x64_node *) log_calloc(1, sizeof(x64_node));
     log_verify(node_new != nullptr, nullptr);
@@ -160,7 +160,7 @@ x64_node *x64_node_new(const X64_CMD type,
 //--------------------------------------------------------------------------------------------------------------------------------
 
 bool x64_node_ctor(x64_node *const node, const X64_CMD type,
-                                         const X64_cc    cc)
+                                         const X64_cc    cc /* = X64_cc_no */)
 {
     log_verify(node != nullptr, false);
 

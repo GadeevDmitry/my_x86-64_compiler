@@ -40,6 +40,7 @@ enum X64_cc
     X64_cc_GE = 0xD , ///< if greater or equal  (          SF  = OF)
     X64_cc_LE = 0xE , ///< if less or equal     (ZF = 1 || SF != OF)
     X64_cc_NE = 0x5 , ///< if not equal         (ZF = 0            )
+    X64_cc_no =  -1 , ///< no cc
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -98,10 +99,10 @@ void         x64_operand_delete(void        *const _operand);
 // set get
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool x64_operand_set_reg(      x64_operand *const operand, const GPR reg) __attribute__((always_inline));
-bool x64_operand_set_imm(      x64_operand *const operand, const int imm) __attribute__((always_inline));
-GPR  x64_operand_get_reg(const x64_operand *const operand)                __attribute__((always_inline));
-int  x64_operand_get_imm(const x64_operand *const operand)                __attribute__((always_inline));
+static bool x64_operand_set_reg(      x64_operand *const operand, const GPR reg) __attribute__((always_inline));
+static bool x64_operand_set_imm(      x64_operand *const operand, const int imm) __attribute__((always_inline));
+static GPR  x64_operand_get_reg(const x64_operand *const operand)                __attribute__((always_inline));
+static int  x64_operand_get_imm(const x64_operand *const operand)                __attribute__((always_inline));
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
@@ -124,7 +125,7 @@ void x64_operand_dump(const void *const _operand);
 // set get
 //--------------------------------------------------------------------------------------------------------------------------------
 
-__always_inline bool x64_operand_set_reg(x64_operand *const operand, const GPR reg)
+static __always_inline bool x64_operand_set_reg(x64_operand *const operand, const GPR reg)
 {
     log_verify(operand != nullptr, false);
 
@@ -135,7 +136,7 @@ __always_inline bool x64_operand_set_reg(x64_operand *const operand, const GPR r
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-__always_inline bool x64_operand_set_imm(x64_operand *const operand, const int imm)
+static __always_inline bool x64_operand_set_imm(x64_operand *const operand, const int imm)
 {
     log_verify(operand != nullptr, false);
 
@@ -146,7 +147,7 @@ __always_inline bool x64_operand_set_imm(x64_operand *const operand, const int i
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-__always_inline GPR x64_operand_get_reg(const x64_operand *const operand)
+static __always_inline GPR x64_operand_get_reg(const x64_operand *const operand)
 {
     log_verify(operand != nullptr, (GPR) -1);
 
@@ -155,7 +156,7 @@ __always_inline GPR x64_operand_get_reg(const x64_operand *const operand)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-__always_inline int x64_operand_get_imm(const x64_operand *const operand)
+static __always_inline int x64_operand_get_imm(const x64_operand *const operand)
 {
     log_verify(operand != nullptr, -1);
 
@@ -191,8 +192,8 @@ struct x64_node
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-x64_node *x64_node_new   (                       const X64_CMD type, const X64_cc cc);
-bool      x64_node_ctor  (x64_node *const  node, const X64_CMD type, const X64_cc cc);
+x64_node *x64_node_new   (                       const X64_CMD type, const X64_cc cc = X64_cc_no);
+bool      x64_node_ctor  (x64_node *const  node, const X64_CMD type, const X64_cc cc = X64_cc_no);
 void      x64_node_delete(void     *const _node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
