@@ -352,7 +352,10 @@ static void translate_push_pop(x64_info *const x64, const IR_node *const IR_cmd)
 
     op1_set(IR_cmd->is_arg.is_reg_arg,
             IR_cmd->is_arg.is_mem_arg,
-            IR_cmd->is_arg.is_imm_arg, (GPR) IR_cmd->reg_num, IR_cmd->imm_val);
+            IR_cmd->is_arg.is_imm_arg, 0, 0);
+
+    if (IR_cmd->is_arg.is_reg_arg) x64_operand_set_reg(&(cmd.op_1), (GPR) IR_cmd->reg_num);
+    if (IR_cmd->is_arg.is_imm_arg) x64_operand_set_imm(&(cmd.op_1),       IR_cmd->imm_val);
 
     cmd_push;
 }
