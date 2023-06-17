@@ -28,10 +28,12 @@ ARR_H = $(ARR).h $(LOG_H) $(ALG_H)
 #================================================================================================================================
 
 all:
-	cd IR             && make IR
-	cd x64            && make X64
-	cd IR_translator  && make IR_translator
-	cd x64_translator && make X64_translator
+	cd IR                && make IR
+	cd x64               && make X64
+	cd binary            && make bin
+	cd IR_translator     && make IR_translator
+	cd x64_translator    && make X64_translator
+	cd binary_translator && make bin_translator
 
 clean:
 	rm -r -f $(OBJ_DIR)/
