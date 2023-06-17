@@ -18,6 +18,31 @@
 #pragma GCC diagnostic ignored "-Wswitch"
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 
+//--------------------------------------------------------------------------------------------------------------------------------
+
+const char *GPR_names[] =
+{
+    "RAX"   ,
+    "RCX"   ,
+    "RDX"   ,
+    "RBX"   ,
+    "RSP"   ,
+    "RBP"   ,
+    "RSI"   ,
+    "RDI"   ,
+
+    "R8"    ,
+    "R9"    ,
+    "R10"   ,
+    "R11"   ,
+    "R12"   ,
+    "R13"   ,
+    "R14"   ,
+    "R15"   ,
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 const char *X64_CMD_names[] =
 {
     "ADD"   ,
@@ -45,38 +70,26 @@ const char *X64_CMD_names[] =
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-const char *X64_cc_names[] =
+const char *X64_SETCC_names[] =
 {
-    "G (greater)"           ,
-    "L (less)"              ,
-    "E (equal)"             ,
-
-    "GE (greater or equal)" ,
-    "LE (less or equal)"    ,
-    "NE (not equal)"        ,
+    "SETG"  ,
+    "SETL"  ,
+    "SETE"  ,
+    "SETGE" ,
+    "SETLE" ,
+    "SETNE" ,
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-const char *GPR_names[] =
+const char *X64_JCC_names[] =
 {
-    "RAX"   ,
-    "RCX"   ,
-    "RDX"   ,
-    "RBX"   ,
-    "RSP"   ,
-    "RBP"   ,
-    "RSI"   ,
-    "RDI"   ,
-
-    "R8"    ,
-    "R9"    ,
-    "R10"   ,
-    "R11"   ,
-    "R12"   ,
-    "R13"   ,
-    "R14"   ,
-    "R15"   ,
+    "JG"    ,
+    "JL"    ,
+    "JE"    ,
+    "JGE"   ,
+    "JLE"   ,
+    "JNE"   ,
 };
 
 //================================================================================================================================
@@ -95,20 +108,21 @@ static bool x64_operand_ctor(x64_operand *const operand, const bool is_reg,
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void x64_operand_header_dump(const x64_operand *const operand) __attribute__((always_inline));
-static void x64_operand_fields_dump(const x64_operand *const operand);
-static void x64_operand_ending_dump()                                 __attribute__((always_inline));
+static void x64_operand_dump    (const x64_operand *const operand);
+
+static void x64_operand_dump_reg(const x64_operand *const operand) __attribute__((always_inline));
+static void x64_operand_dump_imm(const x64_operand *const operand) __attribute__((always_inline));
+static void x64_operand_dump_mem(const x64_operand *const operand);
 
 //================================================================================================================================
 // X64_node
 //================================================================================================================================
 
-//--------------------------------------------------------------------------------------------------------------------------------
-// dump
-//--------------------------------------------------------------------------------------------------------------------------------
-
 static void x64_node_header_dump(const x64_node *const node) __attribute__((always_inline));
-static void x64_node_fields_dump(const x64_node *const node);
 static void x64_node_ending_dump()                           __attribute__((always_inline));
+
+static void x64_node_fields_dump(const x64_node *const node);
+static void x64_node_type_dump  (const x64_node *const node);
+static void x64_node_typecc_dump(const x64_node *const node, const char *names[]);
 
 #endif //X64_STATIC_H

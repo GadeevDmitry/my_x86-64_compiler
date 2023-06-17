@@ -77,55 +77,47 @@ void x64_operand_delete(void *const _operand)
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void x64_operand_dump(const void *const _operand)
-{
-    log_verify(_operand != nullptr, (void) 0);
-
-    const x64_operand *const operand = (const x64_operand *) _operand;
-
-    x64_operand_header_dump(operand);
-    x64_operand_fields_dump(operand);
-    x64_operand_ending_dump();
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static __always_inline void x64_operand_header_dump(const x64_operand *const operand)
+static void x64_operand_dump(const x64_operand *const operand)
 {
     log_assert(operand != nullptr);
 
-    log_tab_service_message("x64_operand (addr: %p)\n"
-                            "{", "\n",     operand);
-    LOG_TAB++;
+    if      ($is_reg && !$is_mem && !$is_imm) x64_operand_dump_reg(operand);
+    else if ($is_imm && !$is_mem && !$is_reg) x64_operand_dump_imm(operand);
+    else                                      x64_operand_dump_mem(operand);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void x64_operand_fields_dump(const x64_operand *const operand)
+static __always_inline void x64_operand_dump_reg(const x64_operand *const operand)
 {
     log_assert(operand != nullptr);
+    log_assert($is_reg && !$is_mem && !$is_imm);
 
-    log_tab_service_message("{", "\n");
-    LOG_TAB++;
-
-    usual_field_dump("is_reg", "%d", $is_reg);
-    usual_field_dump("is_mem", "%d", $is_mem);
-    usual_field_dump("is_imm", "%d", $is_imm);
-
-    LOG_TAB--;
-    log_tab_service_message("}", "\n\n");
-
-    if ($is_reg) log_tab_message("reg = %s\n", GPR_names[$reg]);
-    if ($is_mem) log_tab_message("scl = %d\n", $scl);
-    if ($is_imm) log_tab_message("imm = %d\n", $imm);
+    log_message("%s", GPR_names[$reg]);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static __always_inline void x64_operand_ending_dump()
+static __always_inline void x64_operand_dump_imm(const x64_operand *const operand)
 {
-    LOG_TAB--;
-    log_tab_service_message("}", "\n");
+    log_assert(operand != nullptr);
+    log_assert($is_imm && !$is_mem && !$is_reg);
+
+    log_message("%d", $imm);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void x64_operand_dump_mem(const x64_operand *const operand)
+{
+    log_assert(operand != nullptr);
+    log_assert($is_mem);
+
+    if      ($is_reg && !$is_imm) log_message("[%d * %s]"       , $scl, GPR_names[$reg]);
+    else if ($is_imm && !$is_reg) log_message("[%d * %d]"       , $scl,                  $imm);
+    else if ($is_imm &&  $is_reg) log_message("[%d * (%s + %d)]", $scl, GPR_names[$reg], $imm);
+
+    else                          log_assert_verbose(false, "impossible operand");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -243,32 +235,23 @@ static __always_inline void x64_node_header_dump(const x64_node *const node)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+static __always_inline void x64_node_ending_dump()
+{
+    LOG_TAB--;
+    log_tab_service_message("}", "\n\n");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 static void x64_node_fields_dump(const x64_node *const node)
 {
     log_assert(node != nullptr);
 
-    usual_field_dump("type", "%s", X64_CMD_names[$type]);
+    x64_node_type_dump(node);
 
-    if ($type == X64_CMD_Jcc ||
-        $type == X64_CMD_SETcc)
-    {
-        switch ($cc)
-        {
-            case X64_cc_G : usual_field_dump("cc  ", "%s", X64_cc_names[0]); break;
-            case X64_cc_L : usual_field_dump("cc  ", "%s", X64_cc_names[1]); break;
-            case X64_cc_E : usual_field_dump("cc  ", "%s", X64_cc_names[2]); break;
+    if ($type == X64_CMD_RET) return;
 
-            case X64_cc_GE: usual_field_dump("cc  ", "%s", X64_cc_names[3]); break;
-            case X64_cc_LE: usual_field_dump("cc  ", "%s", X64_cc_names[4]); break;
-            case X64_cc_NE: usual_field_dump("cc  ", "%s", X64_cc_names[5]); break;
-
-            case X64_cc_no:
-            default       : log_assert_verbose(false, "undefined X64_cc value");
-                            break;
-        }
-    }
-
-    if ($type != X64_CMD_RET) x64_operand_dump(&$op_1);
+    x64_operand_dump(&$op_1);
 
     switch ($type)
     {
@@ -280,7 +263,9 @@ static void x64_node_fields_dump(const x64_node *const node)
         case X64_CMD_XOR :
 
         case X64_CMD_CMP :
-        case X64_CMD_TEST: x64_operand_dump(&$op_2);
+        case X64_CMD_TEST: log_message(", ");
+                           x64_operand_dump(&$op_2);
+                           log_message("\n");
                            break;
         default          : break;
     }
@@ -288,12 +273,38 @@ static void x64_node_fields_dump(const x64_node *const node)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static __always_inline void x64_node_ending_dump()
+static void x64_node_type_dump(const x64_node *const node)
 {
-    LOG_TAB--;
-    log_tab_service_message("}", "\n");
+    log_assert(node != nullptr);
+
+    if      ($type == X64_CMD_Jcc  ) x64_node_typecc_dump(node, X64_JCC_names);
+    else if ($type == X64_CMD_SETcc) x64_node_typecc_dump(node, X64_SETCC_names);
+    else                             log_tab_message("%s ", X64_CMD_names[$type]);
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void x64_node_typecc_dump(const x64_node *const node, const char *names[])
+{
+    log_assert(node != nullptr);
+    log_assert(($type == X64_CMD_Jcc) ||
+               ($type == X64_CMD_SETcc));
+
+    switch ($cc)
+    {
+        case X64_cc_G : log_tab_message("%s ", names[0]); break;
+        case X64_cc_L : log_tab_message("%s ", names[1]); break;
+        case X64_cc_E : log_tab_message("%s ", names[2]); break;
+        case X64_cc_GE: log_tab_message("%s ", names[3]); break;
+        case X64_cc_LE: log_tab_message("%s ", names[4]); break;
+        case X64_cc_NE: log_tab_message("%s ", names[5]); break;
+
+        default       : log_assert_verbose(false, "undefined X64_cc value");
+                        break;
+    }
+}
+
+// } x64_node_pretty_fields_dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #undef $type
