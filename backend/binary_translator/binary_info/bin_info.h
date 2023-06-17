@@ -3,13 +3,11 @@
 
 #include <stdlib.h>
 
-#define LOG_NTRACE
-#include "../../../lib/logs/log.h"
 #include "../../../lib/array/array.h"
 #include "../../../lib/vector/vector.h"
 
 #include "../../binary/bin.h"
-#include "../../x64/x64.h"
+
 
 //================================================================================================================================
 // BINARY_INFO
@@ -28,10 +26,12 @@ struct binary_info
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-binary_info *binary_info_new   (                            const size_t x64_size, const size_t main_func_x64_addr);
-bool         binary_info_ctor  (binary_info *const  binary, const size_t x64_size, const size_t main_func_x64_addr);
-void         binary_info_delete(void        *const _binary);
-void         binary_info_dtor  (void        *const _binary);
+binary_info *binary_info_new           (                            const size_t x64_size, const size_t main_func_x64_addr);
+bool         binary_info_ctor          (binary_info *const  binary, const size_t x64_size, const size_t main_func_x64_addr);
+void         binary_info_delete        (void        *const _binary);
+void         binary_info_dtor          (void        *const _binary);
+array       *binary_info_delete_no_cmds(void        *const _binary);
+array       *binary_info_dtor_no_cmds  (void        *const _binary);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // query

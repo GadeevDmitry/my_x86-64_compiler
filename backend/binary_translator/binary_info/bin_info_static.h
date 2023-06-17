@@ -4,9 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define LOG_NTRACE
+#include "../../../lib/logs/log.h"
 #include "../../../lib/algorithm/algorithm.h"
 
 #include "bin_info.h"
+#include "../../x64/x64.h"
 
 //================================================================================================================================
 // BINARY_INFO
