@@ -9,6 +9,7 @@
 
 #include "../x64/x64.h"
 #include "../binary/bin.h"
+
 #include "bin_translator.h"
 #include "binary_info/bin_info.h"
 
@@ -35,5 +36,16 @@ static void translate_jcc               (binary_info *const binary, const x64_no
 static void translate_call              (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
 static void translate_call_rel          (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
 static void translate_call_abs          (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_jmp               (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_ret               (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_push              (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_push_imm          (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_push_reg          (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_push_mem          (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_pop               (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_pop_reg           (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+static void translate_pop_mem           (binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num);
+
+static void translate_push_pop_mem      (binary_info *const binary, const x64_node *const x64_cmd, binary_node *const bin_cmd);
 
 #endif //BIN_TRANSLATOR_STATIC_H
