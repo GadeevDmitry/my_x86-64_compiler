@@ -16,11 +16,14 @@
 // FRONTEND
 //================================================================================================================================
 
-AST_node *frontend(const char *source_code, size_t *const main_func_id,
-                                            size_t *const var_quantity,
-                                            size_t *const func_quantity)
+AST_node *frontend(const char *source_code, size_t *const  var_quantity,
+                                            size_t *const func_quantity,
+                                            size_t *const  main_func_id)
 {
-    log_verify(source_code != nullptr, nullptr);
+    log_verify(source_code   != nullptr, nullptr);
+    log_verify( var_quantity != nullptr, nullptr);
+    log_verify(func_quantity != nullptr, nullptr);
+    log_verify(main_func_id  != nullptr, nullptr);
 
     buffer *source = buffer_new(source_code);
     if (source == nullptr)
