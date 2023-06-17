@@ -226,6 +226,8 @@ bool binary_node_store(const binary_node *const node, buffer *const buff)
 
     if ($is_disp32)       buffer_write(buff, &$disp32, 4);
     if ($is_imm32)        buffer_write(buff, &$imm32 , 4);
+
+    return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
