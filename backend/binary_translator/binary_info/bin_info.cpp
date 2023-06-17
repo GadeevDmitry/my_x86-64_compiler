@@ -162,3 +162,100 @@ static void binary_info_fixup_main_func_addr(binary_info *const binary)
 
     $main_addr = (size_t) binary_info_get_x64_node_pc(binary, $main_addr);
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void binary_info_dump(const void *const _binary, const vector *const x64)
+{
+    log_verify(_binary != nullptr, (void) 0);
+    log_verify(x64     != nullptr, (void) 0);
+
+    const binary_info *const binary = (const binary_info *) _binary;
+
+    log_verify($cmds->size == $cmd_addr->size &&
+               $cmds->size == x64->size, (void) 0);
+
+    binary_info_header_dump(binary);
+    binary_info_fields_dump(binary, x64);
+    binary_info_ending_dump();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static __always_inline void binary_info_header_dump(const binary_info *const binary)
+{
+    log_assert(binary != nullptr);
+
+    log_tab_service_message("binary_info (addr: %p)\n"
+                            "{", "\n",      binary);
+    LOG_TAB++;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void binary_info_fields_dump(const binary_info *const binary, const vector *const x64)
+{
+    log_assert(binary != nullptr);
+
+    usual_field_dump("pc     ", "%lu", $pc);
+    usual_field_dump("main pc", "%lu", $main_addr);
+
+    log_message("\n");
+
+    binary_info_cmds_dump(binary, x64);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void binary_info_cmds_dump(const binary_info *const binary, const vector *const x64)
+{
+    log_assert(binary != nullptr);
+
+    const binary_node *bin_cmd = (const binary_node *)  array_begin($cmds);
+    const binary_node *bin_end = (const binary_node *)  array_end  ($cmds);
+
+    const x64_node *x64_cmd = (const x64_node *) vector_begin(x64);
+    const size_t   *cmd_pc  = (const size_t   *)  array_begin($cmd_addr);
+
+    size_t cmd_num = 0UL;
+    while (bin_cmd != bin_end)
+    {
+        binary_info_cmd_dump(bin_cmd, x64_cmd, *cmd_pc, cmd_num);
+        cmd_num++;
+
+        x64_cmd++;
+        bin_cmd++;
+        cmd_pc ++;
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void binary_info_cmd_dump(const binary_node *const bin_cmd,
+                                 const    x64_node *const x64_cmd, const size_t cmd_pc,
+                                                                   const size_t cmd_num)
+{
+    log_assert(bin_cmd != nullptr);
+    log_assert(x64_cmd != nullptr);
+
+    log_tab_service_message("num = %lu\n"
+                            "pc  = %lu\n"
+                            "{",     "\n", cmd_num, cmd_pc);
+    LOG_TAB++;
+
+       x64_node_dump(x64_cmd);
+    binary_node_dump(bin_cmd);
+
+    LOG_TAB--;
+    log_tab_service_message("}", "\n\n");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static __always_inline void binary_info_ending_dump()
+{
+    LOG_TAB--;
+    log_tab_service_message("}", "\n\n");
+}

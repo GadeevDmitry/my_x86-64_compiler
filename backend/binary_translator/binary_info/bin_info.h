@@ -44,4 +44,10 @@ int  binary_info_get_x64_node_pc(binary_info *const binary, const size_t x64_nod
 
 bool binary_info_fixup_addr     (binary_info *const binary, const vector *const x64);
 
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void binary_info_dump(const void *const _binary, const vector *const x64);
+
 #endif //STRUCTS_H
