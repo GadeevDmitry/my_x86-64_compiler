@@ -268,7 +268,7 @@ static void translate_func_call_ret_val_ignored(prog_info *const prog, const AST
     IR_node cmd = {};
 
     translate_func_call_ret_val_used(prog, subtree);
-    create_command_no_args(IR_CMD_POP); // удаление возвращаемого значения функции из стека
+    create_command(IR_CMD_POP, true, false, false, 0 /* RAX */); // удаление возвращаемого значения функции из стека
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
