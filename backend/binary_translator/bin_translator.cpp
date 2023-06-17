@@ -4,7 +4,7 @@
 // BINARY_TRANSLATOR
 //================================================================================================================================
 
-array *binary_translator(const vector *const x64, size_t *const main_func_x64_addr)
+buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_addr)
 {
     vec_verify(x64, nullptr);
     log_verify(main_func_x64_addr != nullptr, nullptr);
@@ -14,8 +14,12 @@ array *binary_translator(const vector *const x64, size_t *const main_func_x64_ad
     translate_general     (binary, x64);
     binary_info_fixup_addr(binary, x64);
 
+    buffer *exe = binary_info_get_exe_buff(binary);
     *main_func_x64_addr = binary->main_func_addr;
-    return binary_info_delete_no_cmds(binary);
+
+    binary_info_delete(binary);
+
+    return exe;
 }
 
 //================================================================================================================================

@@ -26,23 +26,22 @@ struct binary_info
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-binary_info *binary_info_new           (                            const size_t x64_size, const size_t main_func_x64_addr);
-bool         binary_info_ctor          (binary_info *const  binary, const size_t x64_size, const size_t main_func_x64_addr);
-void         binary_info_delete        (void        *const _binary);
-void         binary_info_dtor          (void        *const _binary);
-array       *binary_info_delete_no_cmds(void        *const _binary);
-array       *binary_info_dtor_no_cmds  (void        *const _binary);
+binary_info *binary_info_new   (                            const size_t x64_size, const size_t main_func_x64_addr);
+bool         binary_info_ctor  (binary_info *const  binary, const size_t x64_size, const size_t main_func_x64_addr);
+void         binary_info_delete(void        *const _binary);
+void         binary_info_dtor  (void        *const _binary);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // query
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool binary_info_push_cmd       (binary_info *const binary, const size_t cmd_num, const binary_node *const cmd);
+bool    binary_info_push_cmd       (binary_info *const binary, const size_t cmd_num, const binary_node *const cmd);
 
-bool binary_info_set_x64_node_pc(binary_info *const binary, const size_t x64_node_num);
-int  binary_info_get_x64_node_pc(binary_info *const binary, const size_t x64_node_num);
+bool    binary_info_set_x64_node_pc(binary_info *const binary, const size_t x64_node_num);
+int     binary_info_get_x64_node_pc(binary_info *const binary, const size_t x64_node_num);
+buffer *binary_info_get_exe_buff   (binary_info *const binary);
 
-bool binary_info_fixup_addr     (binary_info *const binary, const vector *const x64);
+bool    binary_info_fixup_addr     (binary_info *const binary, const vector *const x64);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump

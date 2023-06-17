@@ -6,6 +6,7 @@
 
 #define LOG_NTRACE
 #include "../../lib/logs/log.h"
+#include "../../lib/array/array.h"
 
 #include "../x64/x64.h"
 #include "../binary/bin.h"

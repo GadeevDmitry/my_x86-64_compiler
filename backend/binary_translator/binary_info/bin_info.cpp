@@ -57,28 +57,6 @@ void binary_info_dtor(void *const _binary)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-array *binary_info_delete_no_cmds(void *const _binary)
-{
-    array *cmds = binary_info_dtor_no_cmds(_binary);
-    log_free(_binary);
-
-    return cmds;
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-array *binary_info_dtor_no_cmds(void *const _binary)
-{
-    if (_binary == nullptr) return nullptr;
-
-    binary_info *const binary = (binary_info *) _binary;
-
-    array_free($cmd_addr);
-    return $cmds;
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
 // query
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -113,6 +91,24 @@ int binary_info_get_x64_node_pc(binary_info *const binary, const size_t cmd_num)
     log_verify(cmd_num < $cmd_addr->size, false);
 
     return (int) ((size_t *) array_begin($cmd_addr))[cmd_num];
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+buffer *binary_info_get_exe_buff(binary_info *const binary)
+{
+    log_verify(binary != nullptr, nullptr);
+
+    buffer *exe = buffer_new($pc);
+    log_verify(exe != nullptr, nullptr);
+
+    binary_node *cmd = (binary_node *) array_begin($cmds);
+    binary_node *end = (binary_node *) array_end  ($cmds);
+
+    for (; cmd != end; ++cmd)
+        binary_node_store(cmd, exe);
+
+    return exe;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
