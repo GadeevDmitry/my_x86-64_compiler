@@ -8,8 +8,8 @@
 // IR_TRANSLATOR
 //================================================================================================================================
 
-vector *IR_translator(const AST_node *const tree, const size_t  main_func_id,
-                                                  const size_t  var_quantity,
-                                                  const size_t func_quantity, size_t *const main_func_addr);
+vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
+                                                  const size_t func_quantity,
+                                                  size_t *const main_func_id);
 
 #endif //IR_TRANSLATOR_H

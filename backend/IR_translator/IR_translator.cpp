@@ -4,17 +4,17 @@
 // IR_TRANSLATOR
 //================================================================================================================================
 
-vector *IR_translator(const AST_node *const tree, const size_t  main_func_id,
-                                                  const size_t  var_quantity,
-                                                  const size_t func_quantity, size_t *const main_func_addr)
+vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
+                                                  const size_t func_quantity,
+                                                  size_t *const main_func_id)
 {
     log_verify(tree != nullptr, nullptr);
-    log_verify(main_func_addr != nullptr, nullptr);
+    log_verify(main_func_id != nullptr, nullptr);
 
     prog_info *prog = prog_info_new(var_quantity, func_quantity);
 
     translate_general(prog, tree);
-    prog_info_get_func_addr(prog, main_func_id, main_func_addr);
+    prog_info_get_func_addr(prog, *main_func_id, main_func_id);
 
     vector *IR = prog_info_delete_no_IR(prog);
     return  IR;
