@@ -208,6 +208,27 @@ DWORD binary_node_get_imm32(const binary_node *const node)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// store
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_store(const binary_node *const node, buffer *const buff)
+{
+    log_verify(node != nullptr, false);
+    buf_verify(buff, false);
+
+    if ($is_operand_pref) buffer_write(buff, "\x66"  , 1);
+    if ($is_address_pref) buffer_write(buff, "\x67"  , 1);
+
+    if ($is_REX)          buffer_write(buff, &$REX   , 1);
+    /* opcode */          buffer_write(buff, &$opcode, 1);
+    if ($is_ModRM)        buffer_write(buff, &$ModRM , 1);
+    if ($is_SIB)          buffer_write(buff, &$SIB   , 1);
+
+    if ($is_disp32)       buffer_write(buff, &$disp32, 4);
+    if ($is_imm32)        buffer_write(buff, &$imm32 , 4);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
