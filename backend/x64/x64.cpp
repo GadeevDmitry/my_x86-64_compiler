@@ -243,6 +243,11 @@ static __always_inline void x64_node_ending_dump()
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
+
 static void x64_node_fields_dump(const x64_node *const node)
 {
     log_assert(node != nullptr);
@@ -265,11 +270,12 @@ static void x64_node_fields_dump(const x64_node *const node)
         case X64_CMD_CMP :
         case X64_CMD_TEST: log_message(", ");
                            x64_operand_dump(&$op_2);
-                           log_message("\n");
+        default          : log_message("\n");
                            break;
-        default          : break;
     }
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -299,6 +305,7 @@ static void x64_node_typecc_dump(const x64_node *const node, const char *names[]
         case X64_cc_LE: log_tab_message("%s ", names[4]); break;
         case X64_cc_NE: log_tab_message("%s ", names[5]); break;
 
+        case X64_cc_no:
         default       : log_assert_verbose(false, "undefined X64_cc value");
                         break;
     }
