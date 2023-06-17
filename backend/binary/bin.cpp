@@ -148,6 +148,19 @@ bool binary_node_set_SIB(binary_node *const node, const BYTE scale,
     return binary_node_set_SIB(node, scale, (BYTE) index, (BYTE) base);
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_SIB(binary_node *const node, const BYTE scale,
+                                                  const GPR  index,
+                                                  const BYTE base)
+{
+    log_verify(node != nullptr, false);
+
+    if (index >= R8) binary_node_set_REX_X(node);
+
+    return binary_node_set_SIB(node, scale, (BYTE) index, (BYTE) base);
+}
+
 // } set
 //--------------------------------------------------------------------------------------------------------------------------------
 
