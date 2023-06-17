@@ -235,40 +235,25 @@ static __always_inline void binary_node_header_dump(const binary_node *const nod
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+static __always_inline void binary_node_ending_dump()
+{
+    LOG_TAB--;
+    log_tab_service_message("}", "\n");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 static void binary_node_fields_dump(const binary_node *const node)
 {
     log_assert(node != nullptr);
 
-    binary_node_bool_fields_dump(node);
+    usual_field_dump("opcode", "%x", $opcode);
 
     if ($is_REX   ) binary_node_REX_dump  (node);
     if ($is_ModRM ) binary_node_ModRM_dump(node);
     if ($is_SIB   ) binary_node_SIB_dump  (node);
     if ($is_disp32) usual_field_dump("disp32", "%d", $disp32);
     if ($is_imm32 ) usual_field_dump("imm32 ", "%d", $imm32 );
-
-    usual_field_dump("opcode", "%x", $opcode);
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static void binary_node_bool_fields_dump(const binary_node *const node)
-{
-    log_assert(node != nullptr);
-
-    log_tab_service_message("{", "\n");
-    LOG_TAB++;
-
-    usual_field_dump("is_operand_override_prefix", "%d", $is_operand_pref);
-    usual_field_dump("is_address_override_prefix", "%d", $is_address_pref);
-    usual_field_dump("is_REX                    ", "%d", $is_REX         );
-    usual_field_dump("is_ModRM                  ", "%d", $is_ModRM       );
-    usual_field_dump("is_SIB                    ", "%d", $is_SIB         );
-    usual_field_dump("is_disp32                 ", "%d", $is_disp32      );
-    usual_field_dump("is_imm32                  ", "%d", $is_imm32       );
-
-    LOG_TAB--;
-    log_tab_service_message("}", "\n\n");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -288,15 +273,16 @@ static void binary_node_REX_dump(const binary_node *const node)
     if  (is_higher_half_correct) log_tab_message(HTML_COLOR_LIME_GREEN);
     else                         log_tab_message(HTML_COLOR_DARK_RED  );
 
-    for (size_t bit = 7; bit >= 4; --bit) log_message(" %d", ($REX >> bit) & 1);
+    for (size_t bit = 7; bit > 3; --bit) log_message("|%d", ($REX >> bit) & 1);
     log_message(HTML_COLOR_CANCEL);
 
-    for (size_t bit = 3; bit != 0; --bit) log_message(" %d", ($REX >> bit) & 1);
+    for (size_t bit = 3; bit < 4; --bit) log_message("|%d", ($REX >> bit) & 1);
+    log_message("|\n");
 
     log_tab_service_message(" ^ ^ ^ ^ ^ ^ ^ ^ "  "\n"
                             " 7 6 5 4 3 2 1 0 ", "\n");
     LOG_TAB--;
-    log_tab_service_message("}", "\n\n");
+    log_tab_service_message("}", "\n");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -316,11 +302,11 @@ static void binary_node_ModRM_dump(const binary_node *const node)
     log_message("%d%d%d|", ($ModRM >> 5) & 1, ($ModRM >> 4) & 1, ($ModRM >> 3) & 1);    // reg
     log_message("%d%d%d|", ($ModRM >> 2) & 1, ($ModRM >> 1) & 1, ($ModRM >> 0) & 1);    // r/m
 
-    log_service_message("\n",
+    log_service_message("\n"
                         "^   ^   ^   ^"  "\n"
                         "8   6   3   0", "\n");
     LOG_TAB--;
-    log_tab_service_message("}", "\n\n");
+    log_tab_service_message("}", "\n");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -340,17 +326,9 @@ static void binary_node_SIB_dump(const binary_node *const node)
     log_message("%d%d%d|", ($SIB >> 5) & 1, ($SIB >> 4) & 1, ($SIB >> 3) & 1);  // index
     log_message("%d%d%d|", ($SIB >> 2) & 1, ($SIB >> 1) & 1, ($SIB >> 0) & 1);  // base
 
-    log_service_message("\n",
+    log_service_message("\n"
                         "^   ^   ^   ^"  "\n"
                         "8   6   3   0", "\n");
-    LOG_TAB--;
-    log_tab_message("}", "\n\n");
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static __always_inline void binary_node_ending_dump()
-{
     LOG_TAB--;
     log_tab_service_message("}", "\n");
 }
