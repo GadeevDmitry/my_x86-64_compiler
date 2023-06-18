@@ -37,6 +37,7 @@ static void translate_jcc        (x64_info *const x64, const IR_node *const IR_c
 static void translate_push_pop   (x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_call       (x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_ret        (x64_info *const x64, const IR_node *const IR_cmd);
-static void translate_in_out     (x64_info *const x64, const IR_node *const IR_cmd);
+static void translate_in         (x64_info *const x64, const IR_node *const IR_cmd);
+static void translate_out        (x64_info *const x64, const IR_node *const IR_cmd);
 
 #endif //X64_TRANSLATOR_STATIC_H

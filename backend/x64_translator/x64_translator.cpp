@@ -128,8 +128,8 @@ static void translate_IR_node(x64_info *const x64, const IR_node *const IR_cmd)
         case IR_CMD_CALL      : translate_call       (x64, IR_cmd); break;
         case IR_CMD_RET       : translate_ret        (x64, IR_cmd); break;
 
-        case IR_CMD_IN        :
-        case IR_CMD_OUT       : translate_in_out     (x64, IR_cmd); break;
+        case IR_CMD_IN        : translate_in         (x64, IR_cmd); break;
+        case IR_CMD_OUT       : translate_out        (x64, IR_cmd); break;
 
         default               : log_assert_verbose(false, "undefined IR_CMD");
                                 break;
@@ -391,18 +391,26 @@ static void translate_ret(x64_info *const x64, const IR_node *const IR_cmd)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void translate_in_out(x64_info *const x64, const IR_node *const IR_cmd)
+static void translate_in(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_IN ||
-               IR_cmd->type == IR_CMD_OUT);
+    log_assert(IR_cmd->type == IR_CMD_IN);
 
     x64_node cmd = {};
 
-    cmd_set(X64_CMD_CALL);
+    cmd_unary(X64_CMD_CALL,  R8); // R8 := адрес функции input
+    cmd_unary(X64_CMD_PUSH, RAX); // возвращаемое значение в стек
+}
 
-    if (IR_cmd->type == IR_CMD_IN) op1_reg(R8); // R8 := адрес функции input
-    else                           op1_reg(R9); // R9 := адрес функции output
+//--------------------------------------------------------------------------------------------------------------------------------
 
-    cmd_push;
+static void translate_out(x64_info *const x64, const IR_node *const IR_cmd)
+{
+    translate_verify;
+    log_assert(IR_cmd->type == IR_CMD_OUT);
+
+    x64_node cmd = {};
+
+    cmd_unary(X64_CMD_POP , RDI); // аргумент из стека
+    cmd_unary(X64_CMD_CALL,  R9); // R9 := адрес функции output
 }
