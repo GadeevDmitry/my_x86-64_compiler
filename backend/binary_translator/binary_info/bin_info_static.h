@@ -20,7 +20,6 @@
 
 #define $pc         (binary->pc)
 #define $main_addr  (binary->main_func_addr)
-#define $offset     (binary->offset)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // query

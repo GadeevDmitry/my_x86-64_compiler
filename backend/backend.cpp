@@ -17,9 +17,8 @@
 //================================================================================================================================
 
 buffer *backend(const AST_node *const ast, const size_t  var_quantity,
-                                           const size_t func_quantity,
-                                           const size_t offset, size_t *const main_func_addr,
-                                                                size_t *const glob_var_quantity)
+                                           const size_t func_quantity, size_t *const main_func_addr,
+                                                                       size_t *const glob_var_quantity)
 {
     log_verify(ast               != nullptr, nullptr);
     log_verify(main_func_addr    != nullptr, nullptr);
@@ -27,7 +26,7 @@ buffer *backend(const AST_node *const ast, const size_t  var_quantity,
 
     vector *IR  =  IR_translator   (ast, var_quantity, func_quantity, main_func_addr, glob_var_quantity);
     vector *x64 = x64_translator   (IR , main_func_addr);
-    buffer *exe = binary_translator(x64, main_func_addr, offset);
+    buffer *exe = binary_translator(x64, main_func_addr);
 
     vector_free(IR);
     vector_free(x64);

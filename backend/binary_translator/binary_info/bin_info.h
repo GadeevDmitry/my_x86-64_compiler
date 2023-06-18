@@ -20,15 +20,14 @@ struct binary_info
 
     size_t  pc;             ///< адрес текущей инструкции в байтах
     size_t  main_func_addr; ///< адрес главной функции в cmds
-    size_t  offset;         ///< постоянное смещение для адресов
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-binary_info *binary_info_new   (                            const size_t x64_size, const size_t main_func_x64_addr, const size_t offset = 0UL);
-bool         binary_info_ctor  (binary_info *const  binary, const size_t x64_size, const size_t main_func_x64_addr, const size_t offset = 0UL);
+binary_info *binary_info_new   (                            const size_t x64_size, const size_t main_func_x64_addr);
+bool         binary_info_ctor  (binary_info *const  binary, const size_t x64_size, const size_t main_func_x64_addr);
 void         binary_info_delete(void        *const _binary);
 void         binary_info_dtor  (void        *const _binary);
 

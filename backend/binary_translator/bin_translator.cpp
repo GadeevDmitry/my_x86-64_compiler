@@ -4,15 +4,16 @@
 // BINARY_TRANSLATOR
 //================================================================================================================================
 
-buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_addr, const size_t offset /* = 0UL */)
+buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_addr)
 {
     vec_verify(x64, nullptr);
     log_verify(main_func_x64_addr != nullptr, nullptr);
 
-    binary_info *binary = binary_info_new(x64->size, *main_func_x64_addr, offset);
+    binary_info *binary = binary_info_new(x64->size, *main_func_x64_addr);
 
     translate_general     (binary, x64);
     binary_info_fixup_addr(binary, x64);
+    binary_info_dump      (binary, x64);
 
     buffer *exe = binary_info_get_exe_buff(binary);
     *main_func_x64_addr = binary->main_func_addr;
@@ -457,5 +458,5 @@ static void translate_push_pop_mem(binary_info *const binary, const x64_node *co
     if ($op_1.is_reg == false) binary_node_set_SIB(bin_cmd, scale, (BYTE) 4 /* none */, (BYTE) 5 /* none */);
     else                       binary_node_set_SIB(bin_cmd, scale, $op_1.reg          , (BYTE) 5 /* none */);
 
-    binary_node_set_disp32(bin_cmd, $op_1.scale_factor * $op_1.imm + (DWORD) binary->offset);
+    binary_node_set_disp32(bin_cmd, $op_1.scale_factor * $op_1.imm);
 }
