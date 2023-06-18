@@ -28,7 +28,7 @@ AST_node *frontend(const char *source_code, size_t *const  var_quantity,
     buffer *source = buffer_new(source_code);
     if (source == nullptr)
     {
-        log_error("can't open \"%s\" with source code\n", source_code);
+        fprintf(stderr, BASH_COLOR_RED "ERROR: " BASH_COLOR_WHITE "can't open \"%s\" with source code\n", source_code);
         return nullptr;
     }
 
