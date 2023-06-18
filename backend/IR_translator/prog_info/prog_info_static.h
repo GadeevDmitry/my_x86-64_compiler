@@ -6,6 +6,10 @@
 
 #define LOG_NTRACE
 #define LOG_NLEAK
+
+#define NDEBUG
+#define NVERIFY
+
 #include "../../../lib/logs/log.h"
 #include "../../../lib/algorithm/algorithm.h"
 

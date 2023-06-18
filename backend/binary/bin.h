@@ -4,6 +4,11 @@
 #include <stdlib.h>
 
 #define LOG_NTRACE
+#define LOG_NLEAK
+
+#define NDEBUG
+#define NVERIFY
+
 #include "../../lib/logs/log.h"
 
 #include "../x64/x64.h"

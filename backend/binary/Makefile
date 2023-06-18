@@ -39,7 +39,7 @@ bin:
 	make $(BIN_O)
 
 clean:
-	clean -r -f $(OBJ_DIR)/
+	rm -r -f $(OBJ_DIR)/
 
 .PHONY: bin clean
 

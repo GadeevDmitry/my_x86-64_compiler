@@ -5,6 +5,12 @@
 
 #include "../../tokenizer/tokenizer.h"
 
+#define LOG_NTRACE
+#define LOG_NLEAK
+
+#define NDEBUG
+#define NVERIFY
+
 #include "../../../lib/logs/log.h"
 #include "../../../lib/vector/vector.h"
 #include "../../../lib/stack/stack.h"

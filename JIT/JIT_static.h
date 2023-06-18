@@ -3,10 +3,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include <sys/mman.h>
 
 #define LOG_NTRACE
 #define LOG_NLEAK
+
+#define NDEBUG
+#define NVERIFY
+
 #include "../lib/logs/log.h"
 #include "../lib/algorithm/algorithm.h"
 
@@ -20,8 +26,7 @@
 
 typedef long long type_t;
 
-static const int    SCALE     =  100;
-static const size_t PAGE_SIZE = 4096;
+static const int SCALE = 100;
 
 //================================================================================================================================
 // JIT
@@ -29,14 +34,14 @@ static const size_t PAGE_SIZE = 4096;
 
 struct JIT
 {
-    buffer *exe;
-    void   *RAM;
+    void *exe;
+    void *RAM;
 
     size_t global_data_size;
     size_t main_func_pc;
 
     type_t (*JIT_input )();
-    void   (*JIT_output)(type_t result);
+    void   (*JIT_output)(type_t number);
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -67,15 +72,26 @@ static void JIT_delete(JIT *const run);
 // execute
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void JIT_execute(/* rdi */ const size_t glob_data_size,
-                        /* rsi */ const size_t main_pc       , /* rdx */ type_t (*const jit_input )(),
-                                                               /* rcx */ void   (*const jit_output)(type_t));
-
+static void JIT_execute(/* rdi */ const size_t RAM,
+                        /* rsi */ const size_t main_pc, 
+                        /* rdx */ const size_t global_data_size, /* rcx */  void   (*const jit_output)(type_t),
+                                                                 /* r8  */  type_t (*const jit_input )());
 //--------------------------------------------------------------------------------------------------------------------------------
 // lib
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static type_t JIT_input ();
-static void   JIT_output(type_t result);
+static type_t JIT_input();
+static void   JIT_output           (type_t number);
+static void   JIT_output_not_scaled(type_t number);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void JIT_dump       (const JIT *const run);
+
+static void JIT_header_dump(const JIT *const run);
+static void JIT_fields_dump(const JIT *const run);
+static void JIT_ending_dump();
 
 #endif //JIT_STATIC_H

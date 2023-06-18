@@ -64,6 +64,9 @@ vector *x64_translator(const vector *const IR, size_t *const main_func_ir_addr)
         cmd_push;                                                                                                       \
         }
 
+#define reg_save translate_caller_save(x64)
+#define reg_load translate_caller_load(x64)
+
 //--------------------------------------------------------------------------------------------------------------------------------
 // general
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -398,7 +401,9 @@ static void translate_in(x64_info *const x64, const IR_node *const IR_cmd)
 
     x64_node cmd = {};
 
+    reg_save;
     cmd_unary(X64_CMD_CALL,  R8); // R8 := адрес функции input
+    reg_load;
     cmd_unary(X64_CMD_PUSH, RAX); // возвращаемое значение в стек
 }
 
@@ -412,5 +417,43 @@ static void translate_out(x64_info *const x64, const IR_node *const IR_cmd)
     x64_node cmd = {};
 
     cmd_unary(X64_CMD_POP , RDI); // аргумент из стека
+    reg_save;
     cmd_unary(X64_CMD_CALL,  R9); // R9 := адрес функции output
+    reg_load;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void translate_caller_save(x64_info *const x64)
+{
+    log_verify(x64 != nullptr, (void) 0);
+
+    x64_node cmd = {};
+
+    cmd_unary(X64_CMD_PUSH, RDI);
+    cmd_unary(X64_CMD_PUSH, RSI);
+    cmd_unary(X64_CMD_PUSH, RDX);
+    cmd_unary(X64_CMD_PUSH, RCX);
+    cmd_unary(X64_CMD_PUSH, R8 );
+    cmd_unary(X64_CMD_PUSH, R9 );
+    cmd_unary(X64_CMD_PUSH, R10);
+    cmd_unary(X64_CMD_PUSH, R11);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void translate_caller_load(x64_info *const x64)
+{
+    log_verify(x64 != nullptr, (void) 0);
+
+    x64_node cmd = {};
+
+    cmd_unary(X64_CMD_POP, R11);
+    cmd_unary(X64_CMD_POP, R10);
+    cmd_unary(X64_CMD_POP, R9 );
+    cmd_unary(X64_CMD_POP, R8 );
+    cmd_unary(X64_CMD_POP, RCX);
+    cmd_unary(X64_CMD_POP, RDX);
+    cmd_unary(X64_CMD_POP, RSI);
+    cmd_unary(X64_CMD_POP, RDI);
 }

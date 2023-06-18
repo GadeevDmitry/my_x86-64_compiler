@@ -35,7 +35,7 @@ X64:
 	make $(X64_O)
 
 clean:
-	clean -r -f $(OBJ_DIR)/
+	rm -r -f $(OBJ_DIR)/
 
 .PHONY: X64 clean
 

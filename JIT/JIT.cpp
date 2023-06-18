@@ -11,7 +11,7 @@ bool JIT_run(const char *const source_code)
     JIT *run = JIT_init(source_code);
     if (run == nullptr) return false;
 
-    JIT_execute($glob_data_size, $main_pc, $input, $output);
+    JIT_execute((size_t) $RAM, $main_pc, $glob_data_size, $output, $input);
     JIT_delete (run);
 
     return true;
@@ -51,19 +51,19 @@ static bool JIT_init(JIT *const run, const char *const source_code)
            func_quantity = 0UL;
 
     AST_node *ast = nullptr;
+    buffer   *exe = nullptr;
 
-    ast  = frontend(source_code, &var_quantity, &func_quantity,                &$main_pc); if (ast == nullptr) { JIT_delete(run); return false; }
-    $exe = backend (ast        ,  var_quantity,  func_quantity, (size_t) $RAM, &$main_pc, &$glob_data_size);
+    ast = frontend(source_code, &var_quantity, &func_quantity, &$main_pc); if (ast == nullptr) { JIT_delete(run); return false; }
+    exe = backend (ast        ,  var_quantity,  func_quantity, &$main_pc, &$glob_data_size);
 
-    size_t exe_page_begin  = (size_t) ($exe->buff_beg) / PAGE_SIZE;
-    size_t exe_buff_offset = (size_t) ($exe->buff_beg) - exe_page_begin;
+    $exe = mmap(NULL, exe->buff_size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    log_verify($exe != nullptr, false);
 
-    $main_pc += exe_buff_offset;
-
-    mprotect((void *) exe_page_begin, exe_buff_offset + $exe->buff_size, PROT_EXEC);
-    mprotect((void *) exe_page_begin, exe_buff_offset                  , PROT_READ | PROT_WRITE);
+    memcpy($exe, exe->buff_beg, exe->buff_size);
+    $main_pc += (size_t) $exe;
 
     AST_tree_delete(ast);
+    buffer_free    (exe);
 
     return true;
 }
@@ -76,9 +76,8 @@ static void JIT_delete(JIT *const run)
 {
     if (run == nullptr) return;
 
-    buffer_free($exe);
-    log_free   ($RAM);
-    log_free    (run);
+    log_free($RAM);
+    log_free (run);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -88,9 +87,10 @@ static void JIT_delete(JIT *const run)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static void JIT_execute(/* rdi */ const size_t glob_data_size,
-                        /* rsi */ const size_t main_pc       , /* rdx */ type_t (*const jit_input )(),
-                                                               /* rcx */ void   (*const jit_output)(type_t))
+static void JIT_execute(/* rdi */ const size_t RAM,
+                        /* rsi */ const size_t main_pc, 
+                        /* rdx */ const size_t global_data_size, /* rcx */  void   (*const jit_output)(type_t),
+                                                                 /* r8  */  type_t (*const jit_input )())
 {
     asm(
         ".intel_syntax noprefix\n"
@@ -102,11 +102,13 @@ static void JIT_execute(/* rdi */ const size_t glob_data_size,
         "push r13\n"
         "push r14\n"
         "push r15\n"
-
-        "mov r8 , rdx\n" // r8  = input
+                         // r8  = input
         "mov r9 , rcx\n" // r9  = output
-        "mov rbp, rdi\n" // rbp = main func frame
+        "mov r10, rdi\n" // r10 = RAM
+        "mov rbp, rdx\n" // rbp = main frame offset
         "mov rcx, 100\n" // rcx = SCALE
+
+//      "int 3\n"
 
         "call rsi\n"
 
@@ -130,24 +132,126 @@ static void JIT_execute(/* rdi */ const size_t glob_data_size,
 
 static type_t JIT_input()
 {
-    type_t result = 0;
-    fprintf(stderr, "INPUT: ");
+    fprintf(stderr, "INPUT : ");
 
-    int status = fscanf(stderr, "%lld", &result);
-    while (status == 0)
+    type_t number = 0;
+    type_t digit  = 0;
+    type_t  sign  = 1;
+    bool is_sign  = false;
+
+    for (digit = getc(stdin); digit != EOF && digit != '\n' && digit != '\0'; digit = getc(stdin))
     {
-        fprintf(stderr, "INPUT ERROR, try again: ");
-        status = fscanf(stderr, "%lld", &result);
+        if (digit == '-')
+        {
+            if (!is_sign) { is_sign = true; sign = -1; }
+            continue;
+        }
+        if (!isdigit((int) digit)) continue;
+
+        number *= 10;
+        number += digit - '0';
     }
 
-    return SCALE * result;
+    number *= sign;
+    number *= SCALE;
+
+    return number;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void JIT_output(type_t result)
+static void JIT_output(type_t number)
 {
-    double _result = (double) result / SCALE;
+    fprintf(stderr, "OUTPUT: ");
 
-    fprintf(stderr, "OUTPUT: %lg\n", _result);
+    type_t integer    = number / SCALE;
+    type_t fractional = number % SCALE;
+
+    fractional = fractional < 0 ? fractional + SCALE : fractional;
+
+    JIT_output_not_scaled(integer);
+    putc(',', stdout);
+
+    JIT_output_not_scaled(fractional);
+    putc('\n', stdout);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void JIT_output_not_scaled(type_t number)
+{
+    size_t buff_sz = 100;
+    size_t index   = buff_sz - 2;
+
+    bool is_neg = false;
+    char out_buff[buff_sz] = {};
+
+    if (number < 0)
+    {
+        is_neg = true;
+        number *= -1;
+    }
+
+    do
+    {
+        out_buff[index--] = (char) (number % 10) + '0';
+        number /= 10;
+    }
+    while (number != 0 && index < buff_sz - 2);
+
+    if  (is_neg) out_buff[index] = '-';
+    else         index++;
+
+    for (; out_buff[index] != '\0'; ++index) putc(out_buff[index], stdout);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void JIT_dump(const JIT *const run)
+{
+    log_verify(run != nullptr, (void) 0);
+
+    JIT_header_dump(run);
+    JIT_fields_dump(run);
+    JIT_ending_dump();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void JIT_header_dump(const JIT *const run)
+{
+    log_assert(run != nullptr);
+
+    log_tab_service_message("JIT (addr: %p)\n"
+                            "{", "\n", run);
+    LOG_TAB++;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void JIT_fields_dump(const JIT *const run)
+{
+    log_assert(run != nullptr);
+
+    usual_field_dump("RAM             ", "%p" , $RAM);
+    usual_field_dump("exe             ", "%p" , $exe);
+    usual_field_dump("global_data_size", "%lu", $glob_data_size);
+    usual_field_dump("main_func_pc    ", "%lx", $main_pc);
+
+    log_message("\n");
+
+    usual_field_dump("JIT_input ", "%p", $input);
+    usual_field_dump("JIT_output", "%p", $output);
+
+    log_message("\n");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void JIT_ending_dump()
+{
+    LOG_TAB--;
+    log_tab_service_message("}", "\n\n");
 }

@@ -1,6 +1,12 @@
 #ifndef X64_H
 #define X64_H
 
+#define LOG_NTRACE
+#define LOG_NLEAK
+
+#define NDEBUG
+#define NVERIFY
+
 #include "../../lib/logs/log.h"
 
 //================================================================================================================================

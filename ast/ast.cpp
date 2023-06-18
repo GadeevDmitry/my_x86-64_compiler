@@ -210,7 +210,7 @@ static void AST_tree_static_dump(const AST_node *const node)
 
 static inline void AST_tree_header_dump(FILE *const stream)
 {
-    log_assert(stream != nullptr)
+    log_assert(stream != nullptr);
 
     fprintf(stream, "digraph {\n"
                     "splines=ortho\n"

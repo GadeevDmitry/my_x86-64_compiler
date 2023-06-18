@@ -8,8 +8,9 @@
 
 #define LOG_NTRACE
 #define LOG_NLEAK
-#define LOG_NVERIFY
-#define LOG_NDEBUG
+
+#define NDEBUG
+#define NVERIFY
 
 #include "../../lib/logs/log.h"
 #include "../../lib/algorithm/algorithm.h"

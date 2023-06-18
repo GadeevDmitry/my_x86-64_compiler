@@ -41,7 +41,7 @@ X64_translator:
 	make $(X64_TRANSLATOR_O)
 
 clean:
-	clean -r -f $(OBJ_DIR)/
+	rm -r -f $(OBJ_DIR)/
 
 .PHONY: X64_translator clean
 

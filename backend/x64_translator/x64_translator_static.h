@@ -5,6 +5,11 @@
 #include <stdlib.h>
 
 #define LOG_NTRACE
+#define LOG_NLEAK
+
+#define NDEBUG
+#define NVERIFY
+
 #include "../../lib/logs/log.h"
 
 #include "../IR/IR.h"
@@ -39,5 +44,8 @@ static void translate_call       (x64_info *const x64, const IR_node *const IR_c
 static void translate_ret        (x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_in         (x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_out        (x64_info *const x64, const IR_node *const IR_cmd);
+
+static void translate_caller_save(x64_info *const x64);
+static void translate_caller_load(x64_info *const x64);
 
 #endif //X64_TRANSLATOR_STATIC_H

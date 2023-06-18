@@ -13,7 +13,6 @@ buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_a
 
     translate_general     (binary, x64);
     binary_info_fixup_addr(binary, x64);
-    binary_info_dump      (binary, x64);
 
     buffer *exe = binary_info_get_exe_buff(binary);
     *main_func_x64_addr = binary->main_func_addr;

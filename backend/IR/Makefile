@@ -35,7 +35,7 @@ IR:
 	make $(IR_O)
 
 clean:
-	clean -r -f $(OBJ_DIR)/
+	rm -r -f $(OBJ_DIR)/
 
 .PHONY: IR clean
 

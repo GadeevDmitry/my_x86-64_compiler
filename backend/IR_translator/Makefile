@@ -41,7 +41,7 @@ IR_translator:
 	make $(IR_TRANSLATOR_O)
 
 clean:
-	clean -r -f $(OBJ_DIR)/
+	rm -r -f $(OBJ_DIR)/
 
 .PHONY: IR_translator clean
 
