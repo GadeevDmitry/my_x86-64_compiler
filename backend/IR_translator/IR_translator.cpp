@@ -5,16 +5,19 @@
 //================================================================================================================================
 
 vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
-                                                  const size_t func_quantity,
-                                                  size_t *const main_func_id)
+                                                  const size_t func_quantity, size_t *const main_func_id,
+                                                                              size_t *const glob_var_quantity)
 {
-    log_verify(tree != nullptr, nullptr);
-    log_verify(main_func_id != nullptr, nullptr);
+    log_verify(tree              != nullptr, nullptr);
+    log_verify(main_func_id      != nullptr, nullptr);
+    log_verify(glob_var_quantity != nullptr, nullptr);
 
     prog_info *prog = prog_info_new(var_quantity, func_quantity);
 
     translate_general(prog, tree);
     prog_info_get_func_addr(prog, *main_func_id, main_func_id);
+
+    *glob_var_quantity = prog->relative;
 
     vector *IR = prog_info_delete_no_IR(prog);
     return  IR;
