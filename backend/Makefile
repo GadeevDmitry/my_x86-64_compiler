@@ -23,6 +23,14 @@ STK_H = $(STK).h $(LOG_H) $(ALG_H)
 VEC_H = $(VEC).h $(STK_H)
 ARR_H = $(ARR).h $(LOG_H) $(ALG_H)
 
+#--------------------------------------------------------------------------------------------------------------------------------
+
+AST_H = ../ast/ast.h
+
+IR_TRANSLATOR_H  = IR_translator/IR_translator.h      $(AST_H) $(VEC_H)
+X64_TRANSLATOR_H = x64_translator/x64_translator.h             $(VEC_H)
+BIN_TRANSLATOR_H = binary_translator/bin_translator.h $(ALG_H) $(VEC_H)
+
 #================================================================================================================================
 # BACKEND
 #================================================================================================================================
@@ -34,10 +42,24 @@ all:
 	cd IR_translator     && make IR_translator
 	cd x64_translator    && make X64_translator
 	cd binary_translator && make bin_translator
+	make backend
+
+backend:
+	make $(BACKEND_O)
 
 clean:
 	rm -r -f $(OBJ_DIR)/
 
-.PHONY: all clean
+.PHONY: all backend clean
 
 #--------------------------------------------------------------------------------------------------------------------------------
+
+BACKEND   = backend
+BACKEND_O = $(OBJ_DIR)/backend.o
+
+BACKEND_H   = $(BACKEND).h $(AST_H) $(ALG_H)
+BACKEND_SRC = $(BACKEND).cpp $(BACKEND_H) $(LOG_H) $(VEC_H) $(IR_TRANSLATOR_H) $(X64_TRANSLATOR_H) $(BIN_TRANSLATOR_H)
+
+$(BACKEND_O): $(BACKEND_SRC)
+	mkdir -p $(OBJ_DIR)
+	g++ -c $(CFLAGS) $< -o $@
