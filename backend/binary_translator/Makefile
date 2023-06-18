@@ -40,7 +40,7 @@ bin_translator:
 	make $(BIN_TRANSLATOR_O)
 
 clean:
-	clean -r -f $(OBJ_DIR)/
+	rm -r -f $(OBJ_DIR)/
 
 .PHONY: bin_translator clean
 

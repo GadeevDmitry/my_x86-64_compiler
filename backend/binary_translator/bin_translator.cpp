@@ -371,7 +371,7 @@ static void translate_push_mem(binary_info *const binary, const x64_node *const 
     reset();
 
     set_opcode('\xFF');
-    set_ModRM (0, (BYTE) 6, (BYTE) 4);  // SIB + disp32
+    set_ModRM (2, (BYTE) 6, (BYTE) 4);  // SIB + disp32
 
     translate_push_pop_mem(binary, x64_cmd, &cmd);
 
@@ -423,7 +423,7 @@ static void translate_pop_mem(binary_info *const binary, const x64_node *const x
     reset();
 
     set_opcode('\x8F');
-    set_ModRM (0, (BYTE) 0, (BYTE) 4);
+    set_ModRM (2, (BYTE) 0, (BYTE) 4);
 
     translate_push_pop_mem(binary, x64_cmd, &cmd);
 
@@ -455,8 +455,8 @@ static void translate_push_pop_mem(binary_info *const binary, const x64_node *co
                  break;
     }
 
-    if ($op_1.is_reg == false) binary_node_set_SIB(bin_cmd, scale, (BYTE) 4 /* none */, (BYTE) 5 /* none */);
-    else                       binary_node_set_SIB(bin_cmd, scale, $op_1.reg          , (BYTE) 5 /* none */);
+    if ($op_1.is_reg == false) binary_node_set_SIB(bin_cmd, scale, (BYTE) 4 /* none */, R10);
+    else                       binary_node_set_SIB(bin_cmd, scale, $op_1.reg          , R10); // R10 := начало блока RAM
 
     binary_node_set_disp32(bin_cmd, $op_1.scale_factor * $op_1.imm);
 }
