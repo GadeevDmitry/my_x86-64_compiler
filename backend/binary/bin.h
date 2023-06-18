@@ -69,10 +69,10 @@ static bool binary_node_set_opcode      (binary_node *const node, const BYTE opc
        bool binary_node_set_ModRM       (binary_node *const node, const BYTE mod, const BYTE reg, const GPR  rm);
        bool binary_node_set_ModRM       (binary_node *const node, const BYTE mod, const GPR  reg, const GPR  rm);
 
-       bool binary_node_set_SIB         (binary_node *const node,       BYTE scale,      BYTE index,       BYTE base);
-       bool binary_node_set_SIB         (binary_node *const node, const BYTE scale, const GPR index, const GPR  base);
-       bool binary_node_set_SIB         (binary_node *const node, const BYTE scale, const GPR index, const BYTE base);
-
+       bool binary_node_set_SIB         (binary_node *const node,       BYTE scale,       BYTE index,       BYTE base);
+       bool binary_node_set_SIB         (binary_node *const node, const BYTE scale, const GPR  index, const GPR  base);
+       bool binary_node_set_SIB         (binary_node *const node, const BYTE scale, const GPR  index, const BYTE base);
+       bool binary_node_set_SIB         (binary_node *const node, const BYTE scale, const BYTE index, const GPR  base);
 
 static bool binary_node_set_disp32      (binary_node *const node, const DWORD disp32) __attribute__((always_inline));
 static bool binary_node_set_imm32       (binary_node *const node, const DWORD  imm32) __attribute__((always_inline));
