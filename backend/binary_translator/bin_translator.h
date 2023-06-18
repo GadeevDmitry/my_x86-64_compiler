@@ -8,6 +8,6 @@
 // BINARY_TRANSLATOR
 //================================================================================================================================
 
-buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_addr);
+buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_addr, const size_t offset = 0UL);
 
 #endif //BIN_TRANSLATOR_H

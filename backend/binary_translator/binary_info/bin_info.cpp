@@ -9,19 +9,21 @@
 //--------------------------------------------------------------------------------------------------------------------------------
 
 binary_info *binary_info_new(const size_t x64_size,
-                             const size_t main_func_x64_addr)
+                             const size_t main_func_x64_addr,
+                             const size_t offset /* = 0UL */)
 {
     binary_info *binary_new = (binary_info *) log_calloc(1, sizeof(binary_info));
     log_verify  (binary_new != nullptr, nullptr);
 
-    if (!binary_info_ctor(binary_new, x64_size, main_func_x64_addr)) { log_free(binary_new); return nullptr; }
+    if (!binary_info_ctor(binary_new, x64_size, main_func_x64_addr, offset)) { log_free(binary_new); return nullptr; }
     return binary_new;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 bool binary_info_ctor(binary_info *const binary, const size_t x64_size,
-                                                 const size_t main_func_x64_addr)
+                                                 const size_t main_func_x64_addr,
+                                                 const size_t offset /* = 0UL */)
 {
     log_verify(binary != nullptr, false);
 
@@ -30,6 +32,7 @@ bool binary_info_ctor(binary_info *const binary, const size_t x64_size,
 
     $pc        = 0;
     $main_addr = main_func_x64_addr;
+    $offset    = offset;
 
     return true;
 }
@@ -197,6 +200,7 @@ static void binary_info_fields_dump(const binary_info *const binary, const vecto
 
     usual_field_dump("pc     ", "%lu", $pc);
     usual_field_dump("main pc", "%lu", $main_addr);
+    usual_field_dump("offset ", "%lu", $offset);
 
     log_message("\n");
 
