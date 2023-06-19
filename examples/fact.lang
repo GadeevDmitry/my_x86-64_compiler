@@ -1,15 +1,16 @@
-int factorial ( int n )
+TRABLE factorial ( TRABLE n )
 {
-    if ( n <  0 )           { return 0 ; }
-    if ( n == 0 || n == 1 ) { return 1 ; }
-    return n * factorial ( n - 1 ) ;
+    CHAMPIONS_LEAGUE ( n <  0 )           { MANCHESTER_IS_BLUE 0 ; }
+    CHAMPIONS_LEAGUE ( n == 0 || n == 1 ) { MANCHESTER_IS_BLUE 1 ; }
+
+    MANCHESTER_IS_BLUE n * factorial ( n - 1 ) ;
 }
 
-int N ;
-int CAMP_NOU ( )
+TRABLE N ;
+TRABLE MAN_CITY ( )
 {
-    input  N ;
-    output factorial ( N ) ;
+    DE_BRUYNE  N ;
+    RODRI factorial ( N ) ;
 
-    return 0 ;
+    MANCHESTER_IS_BLUE 0 ;
 }

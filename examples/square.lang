@@ -1,60 +1,59 @@
-int X_1 ;
-int X_2 ;
+TRABLE X_1 ;
+TRABLE X_2 ;
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
-int linear_solver ( int A , int B )         # Ax + B = 0
+TRABLE linear_solver ( TRABLE A , TRABLE B )                # Ax + B = 0
 {
-    if ( A != 0 ) { X_1 = ( -1 * B ) / A ; return 1 ; }
-    else
+    CHAMPIONS_LEAGUE ( A != 0 ) { X_1 = ( -1 * B ) / A ; MANCHESTER_IS_BLUE 1 ; }
+    PREMIER_LEAGUE
     {
-        if ( B == 0 ) { return 3 ; } # inf
-        else          { return 0 ; }
+        CHAMPIONS_LEAGUE ( B == 0 ) { MANCHESTER_IS_BLUE 3 ; } # inf
+        PREMIER_LEAGUE              { MANCHESTER_IS_BLUE 0 ; }
     }
 
-    return 0 ;
+    MANCHESTER_IS_BLUE 0 ;
 }
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
-int square_solver ( int A , int B , int C ) # Ax^2 + Bx + C = 0
+TRABLE square_solver ( TRABLE A , TRABLE B , TRABLE C )     # Ax^2 + Bx + C = 0
 {
-    if ( A == 0 ) { return linear_solver ( B , C ) ; }
+    CHAMPIONS_LEAGUE ( A == 0 ) { MANCHESTER_IS_BLUE linear_solver ( B , C ) ; }
 
-    int D ;
-    D = ( B * B ) - ( 4 * A * C ) ;
+    TRABLE D ; D = ( B * B ) - ( 4 * A * C ) ;
 
-    if ( D <  0 ) {                                                return 0 ; }
-    if ( D == 0 ) { X_1 =   ( -1 * B )               / ( 2 * A ) ; return 1 ; }
-    else          { X_1 = ( ( -1 * B ) - ( D ^ 2 ) ) / ( 2 * A ) ;
-                    X_2 = ( ( -1 * B ) + ( D ^ 2 ) ) / ( 2 * A ) ; return 2 ; }
+    CHAMPIONS_LEAGUE ( D <  0 ) {                                                MANCHESTER_IS_BLUE 0 ; }
+    CHAMPIONS_LEAGUE ( D == 0 ) { X_1 =   ( -1 * B )               / ( 2 * A ) ; MANCHESTER_IS_BLUE 1 ; }
+    PREMIER_LEAGUE              { X_1 = ( ( -1 * B ) - ( D ^ 2 ) ) / ( 2 * A ) ;
+                                  X_2 = ( ( -1 * B ) + ( D ^ 2 ) ) / ( 2 * A ) ; MANCHESTER_IS_BLUE 2 ; }
 
-    return 0 ;
+    MANCHESTER_IS_BLUE 0 ;
 }
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
-int print_ans ( int solve_num )
+TRABLE print_ans ( TRABLE solve_num )
 {
-    output solve_num ;
+    RODRI solve_num ;
 
-    if ( solve_num == 1 ) { output X_1 ;              return 0 ; }
-    if ( solve_num == 2 ) { output X_1 ; output X_2 ; return 0 ; }
+    CHAMPIONS_LEAGUE ( solve_num == 1 ) { RODRI X_1 ;             MANCHESTER_IS_BLUE 0 ; }
+    CHAMPIONS_LEAGUE ( solve_num == 2 ) { RODRI X_1 ; RODRI X_2 ; MANCHESTER_IS_BLUE 0 ; }
 
-    return 0 ;
+    MANCHESTER_IS_BLUE 0 ;
 }
 
 #--------------------------------------------------------------------------------------------------------------------------------
 # MAIN
 #--------------------------------------------------------------------------------------------------------------------------------
 
-int CAMP_NOU ( )
+TRABLE MAN_CITY ( )
 {
-    int A ; input A ;
-    int B ; input B ;
-    int C ; input C ;
+    TRABLE A ; DE_BRUYNE A ;
+    TRABLE B ; DE_BRUYNE B ;
+    TRABLE C ; DE_BRUYNE C ;
 
     print_ans ( square_solver ( A , B , C ) ) ;
 
-    return 0 ;
+    MANCHESTER_IS_BLUE 0 ;
 }

@@ -47,16 +47,16 @@ struct token_name
 
 static token_name KEY_NAMES[] =
 {
-    {"int"   , "int"     , 0},
+    {"TRABLE"            , "int"     , 0},
 
-    {"if"    , "if"      , 0},
-    {"else"  , "else"    , 0},
-    {"while" , "while"   , 0},
+    {"CHAMPIONS_LEAGUE"  , "if"      , 0},
+    {"PREMIER_LEAGUE"    , "else"    , 0},
+    {"GUARDIOLA"         , "while"   , 0},
 
-    {"return", "return"  , 0},
+    {"MANCHESTER_IS_BLUE", "return"  , 0},
 
-    {"input" , "input"   , 0},
-    {"output", "output"  , 0},
+    {"DE_BRUYNE"         , "input"   , 0},
+    {"RODRI"             , "output"  , 0},
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------
