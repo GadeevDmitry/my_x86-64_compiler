@@ -104,6 +104,7 @@ static void translate_IR_node(x64_info *const x64, const IR_node *const IR_cmd)
         case IR_CMD_SUB       : translate_add_sub    (x64, IR_cmd); break;
         case IR_CMD_MUL       : translate_mul        (x64, IR_cmd); break;
         case IR_CMD_DIV       : translate_div        (x64, IR_cmd); break;
+        case IR_CMD_POW       : translate_pow        (x64, IR_cmd); break;
 
         case IR_CMD_ARE_EQUAL :
         case IR_CMD_NOT_EQUAL :
@@ -197,6 +198,23 @@ static void translate_div(x64_info *const x64, const IR_node *const IR_cmd)
     cmd_unary(X64_CMD_IDIV, RSI)                            // idiv rsi ; rax = rdx:rax / rsi
 
     cmd_unary(X64_CMD_PUSH, RAX)                            // push rax ; result
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void translate_pow(x64_info *const x64, const IR_node *const IR_cmd)
+{
+    translate_verify;
+
+    x64_node cmd = {};
+
+    cmd_unary(X64_CMD_POP, RSI) // показатель степени
+    cmd_unary(X64_CMD_POP, RDI) // основание степени
+
+    reg_save;
+    cmd_unary(X64_CMD_CALL, R11) // R11 := адрес функции pow
+    reg_load;
+    cmd_unary(X64_CMD_PUSH, RAX) // возвращаемое значение в стек
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -430,14 +448,14 @@ static void translate_caller_save(x64_info *const x64)
 
     x64_node cmd = {};
 
-    cmd_unary(X64_CMD_PUSH, RDI);
-    cmd_unary(X64_CMD_PUSH, RSI);
-    cmd_unary(X64_CMD_PUSH, RDX);
-    cmd_unary(X64_CMD_PUSH, RCX);
-    cmd_unary(X64_CMD_PUSH, R8 );
-    cmd_unary(X64_CMD_PUSH, R9 );
-    cmd_unary(X64_CMD_PUSH, R10);
-    cmd_unary(X64_CMD_PUSH, R11);
+    cmd_unary(X64_CMD_PUSH, RDI)
+    cmd_unary(X64_CMD_PUSH, RSI)
+    cmd_unary(X64_CMD_PUSH, RDX)
+    cmd_unary(X64_CMD_PUSH, RCX)
+    cmd_unary(X64_CMD_PUSH, R8 )
+    cmd_unary(X64_CMD_PUSH, R9 )
+    cmd_unary(X64_CMD_PUSH, R10)
+    cmd_unary(X64_CMD_PUSH, R11)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -448,12 +466,12 @@ static void translate_caller_load(x64_info *const x64)
 
     x64_node cmd = {};
 
-    cmd_unary(X64_CMD_POP, R11);
-    cmd_unary(X64_CMD_POP, R10);
-    cmd_unary(X64_CMD_POP, R9 );
-    cmd_unary(X64_CMD_POP, R8 );
-    cmd_unary(X64_CMD_POP, RCX);
-    cmd_unary(X64_CMD_POP, RDX);
-    cmd_unary(X64_CMD_POP, RSI);
-    cmd_unary(X64_CMD_POP, RDI);
+    cmd_unary(X64_CMD_POP, R11)
+    cmd_unary(X64_CMD_POP, R10)
+    cmd_unary(X64_CMD_POP, R9 )
+    cmd_unary(X64_CMD_POP, R8 )
+    cmd_unary(X64_CMD_POP, RCX)
+    cmd_unary(X64_CMD_POP, RDX)
+    cmd_unary(X64_CMD_POP, RSI)
+    cmd_unary(X64_CMD_POP, RDI)
 }

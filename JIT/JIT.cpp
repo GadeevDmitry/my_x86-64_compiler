@@ -11,7 +11,7 @@ bool JIT_run(const char *const source_code)
     JIT *run = JIT_init(source_code);
     if (run == nullptr) return false;
 
-    JIT_execute((size_t) $RAM, $main_pc, $glob_data_size, $output, $input);
+    JIT_execute((size_t) $RAM, $main_pc, $glob_data_size, $pow, $input, $output);
     JIT_delete (run);
 
     return true;
@@ -42,6 +42,7 @@ static bool JIT_init(JIT *const run, const char *const source_code)
     $RAM    = (type_t *) log_calloc(1, 10000UL /* RAM size */);
     $exe    = nullptr;
 
+    $pow    = JIT_pow;
     $input  = JIT_input;
     $output = JIT_output;
 
@@ -53,7 +54,7 @@ static bool JIT_init(JIT *const run, const char *const source_code)
     AST_node *ast = nullptr;
     buffer   *exe = nullptr;
 
-    ast = frontend(source_code, &var_quantity, &func_quantity, &$main_pc); if (ast == nullptr) { JIT_delete(run); return false; }
+    ast = frontend(source_code, &var_quantity, &func_quantity, &$main_pc); if (ast == nullptr) { JIT_dtor(run); return false; }
     exe = backend (ast        ,  var_quantity,  func_quantity, &$main_pc, &$glob_data_size);
 
     $exe = mmap(NULL, exe->buff_size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
@@ -69,15 +70,24 @@ static bool JIT_init(JIT *const run, const char *const source_code)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// delete
+// dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static void JIT_delete(JIT *const run)
 {
     if (run == nullptr) return;
 
+    JIT_dtor(run);
+    log_free(run);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void JIT_dtor(JIT *const run)
+{
+    if (run == nullptr) return;
+
     log_free($RAM);
-    log_free (run);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -89,8 +99,9 @@ static void JIT_delete(JIT *const run)
 
 static void JIT_execute(/* rdi */ const size_t RAM,
                         /* rsi */ const size_t main_pc, 
-                        /* rdx */ const size_t global_data_size, /* rcx */  void   (*const jit_output)(type_t),
-                                                                 /* r8  */  type_t (*const jit_input )())
+                        /* rdx */ const size_t global_data_size, /* rcx */  type_t (*const jit_pow   )(type_t, type_t),
+                                                                 /* r8  */  type_t (*const jit_input )(),
+                                                                 /* r9  */  void   (*const jit_output)(type_t))
 {
     asm(
         ".intel_syntax noprefix\n"
@@ -103,7 +114,8 @@ static void JIT_execute(/* rdi */ const size_t RAM,
         "push r14\n"
         "push r15\n"
                          // r8  = input
-        "mov r9 , rcx\n" // r9  = output
+                         // r9  = output
+        "mov r11, rcx\n" // r11 = pow
         "mov r10, rdi\n" // r10 = RAM
         "mov rbp, rdx\n" // rbp = main frame offset
         "mov rcx, 100\n" // rcx = SCALE
@@ -128,6 +140,20 @@ static void JIT_execute(/* rdi */ const size_t RAM,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // lib
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static type_t JIT_pow(type_t basis, type_t indicator)
+{
+    type_t result = 0;
+    while (result * result <= basis * SCALE)
+    {
+        result++;
+    }
+
+    result--;
+    return result;
+}
+
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static type_t JIT_input()
@@ -164,10 +190,8 @@ static void JIT_output(type_t number)
 {
     fprintf(stderr, "OUTPUT: ");
 
-    type_t integer    = number / SCALE;
+    type_t integer    = number / SCALE; number = (number < 0) ? -1 * number : number;
     type_t fractional = number % SCALE;
-
-    fractional = fractional < 0 ? fractional + SCALE : fractional;
 
     JIT_output_not_scaled(integer);
     putc(',', stdout);

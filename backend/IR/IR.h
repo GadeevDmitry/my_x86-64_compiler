@@ -13,6 +13,7 @@ enum IR_CMD
     IR_CMD_SUB          ,
     IR_CMD_MUL          ,
     IR_CMD_DIV          ,
+    IR_CMD_POW          ,
 
     IR_CMD_ARE_EQUAL    ,
     IR_CMD_MORE         ,

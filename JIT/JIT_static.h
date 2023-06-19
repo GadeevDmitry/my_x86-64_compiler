@@ -40,6 +40,7 @@ struct JIT
     size_t global_data_size;
     size_t main_func_pc;
 
+    type_t (*JIT_pow)   (type_t basis, type_t indicator);
     type_t (*JIT_input )();
     void   (*JIT_output)(type_t number);
 };
@@ -52,6 +53,7 @@ struct JIT
 #define $glob_data_size (run->global_data_size)
 #define $main_pc        (run->main_func_pc)
 
+#define $pow            (run->JIT_pow)
 #define $input          (run->JIT_input)
 #define $output         (run->JIT_output)
 
@@ -63,10 +65,11 @@ static JIT *JIT_init(                const char *const source_code);
 static bool JIT_init(JIT *const run, const char *const source_code);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// delete
+// dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static void JIT_delete(JIT *const run);
+static void JIT_dtor  (JIT *const run);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // execute
@@ -74,12 +77,15 @@ static void JIT_delete(JIT *const run);
 
 static void JIT_execute(/* rdi */ const size_t RAM,
                         /* rsi */ const size_t main_pc, 
-                        /* rdx */ const size_t global_data_size, /* rcx */  void   (*const jit_output)(type_t),
-                                                                 /* r8  */  type_t (*const jit_input )());
+                        /* rdx */ const size_t global_data_size, /* rcx */  type_t (*const jit_pow   )(type_t, type_t),
+                                                                 /* r8  */  type_t (*const jit_input )(),
+                                                                 /* r9  */  void   (*const jit_output)(type_t));
+
 //--------------------------------------------------------------------------------------------------------------------------------
 // lib
 //--------------------------------------------------------------------------------------------------------------------------------
 
+static type_t JIT_pow  (type_t basis, type_t indicator);
 static type_t JIT_input();
 static void   JIT_output           (type_t number);
 static void   JIT_output_not_scaled(type_t number);

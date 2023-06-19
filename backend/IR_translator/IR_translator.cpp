@@ -566,6 +566,7 @@ static void translate_operator_binary(prog_info *const prog, const AST_node *con
         case AST_OPERATOR_SUB       : create_command_no_args(IR_CMD_SUB);            break;
         case AST_OPERATOR_MUL       : create_command_no_args(IR_CMD_MUL);            break;
         case AST_OPERATOR_DIV       : create_command_no_args(IR_CMD_DIV);            break;
+        case AST_OPERATOR_POW       : create_command_no_args(IR_CMD_POW);            break;
 
         case AST_OPERATOR_ARE_EQUAL : create_command_no_args(IR_CMD_ARE_EQUAL);      break;
         case AST_OPERATOR_NOT_EQUAL : create_command_no_args(IR_CMD_NOT_EQUAL);      break;

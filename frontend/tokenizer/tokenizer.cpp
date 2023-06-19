@@ -34,9 +34,9 @@ vector *tokenizer(buffer *const source)
         token  cur_token = {};
         size_t cur_token_size = buffer_get_token_size(source);
 
-        if      (*$src_pos == '#') buffer_skip_line(source);    // пропуск комментария
+        if      (*$src_pos == '#') { buffer_skip_line(source, &source_line); continue; } // пропуск комментария
 
-        else if (try_tokenize_type_key     (source, &cur_token.value.key    )) token_init_common(&cur_token, TOKEN_KEY     , cur_token_size, source_line);
+        if      (try_tokenize_type_key     (source, &cur_token.value.key    )) token_init_common(&cur_token, TOKEN_KEY     , cur_token_size, source_line);
         else if (try_tokenize_type_int     (source, &cur_token.value.imm_int)) token_init_common(&cur_token, TOKEN_INT     , cur_token_size, source_line);
         else if (try_tokenize_type_operator(source, &cur_token.value.op     )) token_init_common(&cur_token, TOKEN_OPERATOR, cur_token_size, source_line);
         else    {    tokenize_type_name    (source, &cur_token.value.name   ); token_init_common(&cur_token, TOKEN_NAME    , cur_token_size, source_line); }
