@@ -23,10 +23,13 @@ TRABLE square_solver ( TRABLE A , TRABLE B , TRABLE C )     # Ax^2 + Bx + C = 0
 
     TRABLE D ; D = ( B * B ) - ( 4 * A * C ) ;
 
-    CHAMPIONS_LEAGUE ( D <  0 ) {                                                MANCHESTER_IS_BLUE 0 ; }
-    CHAMPIONS_LEAGUE ( D == 0 ) { X_1 =   ( -1 * B )               / ( 2 * A ) ; MANCHESTER_IS_BLUE 1 ; }
-    PREMIER_LEAGUE              { X_1 = ( ( -1 * B ) - ( D ^ 2 ) ) / ( 2 * A ) ;
-                                  X_2 = ( ( -1 * B ) + ( D ^ 2 ) ) / ( 2 * A ) ; MANCHESTER_IS_BLUE 2 ; }
+    RODRI   D ;
+    RODRI ^ D ;
+
+    CHAMPIONS_LEAGUE ( D <  0 ) {                                          MANCHESTER_IS_BLUE 0 ; }
+    CHAMPIONS_LEAGUE ( D == 0 ) { X_1 =   ( -1 * B )         / ( 2 * A ) ; MANCHESTER_IS_BLUE 1 ; }
+    PREMIER_LEAGUE              { X_1 = ( ( -1 * B ) - ^ D ) / ( 2 * A ) ;
+                                  X_2 = ( ( -1 * B ) + ^ D ) / ( 2 * A ) ; MANCHESTER_IS_BLUE 2 ; }
 
     MANCHESTER_IS_BLUE 0 ;
 }

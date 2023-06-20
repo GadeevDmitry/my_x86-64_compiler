@@ -81,7 +81,7 @@ bool prog_info_scope_out(prog_info *const prog);
 // other
 //--------------------------------------------------------------------------------------------------------------------------------
 
-size_t prog_info_create_command      (      prog_info *const prog, const IR_node *const cmd);
+size_t prog_info_create_command      (      prog_info *const prog, const IR_CMD type, const bool is_reg, const bool is_mem, const bool is_imm, ...);
 size_t prog_info_get_next_command_num(const prog_info *const prog);
 bool   prog_info_fixup_jmp_addr      (      prog_info *const prog, const size_t jmp_cmd_num, const size_t label_num);
 

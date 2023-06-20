@@ -28,7 +28,7 @@ enum AST_OPERATOR_TYPE
     AST_OPERATOR_SUB        ,
     AST_OPERATOR_MUL        ,
     AST_OPERATOR_DIV        ,
-    AST_OPERATOR_POW        ,
+    AST_OPERATOR_SQRT       ,
 
     AST_OPERATOR_INPUT      ,
     AST_OPERATOR_OUTPUT     ,

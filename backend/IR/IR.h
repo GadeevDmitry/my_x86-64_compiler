@@ -13,7 +13,7 @@ enum IR_CMD
     IR_CMD_SUB          ,
     IR_CMD_MUL          ,
     IR_CMD_DIV          ,
-    IR_CMD_POW          ,
+    IR_CMD_SQRT         ,
 
     IR_CMD_ARE_EQUAL    ,
     IR_CMD_MORE         ,
@@ -66,6 +66,7 @@ struct IR_node
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
+bool     IR_node_ctor  (IR_node *const  node, const IR_CMD type, const bool is_reg, const bool is_mem, const bool is_imm, va_list ap);
 bool     IR_node_ctor  (IR_node *const  node, const IR_CMD type, const bool is_reg, const bool is_mem, const bool is_imm, ...);
 IR_node *IR_node_new   (                      const IR_CMD type, const bool is_reg, const bool is_mem, const bool is_imm, ...);
 void     IR_node_delete(void    *const _node);

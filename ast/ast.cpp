@@ -44,8 +44,6 @@ static bool AST_node_set_value(AST_node *const node, const AST_NODE_TYPE type, v
         default: break;
     }
 
-    va_end(value);
-
     return true;
 }
 
@@ -73,7 +71,10 @@ bool AST_node_ctor(AST_node *const node, const AST_NODE_TYPE type, ...)
     va_list  value;
     va_start(value, type);
 
-    return AST_node_ctor(node, type, value);
+    bool result = AST_node_ctor(node, type, value);
+
+    va_end(value);
+    return result;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -86,7 +87,9 @@ AST_node *AST_node_new(const AST_NODE_TYPE type, ...)
     va_list  value;
     va_start(value, type);
 
-    if (!AST_node_ctor(node_new, type, value)) { log_free(node_new); return nullptr; }
+    if (!AST_node_ctor(node_new, type, value)) { log_free(node_new); node_new = nullptr; }
+
+    va_end(value);
     return node_new;
 }
 

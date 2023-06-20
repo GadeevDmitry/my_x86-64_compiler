@@ -11,8 +11,8 @@ bool JIT_run(const char *const source_code)
     JIT *run = JIT_init(source_code);
     if (run == nullptr) return false;
 
-    JIT_execute((size_t) $RAM, $main_pc, $glob_data_size, $pow, $input, $output);
-    JIT_delete (run);
+    JIT_execute((size_t) $RAM, $main_pc, $glob_data_size, $sqrt, $input, $output);
+    JIT_delete(run);
 
     return true;
 }
@@ -42,7 +42,7 @@ static bool JIT_init(JIT *const run, const char *const source_code)
     $RAM    = (type_t *) log_calloc(1, 10000UL /* RAM size */);
     $exe    = nullptr;
 
-    $pow    = JIT_pow;
+    $sqrt   = JIT_sqrt;
     $input  = JIT_input;
     $output = JIT_output;
 
@@ -99,7 +99,7 @@ static void JIT_dtor(JIT *const run)
 
 static void JIT_execute(/* rdi */ const size_t RAM,
                         /* rsi */ const size_t main_pc, 
-                        /* rdx */ const size_t global_data_size, /* rcx */  type_t (*const jit_pow   )(type_t, type_t),
+                        /* rdx */ const size_t global_data_size, /* rcx */  type_t (*const jit_sqrt  )(type_t),
                                                                  /* r8  */  type_t (*const jit_input )(),
                                                                  /* r9  */  void   (*const jit_output)(type_t))
 {
@@ -115,7 +115,7 @@ static void JIT_execute(/* rdi */ const size_t RAM,
         "push r15\n"
                          // r8  = input
                          // r9  = output
-        "mov r11, rcx\n" // r11 = pow
+        "mov r11, rcx\n" // r11 = sqrt
         "mov r10, rdi\n" // r10 = RAM
         "mov rbp, rdx\n" // rbp = main frame offset
         "mov rcx, 100\n" // rcx = SCALE
@@ -142,10 +142,10 @@ static void JIT_execute(/* rdi */ const size_t RAM,
 // lib
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static type_t JIT_pow(type_t basis, type_t indicator)
+static type_t JIT_sqrt(type_t number)
 {
     type_t result = 0;
-    while (result * result <= basis * SCALE)
+    while (result * result <= number * SCALE)
     {
         result++;
     }
@@ -193,16 +193,16 @@ static void JIT_output(type_t number)
     type_t integer    = number / SCALE; number = (number < 0) ? -1 * number : number;
     type_t fractional = number % SCALE;
 
-    JIT_output_not_scaled(integer);
+    JIT_output_not_scaled(integer, false);
     putc(',', stdout);
 
-    JIT_output_not_scaled(fractional);
+    JIT_output_not_scaled(fractional, true);
     putc('\n', stdout);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void JIT_output_not_scaled(type_t number)
+static void JIT_output_not_scaled(type_t number, bool is_fractional)
 {
     size_t buff_sz = 100;
     size_t index   = buff_sz - 2;
@@ -226,7 +226,14 @@ static void JIT_output_not_scaled(type_t number)
     if  (is_neg) out_buff[index] = '-';
     else         index++;
 
-    for (; out_buff[index] != '\0'; ++index) putc(out_buff[index], stdout);
+    if (!is_fractional) for (; out_buff[index] != '\0'; ++index) putc(out_buff[index], stdout);
+    else
+    {
+        if (index == buff_sz - 2) out_buff[buff_sz - 3] = '0';
+
+        putc(out_buff[buff_sz - 3], stdout);
+        putc(out_buff[buff_sz - 2], stdout);
+    }
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -266,6 +273,7 @@ static void JIT_fields_dump(const JIT *const run)
 
     log_message("\n");
 
+    usual_field_dump("JIT_sqrt  ", "%p", $sqrt);
     usual_field_dump("JIT_input ", "%p", $input);
     usual_field_dump("JIT_output", "%p", $output);
 

@@ -90,8 +90,8 @@ static bool parse_equal                     (prog_info *const prog, token_arr_pa
 static bool parse_cmp                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
 static bool parse_add_sub                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
 static bool parse_mul_div                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
-static bool parse_pow                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree) __attribute__((always_inline));
 static bool parse_not                       (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
+static bool parse_sqrt                      (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 
 static bool parse_log_or_token              (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_log_and_token             (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
@@ -99,7 +99,6 @@ static bool parse_equal_token               (                       token_arr_pa
 static bool parse_cmp_token                 (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_add_sub_token             (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_mul_div_token             (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
-static bool parse_pow_token                 (                       token_arr_pass *const tkn_pass, AST_node **const subtree);
 
 static bool parse_operand                   (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);
 static bool parse_expression                (prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree);

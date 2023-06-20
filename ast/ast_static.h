@@ -45,7 +45,7 @@ static const char *AST_OPERATOR_NAMES[] =
     "SUB"   ,
     "MUL"   ,
     "DIV"   ,
-    "POW"   ,
+    "SQRT"  ,
 
     "IN"    ,
     "OUT"   ,

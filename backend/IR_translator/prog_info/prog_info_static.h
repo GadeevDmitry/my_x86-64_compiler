@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define LOG_NTRACE
 #define LOG_NLEAK

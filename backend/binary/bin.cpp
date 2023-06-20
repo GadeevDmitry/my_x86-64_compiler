@@ -62,6 +62,102 @@ void binary_node_delete(void *const _node)
 //--------------------------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// pref
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_operand_pref(binary_node *const node)
+{
+    log_verify(node != nullptr, false);
+
+    $is_operand_pref = true;
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_address_pref(binary_node *const node)
+{
+    log_verify(node != nullptr, false);
+
+    $is_address_pref = true;
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// REX
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_REX(binary_node *const node, const BYTE REX)
+{
+    log_verify(node != nullptr, false);
+
+    $is_REX = true;
+    $REX    =  REX;
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_REX_W(binary_node *const node)
+{
+    log_verify(node != nullptr, false);
+
+    $is_REX = true;             //      _______________
+    $REX    = $REX | (1 << 3);  // REX |0|1|0|0|W|r|x|b|
+                                //      ^ ^ ^ ^ ^ ^ ^ ^
+    return true;                //      7 6 5 4 3 0 1 2
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_REX_R(binary_node *const node)
+{
+    log_verify(node != nullptr, false);
+
+    $is_REX = true;             //      _______________
+    $REX    = $REX | (1 << 2);  // REX |0|1|0|0|w|R|x|b|
+                                //      ^ ^ ^ ^ ^ ^ ^ ^
+    return true;                //      7 6 5 4 3 2 1 0
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_REX_X(binary_node *const node)
+{
+    log_verify(node != nullptr, false);
+
+    $is_REX = true;             //      _______________
+    $REX    = $REX | (1 << 1);  // REX |0|1|0|0|w|r|X|b|
+                                //      ^ ^ ^ ^ ^ ^ ^ ^
+    return true;                //      7 6 5 4 3 2 1 0
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_REX_B(binary_node *const node)
+{
+    log_verify(node != nullptr, false);
+
+    $is_REX = true;             //      _______________
+    $REX    = $REX | (1 << 0);  // REX |0|1|0|0|w|r|x|B|
+                                //      ^ ^ ^ ^ ^ ^ ^ ^
+    return true;                //      7 5 5 4 3 2 1 0
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// opcode
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_opcode(binary_node *const node, const BYTE opcode)
+{
+    log_verify(node != nullptr, false);
+
+    $opcode = opcode;
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // ModRM
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -77,10 +173,10 @@ bool binary_node_set_ModRM(binary_node *const node, BYTE mod,
     reg = reg % 8;
     rm  = rm  % 8;
 
-    $ModRM = (BYTE) ($ModRM | (mod << 6));
-    $ModRM = (BYTE) ($ModRM | (reg << 3));
-    $ModRM = (BYTE) ($ModRM | (rm  << 0));
-
+    $ModRM = (BYTE) ($ModRM | (mod << 6));  //  ___________
+    $ModRM = (BYTE) ($ModRM | (reg << 3));  // |mod|reg|r/m|
+    $ModRM = (BYTE) ($ModRM | (rm  << 0));  // ^   ^   ^   ^
+                                            // 8   6   3   0
     return true;
 }
 
@@ -127,10 +223,10 @@ bool binary_node_set_SIB(binary_node *const node, BYTE scale,
     index = index % 8;
     base  = base  % 8;
 
-    $SIB = (BYTE) ($SIB | (scale << 6));
-    $SIB = (BYTE) ($SIB | (index << 3));
-    $SIB = (BYTE) ($SIB | (base  << 0));
-
+    $SIB = (BYTE) ($SIB | (scale << 6));  //  ____________
+    $SIB = (BYTE) ($SIB | (index << 3));  // |scl|ind|base|
+    $SIB = (BYTE) ($SIB | (base  << 0));  // ^   ^   ^    ^
+                                          // 8   6   3    0
     return true;
 }
 
@@ -172,6 +268,34 @@ bool binary_node_set_SIB(binary_node *const node, const BYTE scale,
     if (base >= R8) binary_node_set_REX_B(node);
 
     return binary_node_set_SIB(node, scale, (BYTE) index, (BYTE) base);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// disp32
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_disp32(binary_node *const node, const DWORD disp32)
+{
+    log_verify(node != nullptr, false);
+
+    $is_disp32 = true;
+    $disp32 = disp32;
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// imm32
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool binary_node_set_imm32(binary_node *const node, const DWORD imm32)
+{
+    log_verify(node != nullptr, false);
+
+    $is_imm32 = true;
+    $imm32 = imm32;
+
+    return true;
 }
 
 // } set

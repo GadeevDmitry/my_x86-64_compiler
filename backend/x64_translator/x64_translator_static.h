@@ -33,7 +33,7 @@ static void translate_IR_node    (x64_info *const x64, const IR_node *const IR_c
 static void translate_add_sub    (x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_mul        (x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_div        (x64_info *const x64, const IR_node *const IR_cmd);
-static void translate_pow        (x64_info *const x64, const IR_node *const IR_cmd);
+static void translate_sqrt       (x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_conditional(x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_not        (x64_info *const x64, const IR_node *const IR_cmd);
 static void translate_log_or     (x64_info *const x64, const IR_node *const IR_cmd);

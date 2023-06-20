@@ -913,7 +913,7 @@ $o  return true;
 
 static __always_inline bool parse_mul_div(prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree)
 {
-    return parse_op_pattern(prog, tkn_pass, subtree, parse_pow, parse_mul_div_token);
+    return parse_op_pattern(prog, tkn_pass, subtree, parse_not, parse_mul_div_token);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -935,31 +935,6 @@ $o  return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// parse_pow
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static __always_inline bool parse_pow(prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree)
-{
-    return parse_op_pattern(prog, tkn_pass, subtree, parse_not, parse_pow_token);
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool parse_pow_token(token_arr_pass *const tkn_pass, AST_node **const subtree)
-{
-$i
-    log_verify(tkn_pass != nullptr, false);
-    log_verify(subtree  != nullptr, false);
-
-$   if (is_passed || !token_op_is_pow($tkn_pos)) { $o return false; }
-    next;
-
-$   *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_POW);
-
-$o  return true;
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
 // parse_not
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -973,6 +948,30 @@ $       *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_NOT);
         next;
 
         AST_node *child = nullptr;
+        try_parse(parse_sqrt, prog, tkn_pass, &child);
+$       AST_node_hang_left(*subtree, child);
+
+        parse_success;
+    }
+
+$   bool   result = parse_sqrt(prog, tkn_pass, subtree);
+$o  return result;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// parse_sqrt
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool parse_sqrt(prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree)
+{
+    parse_start;
+
+$   if (!is_passed && token_op_is_pow($tkn_pos))
+    {
+$       *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_SQRT);
+        next;
+
+        AST_node *child = nullptr;
         try_parse(parse_operand, prog, tkn_pass, &child);
 $       AST_node_hang_left(*subtree, child);
 
@@ -980,7 +979,7 @@ $       AST_node_hang_left(*subtree, child);
     }
 
 $   bool   result = parse_operand(prog, tkn_pass, subtree);
-$o  return result;
+$   return result;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

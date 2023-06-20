@@ -46,7 +46,7 @@ buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_a
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define reset()                 binary_node_reset(&cmd);
+#define cmd_init()              binary_node cmd = {}; binary_node_reset(&cmd);
 
 #define set_operand_pref()      binary_node_set_operand_pref(&cmd)
 #define set_address_pref()      binary_node_set_address_pref(&cmd)
@@ -98,29 +98,30 @@ static void translate_x64_node(binary_info *const binary, const x64_node *const 
     translate_verify;
 
     switch (x64_cmd->type)
-    {
-        case X64_CMD_ADD  :
-        case X64_CMD_SUB  :
+    {                      
+                            #define translate(opcode) translate_general_arithmetic(binary, x64_cmd, cmd_num, opcode)
+        case X64_CMD_ADD  : translate('\x01'); break;
+        case X64_CMD_SUB  : translate('\x29'); break;
 
-        case X64_CMD_OR   :
-        case X64_CMD_AND  :
-        case X64_CMD_XOR  :
+        case X64_CMD_OR   : translate('\x09'); break;
+        case X64_CMD_AND  : translate('\x21'); break;
+        case X64_CMD_XOR  : translate('\x31'); break;
 
-        case X64_CMD_CMP  :
-        case X64_CMD_TEST : translate_general_arithmetic(binary, x64_cmd, cmd_num); break;
-
+        case X64_CMD_CMP  : translate('\x39'); break;
+        case X64_CMD_TEST : translate('\x85'); break;
+                            #undef translate
         case X64_CMD_IMUL :
-        case X64_CMD_IDIV : translate_imul_idiv         (binary, x64_cmd, cmd_num); break;
+        case X64_CMD_IDIV : translate_imul_idiv(binary, x64_cmd, cmd_num); break;
 
-        case X64_CMD_SETcc: translate_setcc             (binary, x64_cmd, cmd_num); break;
-        case X64_CMD_Jcc  : translate_jcc               (binary, x64_cmd, cmd_num); break;
+        case X64_CMD_SETcc: translate_setcc    (binary, x64_cmd, cmd_num); break;
+        case X64_CMD_Jcc  : translate_jcc      (binary, x64_cmd, cmd_num); break;
 
-        case X64_CMD_CALL : translate_call              (binary, x64_cmd, cmd_num); break;
-        case X64_CMD_JMP  : translate_jmp               (binary, x64_cmd, cmd_num); break;
-        case X64_CMD_RET  : translate_ret               (binary, x64_cmd, cmd_num); break;
+        case X64_CMD_CALL : translate_call     (binary, x64_cmd, cmd_num); break;
+        case X64_CMD_JMP  : translate_jmp      (binary, x64_cmd, cmd_num); break;
+        case X64_CMD_RET  : translate_ret      (binary, x64_cmd, cmd_num); break;
 
-        case X64_CMD_PUSH : translate_push              (binary, x64_cmd, cmd_num); break;
-        case X64_CMD_POP  : translate_pop               (binary, x64_cmd, cmd_num); break;
+        case X64_CMD_PUSH : translate_push     (binary, x64_cmd, cmd_num); break;
+        case X64_CMD_POP  : translate_pop      (binary, x64_cmd, cmd_num); break;
 
         default           : log_assert_verbose(false, "undefind X64_CMD");
                             break;
@@ -132,33 +133,17 @@ static void translate_x64_node(binary_info *const binary, const x64_node *const 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 
-static void translate_general_arithmetic(binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num)
+static void translate_general_arithmetic(binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num, const BYTE opcode)
 {
     translate_verify;
 
     if (!is_reg_only($op_1) ||
         !is_reg_only($op_2)) no_support;
 
-    binary_node cmd = {};
-    reset();
-
-    switch ($type)
-    {
-        case X64_CMD_ADD : set_opcode('\x01'); break;
-        case X64_CMD_SUB : set_opcode('\x29'); break;
-
-        case X64_CMD_OR  : set_opcode('\x09'); break;
-        case X64_CMD_AND : set_opcode('\x21'); break;
-        case X64_CMD_XOR : set_opcode('\x31'); break;
-
-        case X64_CMD_CMP : set_opcode('\x39'); break;
-        case X64_CMD_TEST: set_opcode('\x85'); break;
-
-        default          : log_assert_verbose(false, "unexpected x64 instruction");
-                           break;
-    }
+    cmd_init();
 
     set_REX_W ();
+    set_opcode(opcode);
     set_ModRM (3, $op_2.reg, $op_1.reg);
 
     cmd_push();
@@ -177,8 +162,7 @@ static void translate_imul_idiv(binary_info *const binary, const x64_node *const
 
     if (!is_reg_only($op_1)) no_support;
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_REX_W ();
     set_opcode('\xF7');
@@ -198,11 +182,10 @@ static void translate_setcc(binary_info *const binary, const x64_node *const x64
 
     if (!is_reg_only($op_1)) no_support;
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_REX   ('\x0F');
-    set_opcode(0x90 + (BYTE) $cc);
+    set_opcode(0x90 + (BYTE) $cond_code);
     set_ModRM (3, (BYTE) 0, $op_1.reg);
 
     cmd_push();
@@ -217,11 +200,10 @@ static void translate_jcc(binary_info *const binary, const x64_node *const x64_c
 
     if (!is_imm_only($op_1)) no_support;
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_REX   ('\x0F');
-    set_opcode(0x80 + (BYTE) $cc);
+    set_opcode(0x80 + (BYTE) $cond_code);
     set_disp32($op_1.imm);
 
     cmd_push();
@@ -249,8 +231,7 @@ static void translate_call_rel(binary_info *const binary, const x64_node *const 
     log_assert($type == X64_CMD_CALL);
     log_assert(is_imm_only($op_1));
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_opcode('\xE8');
     set_disp32($op_1.imm);
@@ -267,8 +248,7 @@ static void translate_call_abs(binary_info *const binary, const x64_node *const 
     log_assert($type == X64_CMD_CALL);
     log_assert(is_reg_only($op_1));
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_opcode('\xFF');
     set_ModRM (3, (BYTE) 2, $op_1.reg);
@@ -285,8 +265,7 @@ static void translate_jmp(binary_info *const binary, const x64_node *const x64_c
 
     if (!is_imm_only($op_1)) no_support;
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_opcode('\xE9');
     set_disp32($op_1.imm);
@@ -301,11 +280,8 @@ static void translate_ret(binary_info *const binary, const x64_node *const x64_c
     translate_verify;
     log_assert($type == X64_CMD_RET);
 
-    binary_node cmd = {};
-    reset();
-
+    cmd_init();
     set_opcode('\xC3');
-
     cmd_push();
 }
 
@@ -330,8 +306,7 @@ static void translate_push_imm(binary_info *const binary, const x64_node *const 
     log_assert($type == X64_CMD_PUSH);
     log_assert(is_imm_only($op_1));
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_opcode('\x68');
     set_imm32 ($op_1.imm);
@@ -348,8 +323,7 @@ static void translate_push_reg(binary_info *const binary, const x64_node *const 
     log_assert($type == X64_CMD_PUSH);
     log_assert(is_reg_only($op_1));
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_opcode('\xFF');
     set_ModRM (3, (BYTE) 6, $op_1.reg);
@@ -366,8 +340,7 @@ static void translate_push_mem(binary_info *const binary, const x64_node *const 
     log_assert($type == X64_CMD_PUSH);
     log_assert(is_mem($op_1));
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_opcode('\xFF');
     set_ModRM (2, (BYTE) 6, (BYTE) 4);  // SIB + disp32
@@ -400,8 +373,7 @@ static void translate_pop_reg(binary_info *const binary, const x64_node *const x
     log_assert($type == X64_CMD_POP);
     log_assert(is_reg_only($op_1));
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_opcode('\x8F');
     set_ModRM (3, (BYTE) 0, $op_1.reg);
@@ -418,8 +390,7 @@ static void translate_pop_mem(binary_info *const binary, const x64_node *const x
     log_assert($type == X64_CMD_POP);
     log_assert(is_mem($op_1));
 
-    binary_node cmd = {};
-    reset();
+    cmd_init();
 
     set_opcode('\x8F');
     set_ModRM (2, (BYTE) 0, (BYTE) 4);

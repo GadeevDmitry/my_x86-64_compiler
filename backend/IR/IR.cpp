@@ -17,9 +17,9 @@
 // ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_reg,
-                                                                 const bool is_mem,
-                                                                 const bool is_imm, va_list ap)
+bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_reg,
+                                                          const bool is_mem,
+                                                          const bool is_imm, va_list ap)
 {
     log_assert(node != nullptr);
 
@@ -32,8 +32,6 @@ static bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_r
     if (is_reg) $reg_num = (unsigned char) va_arg(ap, int);
     if (is_imm) $imm_val = va_arg(ap, int);
 
-    va_end(ap);
-
     return true;
 }
 
@@ -45,21 +43,13 @@ bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_reg,
 {
     log_verify(node != nullptr, false);
 
-    $type = type;
-
-    $is_reg = is_reg;
-    $is_mem = is_mem;
-    $is_imm = is_imm;
-
     va_list  ap;
     va_start(ap, is_imm);
 
-    if (is_reg) $reg_num = (unsigned char) va_arg(ap, int);
-    if (is_imm) $imm_val = va_arg(ap, int);
+    bool result = IR_node_ctor(node, type, is_reg, is_mem, is_imm, ap);
 
     va_end(ap);
-
-    return true;
+    return result;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -74,9 +64,10 @@ IR_node *IR_node_new(const IR_CMD type, const bool is_reg,
     va_list  ap;
     va_start(ap, is_imm);
 
-    if (IR_node_ctor(node_new, type, is_reg, is_mem, is_imm, ap)) return node_new;
+    if (IR_node_ctor(node_new, type, is_reg, is_mem, is_imm, ap)) { va_end(ap); return node_new; }
 
     log_free(node_new);
+    va_end(ap);
     return nullptr;
 }
 

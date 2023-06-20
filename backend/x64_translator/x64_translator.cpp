@@ -28,6 +28,7 @@ vector *x64_translator(const vector *const IR, size_t *const main_func_ir_addr)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#define cmd_init                             x64_node cmd = {}
 #define cmd_set(type, ...)                   x64_node_ctor(&cmd, type, ##__VA_ARGS__)
 #define cmd_push                             x64_info_push_cmd(x64, &cmd)
 
@@ -44,25 +45,55 @@ vector *x64_translator(const vector *const IR, size_t *const main_func_ir_addr)
 
 #define cmd_unary(type, reg)                                                                                            \
         {                                                                                                               \
-        cmd_set  (type);                                                                                                \
-        op1_reg  (reg );                                                                                                \
+        cmd_init;                                                                                                       \
+        cmd_set(type);                                                                                                  \
+        op1_reg(reg );                                                                                                  \
         cmd_push;                                                                                                       \
         }
 
 #define cmd_binary(type, reg_1, reg_2)                                                                                  \
         {                                                                                                               \
-        cmd_set   (type );                                                                                              \
-        op1_reg   (reg_1);                                                                                              \
-        op2_reg   (reg_2);                                                                                              \
+        cmd_init;                                                                                                       \
+        cmd_set(type );                                                                                                 \
+        op1_reg(reg_1);                                                                                                 \
+        op2_reg(reg_2);                                                                                                 \
         cmd_push;                                                                                                       \
         }
 
 #define cmd_setcc(cc, reg)                                                                                              \
         {                                                                                                               \
-        cmd_set     (X64_CMD_SETcc, cc);                                                                                \
-        op1_reg     (reg);                                                                                              \
+        cmd_init;                                                                                                       \
+        cmd_set(X64_CMD_SETcc, cc);                                                                                     \
+        op1_reg(reg);                                                                                                   \
         cmd_push;                                                                                                       \
         }
+
+#define cmd_jcc(cc, imm)                                                                                                \
+        {                                                                                                               \
+        cmd_init;                                                                                                       \
+        cmd_set(X64_CMD_Jcc, cc);                                                                                       \
+        op1_imm(imm);                                                                                                   \
+        cmd_push;                                                                                                       \
+        }
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define ADD( reg_1, reg_2) cmd_binary(X64_CMD_ADD , reg_1, reg_2)
+#define SUB( reg_1, reg_2) cmd_binary(X64_CMD_SUB , reg_1, reg_2)
+#define IMUL(reg)          cmd_unary (X64_CMD_IMUL, reg)
+#define IDIV(reg)          cmd_unary (X64_CMD_IDIV, reg)
+
+#define OR(  reg_1, reg_2) cmd_binary(X64_CMD_OR  , reg_1, reg_2)
+#define AND( reg_1, reg_2) cmd_binary(X64_CMD_AND , reg_1, reg_2)
+#define XOR( reg_1, reg_2) cmd_binary(X64_CMD_XOR , reg_1, reg_2)
+
+#define CMP( reg_1, reg_2) cmd_binary(X64_CMD_CMP , reg_1, reg_2)
+#define TEST(reg_1, reg_2) cmd_binary(X64_CMD_TEST, reg_1, reg_2)
+
+#define PUSH(reg)          cmd_unary (X64_CMD_PUSH, reg)
+#define POP( reg)          cmd_unary (X64_CMD_POP , reg)
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 #define reg_save translate_caller_save(x64)
 #define reg_load translate_caller_load(x64)
@@ -104,7 +135,7 @@ static void translate_IR_node(x64_info *const x64, const IR_node *const IR_cmd)
         case IR_CMD_SUB       : translate_add_sub    (x64, IR_cmd); break;
         case IR_CMD_MUL       : translate_mul        (x64, IR_cmd); break;
         case IR_CMD_DIV       : translate_div        (x64, IR_cmd); break;
-        case IR_CMD_POW       : translate_pow        (x64, IR_cmd); break;
+        case IR_CMD_SQRT      : translate_sqrt       (x64, IR_cmd); break;
 
         case IR_CMD_ARE_EQUAL :
         case IR_CMD_NOT_EQUAL :
@@ -149,15 +180,13 @@ static void translate_add_sub(x64_info *const x64, const IR_node *const IR_cmd)
     log_assert(IR_cmd->type == IR_CMD_ADD ||
                IR_cmd->type == IR_CMD_SUB);
 
-    x64_node cmd = {};
+    POP(RSI)
+    POP(RAX)
 
-    cmd_unary(X64_CMD_POP, RSI)
-    cmd_unary(X64_CMD_POP, RAX)
+    if (IR_cmd->type == IR_CMD_ADD) ADD(RAX, RSI)
+    else                            SUB(RAX, RSI)
 
-    if (IR_cmd->type == IR_CMD_ADD) cmd_binary(X64_CMD_ADD, RAX, RSI)
-    else                            cmd_binary(X64_CMD_SUB, RAX, RSI)
-
-    cmd_unary(X64_CMD_PUSH, RAX)
+    PUSH(RAX)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -167,17 +196,15 @@ static void translate_mul(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_MUL);
 
-    x64_node cmd = {};
+    POP(RSI)    // second operand
+    POP(RAX)    // first  operand
 
-    cmd_unary(X64_CMD_POP , RSI)                            // pop rsi  ; second operand
-    cmd_unary(X64_CMD_POP , RAX)                            // pop rax  ; first  operand
+    IMUL(RSI)   // rdx:rax = rax * rsi
+    IDIV(RCX)   // rax = rdx:rax / rcx,
+                // где rcx = 10^n необходимо для имитации
+                // десятичных дробей
 
-    cmd_unary(X64_CMD_IMUL, RSI)                            // imul rsi ; rdx:rax = rax * rsi
-    cmd_unary(X64_CMD_IDIV, RCX)                            // idiv rcx ; rax = rdx:rax / rcx,
-                                                            //          ; где rcx = 10^n необходимо для имитации
-                                                            //          ; десятичных дробей
-
-    cmd_unary(X64_CMD_PUSH, RAX)                            // push rax ; result
+    PUSH(RAX)   // result
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -187,34 +214,30 @@ static void translate_div(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_DIV);
 
-    x64_node cmd = {};
+    POP(RSI)    // second operand
+    POP(RAX)    // first  operand
 
-    cmd_unary(X64_CMD_POP , RSI)                            // pop rsi  ; second operand
-    cmd_unary(X64_CMD_POP , RAX)                            // pop rax  ; first  operand
+    IMUL(RCX)   // rdx:rax = rax * rcx,
+                // где rcx = 10^n необходимо для имитации
+                // десятичных дробей
+    IDIV(RSI)   // rax = rdx:rax / rsi
 
-    cmd_unary(X64_CMD_IMUL, RCX)                            // imul rcx ; rdx:rax = rax * rcx,
-                                                            //          ; где rcx = 10^n необходимо для имитации
-                                                            //          ; десятичных дробей
-    cmd_unary(X64_CMD_IDIV, RSI)                            // idiv rsi ; rax = rdx:rax / rsi
-
-    cmd_unary(X64_CMD_PUSH, RAX)                            // push rax ; result
+    PUSH(RAX)   // result
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void translate_pow(x64_info *const x64, const IR_node *const IR_cmd)
+static void translate_sqrt(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
 
-    x64_node cmd = {};
-
-    cmd_unary(X64_CMD_POP, RSI) // показатель степени
-    cmd_unary(X64_CMD_POP, RDI) // основание степени
+    POP(RDI)                     // аргумент из стека
 
     reg_save;
-    cmd_unary(X64_CMD_CALL, R11) // R11 := адрес функции pow
+    cmd_unary(X64_CMD_CALL, R11) // R11 := адрес функции sqrt
     reg_load;
-    cmd_unary(X64_CMD_PUSH, RAX) // возвращаемое значение в стек
+
+    PUSH(RAX)                    // возвращаемое значение в стек
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -223,31 +246,26 @@ static void translate_conditional(x64_info *const x64, const IR_node *const IR_c
 {
     translate_verify;
 
-    x64_node cmd = {};
+    POP(RSI)
+    POP(RAX)
 
-    cmd_unary (X64_CMD_POP, RSI)
-    cmd_unary (X64_CMD_POP, RAX)
-
-    cmd_binary(X64_CMD_XOR, RBX, RBX)
-    cmd_binary(X64_CMD_CMP, RAX, RSI)
+    XOR(RBX, RBX)
+    CMP(RAX, RSI)
 
     switch (IR_cmd->type)
     {
-        case IR_CMD_ARE_EQUAL : cmd_set(X64_CMD_SETcc, X64_cc_E ); break; // sete
-        case IR_CMD_NOT_EQUAL : cmd_set(X64_CMD_SETcc, X64_cc_NE); break; // setne
-        case IR_CMD_MORE      : cmd_set(X64_CMD_SETcc, X64_cc_G ); break; // setg
-        case IR_CMD_LESS      : cmd_set(X64_CMD_SETcc, X64_cc_L ); break; // setl
-        case IR_CMD_MORE_EQUAL: cmd_set(X64_CMD_SETcc, X64_cc_GE); break; // setge
-        case IR_CMD_LESS_EQUAL: cmd_set(X64_CMD_SETcc, X64_cc_LE); break; // setle
+        case IR_CMD_ARE_EQUAL : cmd_setcc(X64_cc_E , RBX); break;
+        case IR_CMD_NOT_EQUAL : cmd_setcc(X64_cc_NE, RBX); break;
+        case IR_CMD_MORE      : cmd_setcc(X64_cc_G , RBX); break;
+        case IR_CMD_LESS      : cmd_setcc(X64_cc_L , RBX); break;
+        case IR_CMD_MORE_EQUAL: cmd_setcc(X64_cc_GE, RBX); break;
+        case IR_CMD_LESS_EQUAL: cmd_setcc(X64_cc_LE, RBX); break;
 
         default               : log_assert_verbose(false, "expected conditional binary operator");
                                 break;
     }
 
-    op1_reg(RBX);
-    cmd_push;
-
-    cmd_unary(X64_CMD_PUSH, RBX)
+    PUSH(RBX)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -257,16 +275,14 @@ static void translate_not(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_NOT);
 
-    x64_node cmd = {};
+    POP(RAX)
 
-    cmd_unary (X64_CMD_POP , RAX)
+    XOR (RBX, RBX)
+    TEST(RAX, RAX)
 
-    cmd_binary(X64_CMD_XOR , RBX, RBX)
-    cmd_binary(X64_CMD_TEST, RAX, RAX)
+    cmd_setcc(X64_cc_E, RBX)
 
-    cmd_setcc (X64_cc_E    , RBX)
-
-    cmd_unary (X64_CMD_PUSH, RBX)
+    PUSH(RBX)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -276,17 +292,15 @@ static void translate_log_or(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_LOG_OR);
 
-    x64_node cmd = {};
+    POP(RSI)
+    POP(RAX)
 
-    cmd_unary (X64_CMD_POP , RSI)
-    cmd_unary (X64_CMD_POP , RAX)
+    XOR(RBX, RBX)
+    OR (RAX, RSI)
 
-    cmd_binary(X64_CMD_XOR , RBX, RBX)
-    cmd_binary(X64_CMD_OR  , RAX, RSI)
+    cmd_setcc(X64_cc_NE, RBX)
 
-    cmd_setcc (X64_cc_NE   , RBX)
-
-    cmd_unary (X64_CMD_PUSH, RBX)
+    PUSH(RBX)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -296,23 +310,21 @@ static void translate_log_and(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_LOG_AND);
 
-    x64_node cmd = {};
+    POP(RSI)
+    POP(RAX)
 
-    cmd_unary (X64_CMD_POP , RSI)
-    cmd_unary (X64_CMD_POP , RAX)
+    XOR(RBX, RBX)
+    XOR(RDX, RDX)
 
-    cmd_binary(X64_CMD_XOR , RBX, RBX)
-    cmd_binary(X64_CMD_XOR , RDX, RDX)
+    TEST(RSI, RSI)
+    cmd_setcc(X64_cc_NE, RBX)
 
-    cmd_binary(X64_CMD_TEST, RSI, RSI)
-    cmd_setcc (X64_cc_NE   , RBX)
+    TEST(RAX, RAX)
+    cmd_setcc(X64_cc_NE, RDX)
 
-    cmd_binary(X64_CMD_TEST, RAX, RAX)
-    cmd_setcc (X64_cc_NE   , RDX)
+    AND(RBX, RDX)
 
-    cmd_binary(X64_CMD_AND , RBX, RDX)
-
-    cmd_unary (X64_CMD_PUSH, RBX)
+    PUSH(RBX)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -322,8 +334,7 @@ static void translate_jmp(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_JMP);
 
-    x64_node cmd = {};
-
+    cmd_init;
     cmd_set(X64_CMD_JMP);
     op1_imm(IR_cmd->imm_val);
     cmd_push;    
@@ -335,28 +346,24 @@ static void translate_jcc(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
 
-    x64_node cmd = {};
+    POP(RSI)
+    POP(RAX)
 
-    cmd_unary (X64_CMD_POP, RSI)
-    cmd_unary (X64_CMD_POP, RAX)
+    CMP(RAX, RSI)
 
-    cmd_binary(X64_CMD_CMP, RAX, RSI)
-
-    switch (IR_cmd->type)
+    int imm = IR_cmd->imm_val;
+    switch   (IR_cmd->type)
     {
-        case IR_CMD_JG : cmd_set(X64_CMD_Jcc, X64_cc_G ); break;
-        case IR_CMD_JL : cmd_set(X64_CMD_Jcc, X64_cc_L ); break;
-        case IR_CMD_JE : cmd_set(X64_CMD_Jcc, X64_cc_E ); break;
-        case IR_CMD_JGE: cmd_set(X64_CMD_Jcc, X64_cc_GE); break;
-        case IR_CMD_JLE: cmd_set(X64_CMD_Jcc, X64_cc_LE); break;
-        case IR_CMD_JNE: cmd_set(X64_CMD_Jcc, X64_cc_NE); break;
+        case IR_CMD_JG : cmd_jcc(X64_cc_G , imm); break;
+        case IR_CMD_JL : cmd_jcc(X64_cc_L , imm); break;
+        case IR_CMD_JE : cmd_jcc(X64_cc_E , imm); break;
+        case IR_CMD_JGE: cmd_jcc(X64_cc_GE, imm); break;
+        case IR_CMD_JLE: cmd_jcc(X64_cc_LE, imm); break;
+        case IR_CMD_JNE: cmd_jcc(X64_cc_NE, imm); break;
 
         default        : log_assert_verbose(false, "expected conditional jump command");
                          break;
     }
-
-    op1_imm(IR_cmd->imm_val);
-    cmd_push;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -367,7 +374,7 @@ static void translate_push_pop(x64_info *const x64, const IR_node *const IR_cmd)
     log_assert(IR_cmd->type == IR_CMD_PUSH ||
                IR_cmd->type == IR_CMD_POP);
 
-    x64_node cmd = {};
+    cmd_init;
 
     if (IR_cmd->type == IR_CMD_PUSH) cmd_set(X64_CMD_PUSH);
     else                             cmd_set(X64_CMD_POP );
@@ -390,8 +397,7 @@ static void translate_call(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_CALL);
 
-    x64_node cmd = {};
-
+    cmd_init;
     cmd_set(X64_CMD_CALL);
     op1_imm(IR_cmd->imm_val);
     cmd_push;
@@ -404,8 +410,7 @@ static void translate_ret(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_RET);
 
-    x64_node cmd = {};
-
+    cmd_init;
     cmd_set(X64_CMD_RET);
     cmd_push;
 }
@@ -417,12 +422,11 @@ static void translate_in(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_IN);
 
-    x64_node cmd = {};
-
     reg_save;
     cmd_unary(X64_CMD_CALL,  R8); // R8 := адрес функции input
     reg_load;
-    cmd_unary(X64_CMD_PUSH, RAX); // возвращаемое значение в стек
+
+    PUSH(RAX)                     // возвращаемое значение в стек
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -432,9 +436,8 @@ static void translate_out(x64_info *const x64, const IR_node *const IR_cmd)
     translate_verify;
     log_assert(IR_cmd->type == IR_CMD_OUT);
 
-    x64_node cmd = {};
+    POP(RDI)                      // аргумент из стека
 
-    cmd_unary(X64_CMD_POP , RDI); // аргумент из стека
     reg_save;
     cmd_unary(X64_CMD_CALL,  R9); // R9 := адрес функции output
     reg_load;
@@ -446,16 +449,14 @@ static void translate_caller_save(x64_info *const x64)
 {
     log_verify(x64 != nullptr, (void) 0);
 
-    x64_node cmd = {};
-
-    cmd_unary(X64_CMD_PUSH, RDI)
-    cmd_unary(X64_CMD_PUSH, RSI)
-    cmd_unary(X64_CMD_PUSH, RDX)
-    cmd_unary(X64_CMD_PUSH, RCX)
-    cmd_unary(X64_CMD_PUSH, R8 )
-    cmd_unary(X64_CMD_PUSH, R9 )
-    cmd_unary(X64_CMD_PUSH, R10)
-    cmd_unary(X64_CMD_PUSH, R11)
+    PUSH(RDI)
+    PUSH(RSI)
+    PUSH(RDX)
+    PUSH(RCX)
+    PUSH(R8 )
+    PUSH(R9 )
+    PUSH(R10)
+    PUSH(R11)
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -464,14 +465,12 @@ static void translate_caller_load(x64_info *const x64)
 {
     log_verify(x64 != nullptr, (void) 0);
 
-    x64_node cmd = {};
-
-    cmd_unary(X64_CMD_POP, R11)
-    cmd_unary(X64_CMD_POP, R10)
-    cmd_unary(X64_CMD_POP, R9 )
-    cmd_unary(X64_CMD_POP, R8 )
-    cmd_unary(X64_CMD_POP, RCX)
-    cmd_unary(X64_CMD_POP, RDX)
-    cmd_unary(X64_CMD_POP, RSI)
-    cmd_unary(X64_CMD_POP, RDI)
+    POP(R11)
+    POP(R10)
+    POP(R9 )
+    POP(R8 )
+    POP(RCX)
+    POP(RDX)
+    POP(RSI)
+    POP(RDI)
 }

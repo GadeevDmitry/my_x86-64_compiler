@@ -73,9 +73,8 @@ vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define create_command(type, is_reg, is_mem, is_imm, ...)                   \
-   (IR_node_ctor(&cmd, type, is_reg, is_mem, is_imm, ##__VA_ARGS__),        \
-    prog_info_create_command(prog, &cmd))
+#define create_command(        type, is_reg, is_mem, is_imm, ...)           \
+prog_info_create_command(prog, type, is_reg, is_mem, is_imm, ##__VA_ARGS__)
 
 #define create_command_no_args(type) create_command(type, false, false, false)
 #define next_command() prog_info_get_next_command_num(prog)
@@ -84,33 +83,37 @@ vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
 
 #define memory_frame_in                                                     \
         {                                                                   \
-        create_command(IR_CMD_PUSH, true , false, false, 5 /* RBP */);      \
+        create_command(IR_CMD_PUSH, true , false, false, RBP);              \
         create_command(IR_CMD_PUSH, false, false, true , (int) $rel);       \
         create_command(IR_CMD_ADD , false, false, false);                   \
-        create_command(IR_CMD_POP , true , false, false, 5 /* RBP */);      \
+        create_command(IR_CMD_POP , true , false, false, RBP);              \
         } /* RBP += relative */
 
 #define memory_frame_out                                                    \
         {                                                                   \
-        create_command(IR_CMD_PUSH, true , false, false, 5 /* RBP */);      \
+        create_command(IR_CMD_PUSH, true , false, false, RBP);              \
         create_command(IR_CMD_PUSH, false, false, true , (int) $rel);       \
         create_command(IR_CMD_SUB , false, false, false);                   \
-        create_command(IR_CMD_POP , true , false, false, 5 /* RBP */);      \
+        create_command(IR_CMD_POP , true , false, false, RBP);              \
         } /* RBP -= relative */
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define in_out_variable(var_ind, var_addr, ir_cmd)                                                                                              \
-    if      (prog_info_get_local_var_addr (prog, var_ind, &(var_addr))) create_command(ir_cmd, true , true, true, 5 /* RBP */, (int) var_addr); \
-    else if (prog_info_get_global_var_addr(prog, var_ind, &(var_addr))) create_command(ir_cmd, false, true, true,              (int) var_addr); \
+#define in_out_variable(var_ind, ir_cmd)                                                                                                        \
+{                                                                                                                                               \
+    size_t var_addr = 0UL;                                                                                                                      \
+                                                                                                                                                \
+    if      (prog_info_get_local_var_addr (prog, var_ind, &(var_addr))) create_command(ir_cmd, true , true, true, RBP, (int) var_addr);         \
+    else if (prog_info_get_global_var_addr(prog, var_ind, &(var_addr))) create_command(ir_cmd, false, true, true,      (int) var_addr);         \
     else                                                                                                                                        \
     {                                                                                                                                           \
         log_error("variable %lu is not declared yet\n", var_ind);                                                                               \
         return;                                                                                                                                 \
-    }
+    }                                                                                                                                           \
+}
 
-#define push_variable(var_ind, var_addr) in_out_variable(var_ind, var_addr, IR_CMD_PUSH)
-#define  pop_variable(var_ind, var_addr) in_out_variable(var_ind, var_addr, IR_CMD_POP )
+#define push_variable(var_ind) in_out_variable(var_ind, IR_CMD_PUSH)
+#define  pop_variable(var_ind) in_out_variable(var_ind, IR_CMD_POP )
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // translate_general
@@ -122,10 +125,8 @@ static void translate_general(prog_info *const prog, const AST_node *const subtr
 
     switch ($type)
     {
-        case AST_NODE_FICTIONAL: ast_node_fictional_handler(translate_general);
-
-        case AST_NODE_DECL_VAR : prog_info_set_global_var_addr(prog, $var_ind);
-                                 break;
+        case AST_NODE_FICTIONAL: ast_node_fictional_handler(translate_general); break;
+        case AST_NODE_DECL_VAR : prog_info_set_global_var_addr(prog, $var_ind); break;
 
         case AST_NODE_DECL_FUNC: prog_info_func_begin(prog, $func_ind);
 
@@ -135,7 +136,7 @@ static void translate_general(prog_info *const prog, const AST_node *const subtr
                                  prog_info_func_end(prog);
                                  break;
 
-        default                : ast_node_wrong_type_handler;
+        default                : ast_node_wrong_type_handler; break;
     }
 }
 
@@ -149,12 +150,10 @@ static void translate_args(prog_info *const prog, const AST_node *const subtree)
 
     switch ($type)
     {
-        case AST_NODE_FICTIONAL: ast_node_fictional_handler(translate_args);
+        case AST_NODE_FICTIONAL: ast_node_fictional_handler(translate_args);   break;
+        case AST_NODE_DECL_VAR : prog_info_add_local_var_addr(prog, $var_ind); break;
 
-        case AST_NODE_DECL_VAR : prog_info_add_local_var_addr(prog, $var_ind);
-                                 break;
-
-        default                : ast_node_wrong_type_handler;
+        default                : ast_node_wrong_type_handler; break;
     }
 
     if ($L != nullptr) translate_args(prog, $L);
@@ -197,8 +196,6 @@ static void translate_if(prog_info *const prog, const AST_node *const subtree)
     log_verify($L != nullptr, (void) 0);
     log_verify($R != nullptr, (void) 0);
 
-    IR_node cmd = {};
-
     translate_expression(prog, $L);                                         // <condition>
 
                       create_command(IR_CMD_PUSH, false, false, true, 0);   // push 0
@@ -238,9 +235,7 @@ static void translate_while(prog_info *const prog, const AST_node *const subtree
     log_assert($type == AST_NODE_OPERATOR_WHILE);
     log_verify($L != nullptr, (void) 0);
 
-    IR_node cmd = {};
     size_t label_cond = next_command();                                     // cond:
-
     translate_expression(prog, $L);                                         // <condition>
 
                      create_command(IR_CMD_PUSH, false, false, true, 0);    // push 0
@@ -268,10 +263,8 @@ static void translate_func_call_ret_val_ignored(prog_info *const prog, const AST
     translate_verify;
     log_assert($type == AST_NODE_CALL_FUNC);
 
-    IR_node cmd = {};
-
     translate_func_call_ret_val_used(prog, subtree);
-    create_command(IR_CMD_POP, true, false, false, 0 /* RAX */); // удаление возвращаемого значения функции из стека
+    create_command(IR_CMD_POP, true, false, false, RAX); // удаление возвращаемого значения функции из стека
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -281,7 +274,6 @@ static void translate_func_call_ret_val_used(prog_info *const prog, const AST_no
     translate_verify;
     log_assert($type == AST_NODE_CALL_FUNC);
 
-    IR_node cmd = {};
     size_t  func_addr = 0UL;
 
     if (!prog_info_get_func_addr(prog, $func_ind, &func_addr))
@@ -295,12 +287,12 @@ static void translate_func_call_ret_val_used(prog_info *const prog, const AST_no
         size_t param_quantity = translate_params(prog, $L);
 
         for (size_t param = 0; param < param_quantity; ++param)
-            create_command(IR_CMD_POP, true, true, true, 5 /* RBP */, (int) ($rel + param));
+            create_command(IR_CMD_POP, true, true, true, RBP, (int) ($rel + param));
     }
 
     memory_frame_in;                                                // RBP += relative  : RBP -> фрейм новой функции
     create_command(IR_CMD_CALL, false, false, true , func_addr);    // call func_addr   :
-    create_command(IR_CMD_PUSH,  true, false, false, 0 /* RAX */);  // push RAX         : возвращаемое значение в стек
+    create_command(IR_CMD_PUSH,  true, false, false, RAX);          // push RAX         : возвращаемое значение в стек
     memory_frame_out;                                               // RBP -= relative  : RBP -> фрейм нашей функции
 }
 
@@ -342,8 +334,7 @@ static void translate_return(prog_info *const prog, const AST_node *const subtre
 
     translate_expression(prog, $L);
 
-    IR_node cmd = {};
-    create_command(IR_CMD_POP, true, false, false, 0 /* RAX */); // возвращаемое значение из стека в RAX
+    create_command(IR_CMD_POP, true, false, false, RAX); // возвращаемое значение из стека в RAX
     create_command_no_args(IR_CMD_RET);
 }
 
@@ -362,7 +353,7 @@ static void translate_operator_independent(prog_info *const prog, const AST_node
         case AST_OPERATOR_OUTPUT    : translate_output                (prog, subtree); break;
         case AST_OPERATOR_ASSIGNMENT: translate_assignment_independent(prog, subtree); break;
 
-        default                     : ast_node_wrong_operator_handler;
+        default                     : ast_node_wrong_operator_handler; break;
     }
 }
 
@@ -378,13 +369,10 @@ static void translate_input(prog_info *const prog, const AST_node *const subtree
     log_assert($operator == AST_OPERATOR_INPUT);
     log_verify($L != nullptr, (void) 0);
 
-    IR_node cmd = {};
     create_command_no_args(IR_CMD_IN);
 
-    size_t var_addr = 0UL;
-
     log_verify  ($L->type == AST_NODE_VARIABLE, (void) 0);
-    pop_variable($L->value.var_ind, var_addr);
+    pop_variable($L->value.var_ind);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -401,7 +389,6 @@ static void translate_output(prog_info *const prog, const AST_node *const subtre
 
     translate_expression(prog, $L);
 
-    IR_node cmd = {};
     create_command_no_args(IR_CMD_OUT);
 }
 
@@ -421,11 +408,8 @@ static void translate_assignment_independent(prog_info *const prog, const AST_no
 
     translate_expression(prog, $R);
 
-    IR_node cmd = {};
-    size_t  var_addr = 0UL;
-
     log_verify  ($L->type == AST_NODE_VARIABLE, (void) 0);
-    pop_variable($L->value.var_ind, var_addr);
+    pop_variable($L->value.var_ind);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -442,12 +426,9 @@ static void translate_assignment_dependent(prog_info *const prog, const AST_node
 
     translate_expression(prog, $R);
 
-    IR_node cmd = {};
-    size_t  var_addr = 0UL;
-
     log_verify   ($L->type == AST_NODE_VARIABLE, (void) 0);
-    pop_variable ($L->value.var_ind, var_addr);
-    push_variable($L->value.var_ind, var_addr);
+    pop_variable ($L->value.var_ind);
+    push_variable($L->value.var_ind);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -465,7 +446,7 @@ static void translate_expression(prog_info *const prog, const AST_node *const su
         case AST_NODE_CALL_FUNC: translate_func_call_ret_val_used(prog, subtree); break;
         case AST_NODE_OPERATOR : translate_operator_dependent    (prog, subtree); break;
 
-        default                : ast_node_wrong_type_handler;
+        default                : ast_node_wrong_type_handler; break;
     }
 }
 
@@ -481,7 +462,6 @@ static void translate_immediate_int_operand(prog_info *const prog, const AST_nod
     log_verify($L    == nullptr, (void) 0);
     log_verify($R    == nullptr, (void) 0);
 
-    IR_node cmd = {};
     create_command(IR_CMD_PUSH, false, false, true, SCALE * $imm_int);  // все переменные и промежуточные значения храняться, умноженными
                                                                         // на SCALE = 10^n, чтобы сымитировать десятичные дроби
 }
@@ -498,10 +478,7 @@ static void translate_variable_operand(prog_info *const prog, const AST_node *co
     log_verify($L    == nullptr, (void) 0);
     log_verify($R    == nullptr, (void) 0);
 
-    IR_node cmd = {};
-    size_t  var_addr = 0UL;
-
-    push_variable($var_ind, var_addr);
+    push_variable($var_ind);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -516,7 +493,8 @@ static void translate_operator_dependent(prog_info *const prog, const AST_node *
     switch ($operator)
     {
         case AST_OPERATOR_ASSIGNMENT: translate_assignment_dependent(prog, subtree); break;
-        case AST_OPERATOR_NOT       : translate_operator_unary      (prog, subtree); break;
+        case AST_OPERATOR_NOT       :
+        case AST_OPERATOR_SQRT      : translate_operator_unary      (prog, subtree); break;
         default                     : translate_operator_binary     (prog, subtree); break;
     }
 }
@@ -532,14 +510,13 @@ static void translate_operator_unary(prog_info *const prog, const AST_node *cons
     log_assert($type == AST_NODE_OPERATOR);
     log_verify($L    != nullptr, (void) 0);
 
-    IR_node cmd = {};
-
     translate_expression(prog, $L);
 
     switch ($operator)
     {
-        case AST_OPERATOR_NOT: create_command_no_args(IR_CMD_NOT); break;
-        default              : ast_node_wrong_operator_handler;
+        case AST_OPERATOR_NOT : create_command_no_args(IR_CMD_NOT) ; break;
+        case AST_OPERATOR_SQRT: create_command_no_args(IR_CMD_SQRT); break;
+        default               : ast_node_wrong_operator_handler;     break;
     }
 }
 
@@ -555,8 +532,6 @@ static void translate_operator_binary(prog_info *const prog, const AST_node *con
     log_verify($L    != nullptr, (void) 0);
     log_verify($R    != nullptr, (void) 0);
 
-    IR_node cmd = {};
-
     translate_expression(prog, $L);
     translate_expression(prog, $R);
 
@@ -566,7 +541,6 @@ static void translate_operator_binary(prog_info *const prog, const AST_node *con
         case AST_OPERATOR_SUB       : create_command_no_args(IR_CMD_SUB);            break;
         case AST_OPERATOR_MUL       : create_command_no_args(IR_CMD_MUL);            break;
         case AST_OPERATOR_DIV       : create_command_no_args(IR_CMD_DIV);            break;
-        case AST_OPERATOR_POW       : create_command_no_args(IR_CMD_POW);            break;
 
         case AST_OPERATOR_ARE_EQUAL : create_command_no_args(IR_CMD_ARE_EQUAL);      break;
         case AST_OPERATOR_NOT_EQUAL : create_command_no_args(IR_CMD_NOT_EQUAL);      break;
@@ -578,6 +552,6 @@ static void translate_operator_binary(prog_info *const prog, const AST_node *con
         case AST_OPERATOR_LOG_OR    : create_command_no_args(IR_CMD_LOG_OR);         break;
         case AST_OPERATOR_LOG_AND   : create_command_no_args(IR_CMD_LOG_AND);        break;
 
-        default                     : ast_node_wrong_operator_handler;
+        default                     : ast_node_wrong_operator_handler;               break;
     }
 }
