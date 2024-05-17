@@ -7,9 +7,9 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../lib/logs/log.h"
-#include "../lib/algorithm/algorithm.h"
-#include "../lib/vector/vector.h"
+#include "../lib/include/log.h"
+#include "../lib/include/algorithm.h"
+#include "../lib/include/vector.h"
 
 #include "tokenizer/tokenizer.h"
 #include "parser/parser.h"
@@ -24,10 +24,10 @@ AST_node *frontend(const char *source_code, size_t *const  var_quantity,
                                             size_t *const func_quantity,
                                             size_t *const  main_func_id)
 {
-    log_verify(source_code   != nullptr, nullptr);
-    log_verify( var_quantity != nullptr, nullptr);
-    log_verify(func_quantity != nullptr, nullptr);
-    log_verify(main_func_id  != nullptr, nullptr);
+    LOG_VERIFY(source_code   != nullptr, nullptr);
+    LOG_VERIFY( var_quantity != nullptr, nullptr);
+    LOG_VERIFY(func_quantity != nullptr, nullptr);
+    LOG_VERIFY(main_func_id  != nullptr, nullptr);
 
     buffer *source = buffer_new(source_code);
     if (source == nullptr)
@@ -39,8 +39,8 @@ AST_node *frontend(const char *source_code, size_t *const  var_quantity,
     vector   *token_arr = tokenizer(source); if (token_arr == nullptr) return nullptr;
     AST_node *result    = parser   (token_arr, main_func_id, var_quantity, func_quantity);
 
-    buffer_free(source);
-    vector_free(token_arr);
+    buffer_delete(source);
+    vector_delete(token_arr);
 
     return result;
 }

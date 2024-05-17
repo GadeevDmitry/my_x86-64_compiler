@@ -4,9 +4,9 @@
 // TOKENIZER
 //================================================================================================================================
 
-#define $src_beg    (source->buff_beg)
-#define $src_pos    (source->buff_pos)
-#define $src_size   (source->buff_size)
+#define $src_beg    (source->beg)
+#define $src_pos    (source->pos)
+#define $src_size   (source->size)
 
 #define $type       (tkn->type)
 #define $size       (tkn->size)
@@ -21,10 +21,10 @@
 
 vector *tokenizer(buffer *const source)
 {
-    buf_verify(source, nullptr);
+    BUFFER_VERIFY(source, nullptr);
 
     vector    *token_arr = vector_new(sizeof(token), nullptr, nullptr, token_dump);
-    log_verify(token_arr != nullptr, nullptr);
+    LOG_VERIFY(token_arr != nullptr, nullptr);
 
     size_t source_line = 1;
     token_name_fill_all();
@@ -53,8 +53,8 @@ vector *tokenizer(buffer *const source)
 
 static bool try_tokenize_type_operator(buffer *const source, OPERATOR_TYPE *const op)
 {
-    buf_verify(source       , false);
-    log_verify(op != nullptr, false);
+    BUFFER_VERIFY(source       , false);
+    LOG_VERIFY   (op != nullptr, false);
 
     size_t tkn_len = buffer_get_token_size(source);
 
@@ -74,8 +74,8 @@ static bool try_tokenize_type_operator(buffer *const source, OPERATOR_TYPE *cons
 
 static bool try_tokenize_type_key(buffer *const source, KEY_TYPE *const key)
 {
-    buf_verify(source        , false);
-    log_verify(key != nullptr, false);
+    BUFFER_VERIFY(source        , false);
+    LOG_VERIFY   (key != nullptr, false);
 
     size_t tkn_len = buffer_get_token_size(source);
 
@@ -95,8 +95,8 @@ static bool try_tokenize_type_key(buffer *const source, KEY_TYPE *const key)
 
 static bool try_tokenize_type_int(buffer *const source, int *const imm)
 {
-    buf_verify(source, false);
-    log_verify(imm != nullptr, false);
+    BUFFER_VERIFY(source, false);
+    LOG_VERIFY   (imm != nullptr, false);
 
     size_t tkn_len = buffer_get_token_size(source);
 
@@ -116,8 +116,8 @@ static bool try_tokenize_type_int(buffer *const source, int *const imm)
 
 static bool tokenize_type_name(buffer *const source, const char **name)
 {
-    buf_verify(source         , false);
-    log_verify(name != nullptr, false);
+    BUFFER_VERIFY(source         , false);
+    LOG_VERIFY   (name != nullptr, false);
 
     *name = $src_pos;
     buffer_skip_token(source);
@@ -129,7 +129,7 @@ static bool tokenize_type_name(buffer *const source, const char **name)
 
 static bool tokenize_last(vector *const tkn_arr, const size_t source_line)
 {
-    log_verify(tkn_arr != nullptr, false);
+    LOG_VERIFY(tkn_arr != nullptr, false);
 
     token last = {};
     token_init_common(&last, TOKEN_FICTIONAL, 0, source_line);
@@ -153,7 +153,7 @@ static bool tokenize_last(vector *const tkn_arr, const size_t source_line)
 
 static inline bool token_init_common(token *const tkn, const TOKEN_TYPE type, const size_t size, const size_t line)
 {
-    log_verify(tkn != nullptr, false);
+    LOG_VERIFY(tkn != nullptr, false);
 
     $type = type;
     $size = size;
@@ -172,33 +172,33 @@ void token_dump(const void *const _tkn)
 
     if (!token_header_dump(tkn)) return;
 
-    usual_field_dump("type    ", "%d", $type);
-    usual_field_dump("size    ", "%d", $size);
-    usual_field_dump("line    ", "%d", $line);
+    USUAL_FIELD_DUMP("type    ", "%d", $type);
+    USUAL_FIELD_DUMP("size    ", "%d", $size);
+    USUAL_FIELD_DUMP("line    ", "%d", $line);
 
     switch ($type)
     {
-        case TOKEN_NAME     : log_tab_default_message("name     = %.*s", "\n", $size, $name);            break;
-        case TOKEN_INT      : usual_field_dump       ("imm_int ", "%d", $imm_int);                       break;
-        case TOKEN_KEY      : usual_field_dump       ("key     ", "%s", KEY_NAMES     [$key].name_dump); break;
-        case TOKEN_OPERATOR : usual_field_dump       ("op      ", "%s", OPERATOR_NAMES[$op ].name_dump); break;
-        case TOKEN_FICTIONAL: log_tab_default_message("no value", "\n");                                 break;
+        case TOKEN_NAME     : LOG_TAB_DEFAULT_MESSAGE("name     = %.*s", "\n", $size, $name);            break;
+        case TOKEN_INT      : USUAL_FIELD_DUMP       ("imm_int ", "%d", $imm_int);                       break;
+        case TOKEN_KEY      : USUAL_FIELD_DUMP       ("key     ", "%s", KEY_NAMES     [$key].name_dump); break;
+        case TOKEN_OPERATOR : USUAL_FIELD_DUMP       ("op      ", "%s", OPERATOR_NAMES[$op ].name_dump); break;
+        case TOKEN_FICTIONAL: LOG_TAB_DEFAULT_MESSAGE("no value", "\n");                                 break;
 
-        default             : log_assert(false); break;
+        default             : LOG_ASSERT(false); break;
     }
 
     LOG_TAB--;
-    log_tab_service_message("}", "\n");
+    LOG_TAB_SERVICE_MESSAGE("}", "\n");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static inline bool token_header_dump(const token *const tkn)
 {
-    log_tab_service_message("token (addr: %p)\n"
+    LOG_TAB_SERVICE_MESSAGE("token (addr: %p)\n"
                             "{", "\n",   tkn);
 
-    if (tkn == nullptr) { log_tab_service_message("}", "\n"); return false; }
+    if (tkn == nullptr) { LOG_TAB_SERVICE_MESSAGE("}", "\n"); return false; }
     LOG_TAB++;
 
     return true;

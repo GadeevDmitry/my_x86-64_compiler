@@ -6,8 +6,8 @@
 
 buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_addr)
 {
-    vec_verify(x64, nullptr);
-    log_verify(main_func_x64_addr != nullptr, nullptr);
+    VECTOR_VERIFY(x64, nullptr);
+    LOG_VERIFY   (main_func_x64_addr != nullptr, nullptr);
 
     binary_info *binary = binary_info_new(x64->size, *main_func_x64_addr);
 
@@ -26,15 +26,15 @@ buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_a
 
 #define translate_verify                                                                                        \
         {                                                                                                       \
-            log_verify(binary  != nullptr, (void) 0);                                                           \
-            log_verify(x64_cmd != nullptr, (void) 0);                                                           \
+            LOG_VERIFY(binary  != nullptr, (void) 0);                                                           \
+            LOG_VERIFY(x64_cmd != nullptr, (void) 0);                                                           \
         }
 
 #define no_support                                                                                              \
         {                                                                                                       \
-            log_error("this case is not supported yet");                                                        \
+            LOG_ERROR("this case is not supported yet");                                                        \
             x64_node_dump(x64_cmd);                                                                             \
-            log_tab_error_message("====================", "\n");                                                \
+            LOG_TAB_ERROR_MESSAGE("====================", "\n");                                                \
             return;                                                                                             \
         }
 
@@ -72,8 +72,8 @@ buffer *binary_translator(const vector *const x64, size_t *const main_func_x64_a
 
 static void translate_general(binary_info *const binary, const vector *const x64)
 {
-    log_verify(binary != nullptr, (void) 0);
-    log_verify(x64    != nullptr, (void) 0);
+    LOG_VERIFY(binary != nullptr, (void) 0);
+    LOG_VERIFY(x64    != nullptr, (void) 0);
 
     const x64_node *x64_cur = (const x64_node *) vector_begin(x64);
     const x64_node *x64_end = (const x64_node *) vector_end  (x64);
@@ -123,7 +123,7 @@ static void translate_x64_node(binary_info *const binary, const x64_node *const 
         case X64_CMD_PUSH : translate_push     (binary, x64_cmd, cmd_num); break;
         case X64_CMD_POP  : translate_pop      (binary, x64_cmd, cmd_num); break;
 
-        default           : log_assert_verbose(false, "undefind X64_CMD");
+        default           : LOG_ASSERT_VERBOSE(false, "undefind X64_CMD");
                             break;
     }
 }
@@ -157,7 +157,7 @@ static void translate_imul_idiv(binary_info *const binary, const x64_node *const
 {
     translate_verify;
 
-    log_assert(($type == X64_CMD_IMUL) ||
+    LOG_ASSERT(($type == X64_CMD_IMUL) ||
                ($type == X64_CMD_IDIV));
 
     if (!is_reg_only($op_1)) no_support;
@@ -178,7 +178,7 @@ static void translate_imul_idiv(binary_info *const binary, const x64_node *const
 static void translate_setcc(binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num)
 {
     translate_verify;
-    log_assert($type == X64_CMD_SETcc);
+    LOG_ASSERT($type == X64_CMD_SETcc);
 
     if (!is_reg_only($op_1)) no_support;
 
@@ -196,7 +196,7 @@ static void translate_setcc(binary_info *const binary, const x64_node *const x64
 static void translate_jcc(binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num)
 {
     translate_verify;
-    log_assert($type == X64_CMD_Jcc);
+    LOG_ASSERT($type == X64_CMD_Jcc);
 
     if (!is_imm_only($op_1)) no_support;
 
@@ -214,7 +214,7 @@ static void translate_jcc(binary_info *const binary, const x64_node *const x64_c
 static void translate_call(binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num)
 {
     translate_verify;
-    log_assert($type == X64_CMD_CALL);
+    LOG_ASSERT($type == X64_CMD_CALL);
 
     if (is_mem($op_1)) no_support;
 
@@ -228,8 +228,8 @@ static void translate_call_rel(binary_info *const binary, const x64_node *const 
 {
     translate_verify;
 
-    log_assert($type == X64_CMD_CALL);
-    log_assert(is_imm_only($op_1));
+    LOG_ASSERT($type == X64_CMD_CALL);
+    LOG_ASSERT(is_imm_only($op_1));
 
     cmd_init();
 
@@ -245,8 +245,8 @@ static void translate_call_abs(binary_info *const binary, const x64_node *const 
 {
     translate_verify;
 
-    log_assert($type == X64_CMD_CALL);
-    log_assert(is_reg_only($op_1));
+    LOG_ASSERT($type == X64_CMD_CALL);
+    LOG_ASSERT(is_reg_only($op_1));
 
     cmd_init();
 
@@ -261,7 +261,7 @@ static void translate_call_abs(binary_info *const binary, const x64_node *const 
 static void translate_jmp(binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num)
 {
     translate_verify;
-    log_assert($type == X64_CMD_JMP);
+    LOG_ASSERT($type == X64_CMD_JMP);
 
     if (!is_imm_only($op_1)) no_support;
 
@@ -278,7 +278,7 @@ static void translate_jmp(binary_info *const binary, const x64_node *const x64_c
 static void translate_ret(binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num)
 {
     translate_verify;
-    log_assert($type == X64_CMD_RET);
+    LOG_ASSERT($type == X64_CMD_RET);
 
     cmd_init();
     set_opcode('\xC3');
@@ -290,7 +290,7 @@ static void translate_ret(binary_info *const binary, const x64_node *const x64_c
 static void translate_push(binary_info *const binary, const x64_node *const x64_cmd, const size_t cmd_num)
 {
     translate_verify;
-    log_assert($type == X64_CMD_PUSH);
+    LOG_ASSERT($type == X64_CMD_PUSH);
 
     if      (is_imm_only($op_1)) translate_push_imm(binary, x64_cmd, cmd_num);
     else if (is_reg_only($op_1)) translate_push_reg(binary, x64_cmd, cmd_num);
@@ -303,8 +303,8 @@ static void translate_push_imm(binary_info *const binary, const x64_node *const 
 {
     translate_verify;
 
-    log_assert($type == X64_CMD_PUSH);
-    log_assert(is_imm_only($op_1));
+    LOG_ASSERT($type == X64_CMD_PUSH);
+    LOG_ASSERT(is_imm_only($op_1));
 
     cmd_init();
 
@@ -320,8 +320,8 @@ static void translate_push_reg(binary_info *const binary, const x64_node *const 
 {
     translate_verify;
 
-    log_assert($type == X64_CMD_PUSH);
-    log_assert(is_reg_only($op_1));
+    LOG_ASSERT($type == X64_CMD_PUSH);
+    LOG_ASSERT(is_reg_only($op_1));
 
     cmd_init();
 
@@ -337,8 +337,8 @@ static void translate_push_mem(binary_info *const binary, const x64_node *const 
 {
     translate_verify;
 
-    log_assert($type == X64_CMD_PUSH);
-    log_assert(is_mem($op_1));
+    LOG_ASSERT($type == X64_CMD_PUSH);
+    LOG_ASSERT(is_mem($op_1));
 
     cmd_init();
 
@@ -356,8 +356,8 @@ static void translate_pop(binary_info *const binary, const x64_node *const x64_c
 {
     translate_verify;
 
-    log_assert($type == X64_CMD_POP);
-    log_assert(!is_imm_only($op_1));
+    LOG_ASSERT($type == X64_CMD_POP);
+    LOG_ASSERT(!is_imm_only($op_1));
 
     if (is_reg_only($op_1)) translate_pop_reg(binary, x64_cmd, cmd_num);
     else if (is_mem($op_1)) translate_pop_mem(binary, x64_cmd, cmd_num);
@@ -370,8 +370,8 @@ static void translate_pop_reg(binary_info *const binary, const x64_node *const x
 {
     translate_verify;
 
-    log_assert($type == X64_CMD_POP);
-    log_assert(is_reg_only($op_1));
+    LOG_ASSERT($type == X64_CMD_POP);
+    LOG_ASSERT(is_reg_only($op_1));
 
     cmd_init();
 
@@ -387,8 +387,8 @@ static void translate_pop_mem(binary_info *const binary, const x64_node *const x
 {
     translate_verify;
 
-    log_assert($type == X64_CMD_POP);
-    log_assert(is_mem($op_1));
+    LOG_ASSERT($type == X64_CMD_POP);
+    LOG_ASSERT(is_mem($op_1));
 
     cmd_init();
 
@@ -404,13 +404,13 @@ static void translate_pop_mem(binary_info *const binary, const x64_node *const x
 
 static void translate_push_pop_mem(binary_info *const binary, const x64_node *const x64_cmd, binary_node *const bin_cmd)
 {
-    log_verify(binary  != nullptr, (void) 0);
-    log_verify(x64_cmd != nullptr, (void) 0);
-    log_verify(bin_cmd != nullptr, (void) 0);
+    LOG_VERIFY(binary  != nullptr, (void) 0);
+    LOG_VERIFY(x64_cmd != nullptr, (void) 0);
+    LOG_VERIFY(bin_cmd != nullptr, (void) 0);
 
-    log_assert(($type == X64_CMD_PUSH) ||
+    LOG_ASSERT(($type == X64_CMD_PUSH) ||
                ($type == X64_CMD_POP ));
-    log_assert(is_mem($op_1));
+    LOG_ASSERT(is_mem($op_1));
 
     BYTE scale = 0;
 
@@ -421,7 +421,7 @@ static void translate_push_pop_mem(binary_info *const binary, const x64_node *co
         case  4: scale = 2; break;
         case  8: scale = 3; break;
 
-        default: log_assert_verbose(false, "impossible scale factor");
+        default: LOG_ASSERT_VERBOSE(false, "impossible scale factor");
                  break;
     }
 

@@ -6,8 +6,8 @@
 
 vector *x64_translator(const vector *const IR, size_t *const main_func_ir_addr)
 {
-    vec_verify(IR, nullptr);
-    log_verify(main_func_ir_addr != nullptr, nullptr);
+    VECTOR_VERIFY(IR, nullptr);
+    LOG_VERIFY   (main_func_ir_addr != nullptr, nullptr);
 
     x64_info *x64 = x64_info_new(IR->size, *main_func_ir_addr);
 
@@ -22,8 +22,8 @@ vector *x64_translator(const vector *const IR, size_t *const main_func_ir_addr)
 
 #define translate_verify                                                                                                \
         {                                                                                                               \
-            log_verify(x64    != nullptr, (void) 0);                                                                    \
-            log_verify(IR_cmd != nullptr, (void) 0);                                                                    \
+            LOG_VERIFY(x64    != nullptr, (void) 0);                                                                    \
+            LOG_VERIFY(IR_cmd != nullptr, (void) 0);                                                                    \
         }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -104,8 +104,8 @@ vector *x64_translator(const vector *const IR, size_t *const main_func_ir_addr)
 
 static void translate_general(x64_info *const x64, const vector *const IR)
 {
-    log_verify(x64 != nullptr, (void) 0);
-    log_verify(IR  != nullptr, (void) 0);
+    LOG_VERIFY(x64 != nullptr, (void) 0);
+    LOG_VERIFY(IR  != nullptr, (void) 0);
 
     const IR_node *IR_cur = (const IR_node *) vector_begin(IR);
     const IR_node *IR_end = (const IR_node *) vector_end  (IR);
@@ -166,7 +166,7 @@ static void translate_IR_node(x64_info *const x64, const IR_node *const IR_cmd)
         case IR_CMD_IN        : translate_in         (x64, IR_cmd); break;
         case IR_CMD_OUT       : translate_out        (x64, IR_cmd); break;
 
-        default               : log_assert_verbose(false, "undefined IR_CMD");
+        default               : LOG_ASSERT_VERBOSE(false, "undefined IR_CMD");
                                 break;
     }
 }
@@ -177,7 +177,7 @@ static void translate_add_sub(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
 
-    log_assert(IR_cmd->type == IR_CMD_ADD ||
+    LOG_ASSERT(IR_cmd->type == IR_CMD_ADD ||
                IR_cmd->type == IR_CMD_SUB);
 
     POP(RSI)
@@ -194,7 +194,7 @@ static void translate_add_sub(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_mul(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_MUL);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_MUL);
 
     POP(RSI)    // second operand
     POP(RAX)    // first  operand
@@ -212,7 +212,7 @@ static void translate_mul(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_div(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_DIV);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_DIV);
 
     POP(RSI)    // second operand
     POP(RAX)    // first  operand
@@ -261,7 +261,7 @@ static void translate_conditional(x64_info *const x64, const IR_node *const IR_c
         case IR_CMD_MORE_EQUAL: cmd_setcc(X64_cc_GE, RBX); break;
         case IR_CMD_LESS_EQUAL: cmd_setcc(X64_cc_LE, RBX); break;
 
-        default               : log_assert_verbose(false, "expected conditional binary operator");
+        default               : LOG_ASSERT_VERBOSE(false, "expected conditional binary operator");
                                 break;
     }
 
@@ -273,7 +273,7 @@ static void translate_conditional(x64_info *const x64, const IR_node *const IR_c
 static void translate_not(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_NOT);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_NOT);
 
     POP(RAX)
 
@@ -290,7 +290,7 @@ static void translate_not(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_log_or(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_LOG_OR);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_LOG_OR);
 
     POP(RSI)
     POP(RAX)
@@ -308,7 +308,7 @@ static void translate_log_or(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_log_and(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_LOG_AND);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_LOG_AND);
 
     POP(RSI)
     POP(RAX)
@@ -332,7 +332,7 @@ static void translate_log_and(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_jmp(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_JMP);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_JMP);
 
     cmd_init;
     cmd_set(X64_CMD_JMP);
@@ -361,7 +361,7 @@ static void translate_jcc(x64_info *const x64, const IR_node *const IR_cmd)
         case IR_CMD_JLE: cmd_jcc(X64_cc_LE, imm); break;
         case IR_CMD_JNE: cmd_jcc(X64_cc_NE, imm); break;
 
-        default        : log_assert_verbose(false, "expected conditional jump command");
+        default        : LOG_ASSERT_VERBOSE(false, "expected conditional jump command");
                          break;
     }
 }
@@ -371,7 +371,7 @@ static void translate_jcc(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_push_pop(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_PUSH ||
+    LOG_ASSERT(IR_cmd->type == IR_CMD_PUSH ||
                IR_cmd->type == IR_CMD_POP);
 
     cmd_init;
@@ -395,7 +395,7 @@ static void translate_push_pop(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_call(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_CALL);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_CALL);
 
     cmd_init;
     cmd_set(X64_CMD_CALL);
@@ -408,7 +408,7 @@ static void translate_call(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_ret(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_RET);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_RET);
 
     cmd_init;
     cmd_set(X64_CMD_RET);
@@ -420,7 +420,7 @@ static void translate_ret(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_in(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_IN);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_IN);
 
     reg_save;
     cmd_unary(X64_CMD_CALL,  R8); // R8 := адрес функции input
@@ -434,7 +434,7 @@ static void translate_in(x64_info *const x64, const IR_node *const IR_cmd)
 static void translate_out(x64_info *const x64, const IR_node *const IR_cmd)
 {
     translate_verify;
-    log_assert(IR_cmd->type == IR_CMD_OUT);
+    LOG_ASSERT(IR_cmd->type == IR_CMD_OUT);
 
     POP(RDI)                      // аргумент из стека
 
@@ -447,7 +447,7 @@ static void translate_out(x64_info *const x64, const IR_node *const IR_cmd)
 
 static void translate_caller_save(x64_info *const x64)
 {
-    log_verify(x64 != nullptr, (void) 0);
+    LOG_VERIFY(x64 != nullptr, (void) 0);
 
     PUSH(RDI)
     PUSH(RSI)
@@ -463,7 +463,7 @@ static void translate_caller_save(x64_info *const x64)
 
 static void translate_caller_load(x64_info *const x64)
 {
-    log_verify(x64 != nullptr, (void) 0);
+    LOG_VERIFY(x64 != nullptr, (void) 0);
 
     POP(R11)
     POP(R10)

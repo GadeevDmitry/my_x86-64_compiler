@@ -11,9 +11,9 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../../../lib/logs/log.h"
-#include "../../../lib/vector/vector.h"
-#include "../../../lib/stack/stack.h"
+#include "../../../lib/include/log.h"
+#include "../../../lib/include/vector.h"
+#include "../../../lib/include/stack.h"
 
 //================================================================================================================================
 // TOKEN_ARR_PASS
@@ -40,7 +40,7 @@ void            token_arr_pass_delete(token_arr_pass *const tkn_pass);
 static inline void token_arr_pass_next(token_arr_pass *const tkn_pass);
 static inline void token_arr_pass_next(token_arr_pass *const tkn_pass)
 {
-    log_verify(tkn_pass != nullptr, (void) 0);
+    LOG_VERIFY(tkn_pass != nullptr, (void) 0);
 
     tkn_pass->arr_pos++;
 }
@@ -50,7 +50,7 @@ static inline void token_arr_pass_next(token_arr_pass *const tkn_pass)
 static inline void token_arr_pass_reset(token_arr_pass *const tkn_pass, const token *const reset_val);
 static inline void token_arr_pass_reset(token_arr_pass *const tkn_pass, const token *const reset_val)
 {
-    log_verify(tkn_pass != nullptr, (void) 0);
+    LOG_VERIFY(tkn_pass != nullptr, (void) 0);
 
     tkn_pass->arr_pos = reset_val;
 }
@@ -60,7 +60,7 @@ static inline void token_arr_pass_reset(token_arr_pass *const tkn_pass, const to
 static inline bool token_arr_pass_is_passed(const token_arr_pass *const tkn_pass);
 static inline bool token_arr_pass_is_passed(const token_arr_pass *const tkn_pass)
 {
-    log_verify(tkn_pass != nullptr, false);
+    LOG_VERIFY(tkn_pass != nullptr, false);
 
     return tkn_pass->arr_pos == tkn_pass->arr_end;
 }
@@ -122,7 +122,7 @@ static inline bool var_info_is_exist      (const var_info *const var);
 
 static inline bool var_info_frame_new(var_info *const var, const size_t frame)
 {
-    log_verify(var != nullptr, false);
+    LOG_VERIFY(var != nullptr, false);
 
     return stack_push(var->frame, &frame);
 }
@@ -133,7 +133,7 @@ static inline bool var_info_frame_new(var_info *const var, const size_t frame)
 
 static inline bool var_info_is_exist(const var_info *const var)
 {
-    log_verify(var != nullptr, false);
+    LOG_VERIFY(var != nullptr, false);
 
     return !stack_is_empty(var->frame);
 }
@@ -187,7 +187,7 @@ static inline bool func_info_set_arg      (      func_info *const func, const si
 
 static inline bool func_info_add_arg(func_info *const func)
 {
-    log_verify(func != nullptr, false);
+    LOG_VERIFY(func != nullptr, false);
 
     func->args_quantity++;
     return true;
@@ -197,7 +197,7 @@ static inline bool func_info_add_arg(func_info *const func)
 
 static inline bool func_info_set_arg(func_info *const func, const size_t args_quantity)
 {
-    log_verify(func != nullptr, false);
+    LOG_VERIFY(func != nullptr, false);
 
     func->args_quantity = args_quantity;
     return true;
@@ -290,9 +290,9 @@ static inline void prog_info_meet_return(prog_info *const prog);
 
 static inline bool prog_info_is_name_decl_possible(const prog_info *const prog, const token *const tkn)
 {
-    log_verify(prog != nullptr, false);
-    log_verify(tkn  != nullptr, false);
-    log_verify(tkn->type == TOKEN_NAME, false);
+    LOG_VERIFY(prog != nullptr, false);
+    LOG_VERIFY(tkn  != nullptr, false);
+    LOG_VERIFY(tkn->type == TOKEN_NAME, false);
 
     return !prog_info_is_var_exist_local(prog, tkn) && !prog_info_is_func_name_exist(prog, tkn);
 }
@@ -301,9 +301,9 @@ static inline bool prog_info_is_name_decl_possible(const prog_info *const prog, 
 
 static inline bool prog_info_is_name_access_possible(const prog_info *const prog, const token *const tkn)
 {
-    log_verify(prog != nullptr, false);
-    log_verify(tkn  != nullptr, false);
-    log_verify(tkn->type == TOKEN_NAME, false);
+    LOG_VERIFY(prog != nullptr, false);
+    LOG_VERIFY(tkn  != nullptr, false);
+    LOG_VERIFY(tkn->type == TOKEN_NAME, false);
 
     return prog_info_is_var_exist(prog, tkn) || prog_info_is_func_name_exist(prog, tkn);
 }
@@ -314,7 +314,7 @@ static inline bool prog_info_is_name_access_possible(const prog_info *const prog
 
 static inline void prog_info_scope_open(prog_info *const prog)
 {
-    log_verify(prog != nullptr, (void) 0);
+    LOG_VERIFY(prog != nullptr, (void) 0);
 
     prog->frame++;
 }
@@ -325,7 +325,7 @@ static inline void prog_info_scope_open(prog_info *const prog)
 
 static inline void prog_info_meet_return(prog_info *const prog)
 {
-    log_verify(prog != nullptr, (void) 0);
+    LOG_VERIFY(prog != nullptr, (void) 0);
 
     if (prog->frame == 1) prog->is_return_op = true;
 }

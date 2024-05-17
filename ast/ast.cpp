@@ -21,7 +21,7 @@
 
 static bool AST_node_set_value(AST_node *const node, const AST_NODE_TYPE type, va_list value)
 {
-    log_assert(node != nullptr);
+    LOG_ASSERT(node != nullptr);
 
     switch (type)
     {
@@ -51,7 +51,7 @@ static bool AST_node_set_value(AST_node *const node, const AST_NODE_TYPE type, v
 
 static inline bool AST_node_ctor(AST_node *const node, const AST_NODE_TYPE type, va_list value)
 {
-    log_assert(node != nullptr);
+    LOG_ASSERT(node != nullptr);
 
     $type = type;
 
@@ -66,7 +66,7 @@ static inline bool AST_node_ctor(AST_node *const node, const AST_NODE_TYPE type,
 
 bool AST_node_ctor(AST_node *const node, const AST_NODE_TYPE type, ...)
 {
-    log_verify(node != nullptr, false);
+    LOG_VERIFY(node != nullptr, false);
 
     va_list  value;
     va_start(value, type);
@@ -81,13 +81,13 @@ bool AST_node_ctor(AST_node *const node, const AST_NODE_TYPE type, ...)
 
 AST_node *AST_node_new(const AST_NODE_TYPE type, ...)
 {
-    AST_node  *node_new = (AST_node *) log_calloc(1, sizeof(AST_node));
-    log_verify(node_new != nullptr, nullptr);
+    AST_node  *node_new = (AST_node *) LOG_CALLOC(1, sizeof(AST_node));
+    LOG_VERIFY(node_new != nullptr, nullptr);
 
     va_list  value;
     va_start(value, type);
 
-    if (!AST_node_ctor(node_new, type, value)) { log_free(node_new); node_new = nullptr; }
+    if (!AST_node_ctor(node_new, type, value)) { LOG_FREE(node_new); node_new = nullptr; }
 
     va_end(value);
     return node_new;
@@ -97,7 +97,7 @@ AST_node *AST_node_new(const AST_NODE_TYPE type, ...)
 
 bool AST_node_set_value(AST_node *const node, const AST_NODE_TYPE type, ...)
 {
-    log_verify(node != nullptr, false);
+    LOG_VERIFY(node != nullptr, false);
 
     va_list  value;
     va_start(value, type);
@@ -111,7 +111,7 @@ bool AST_node_set_value(AST_node *const node, const AST_NODE_TYPE type, ...)
 
 void AST_node_delete(AST_node *const node)
 {
-    log_free(node);
+    LOG_FREE(node);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ bool AST_node_hang_right(AST_node *const tree, AST_node *const node)
 
 AST_node *AST_tree_hang_by_adapter(AST_node *const tree, AST_node *const node)
 {
-    log_verify(tree != nullptr, nullptr);
+    LOG_VERIFY(tree != nullptr, nullptr);
 
     if (tree->left  == nullptr) { AST_node_hang_left(tree, node); return tree; }
     if (tree->right == nullptr)
@@ -174,7 +174,7 @@ AST_node *AST_tree_hang_by_adapter(AST_node *const tree, AST_node *const node)
 void AST_tree_graphviz_dump(const void *const _node)
 {
     const  AST_node *const node = (const AST_node *) _node;
-    log_verify(node != nullptr, (void) 0);
+    LOG_VERIFY(node != nullptr, (void) 0);
 
     AST_tree_static_dump(node);
 }
@@ -183,7 +183,7 @@ void AST_tree_graphviz_dump(const void *const _node)
 
 static void AST_tree_static_dump(const AST_node *const node)
 {
-    log_assert(node != nullptr);
+    LOG_ASSERT(node != nullptr);
 
     static size_t dump_num = 0;
 
@@ -197,7 +197,7 @@ static void AST_tree_static_dump(const AST_node *const node)
     sprintf(dump_filename_png, "ast/graphviz_dump_png/ast_%.5lu.png", dump_num);
 
     FILE *stream = fopen(dump_filename_txt, "w");
-    log_verify(stream != nullptr,  (void) 0);
+    LOG_VERIFY(stream != nullptr,  (void) 0);
     setvbuf   (stream,   nullptr, _IONBF, 0);
 
     dump_num++;
@@ -213,7 +213,7 @@ static void AST_tree_static_dump(const AST_node *const node)
 
 static inline void AST_tree_header_dump(FILE *const stream)
 {
-    log_assert(stream != nullptr);
+    LOG_ASSERT(stream != nullptr);
 
     fprintf(stream, "digraph {\n"
                     "splines=ortho\n"
@@ -224,8 +224,8 @@ static inline void AST_tree_header_dump(FILE *const stream)
 
 static size_t AST_tree_content_dump(const AST_node *const node, const size_t node_index, FILE *const stream)
 {
-    log_assert(node   != nullptr);
-    log_assert(stream != nullptr);
+    LOG_ASSERT(node   != nullptr);
+    LOG_ASSERT(stream != nullptr);
 
     AST_node_content_dump(node, node_index, stream);
 
@@ -243,9 +243,9 @@ static size_t AST_tree_content_dump(const AST_node *const node, const size_t nod
 
 static void AST_tree_ending_dump(const char *txt_file, const char *png_file, FILE *const stream)
 {
-    log_assert(txt_file != nullptr);
-    log_assert(png_file != nullptr);
-    log_assert(stream   != nullptr);
+    LOG_ASSERT(txt_file != nullptr);
+    LOG_ASSERT(png_file != nullptr);
+    LOG_ASSERT(stream   != nullptr);
 
     fprintf(stream, "}\n");
 
@@ -253,18 +253,18 @@ static void AST_tree_ending_dump(const char *txt_file, const char *png_file, FIL
     sprintf(dump_system_cmd, "dot %s -T png -o %s", txt_file, png_file);
     system (dump_system_cmd);
 
-    log_message("<img src=%s>\n", png_file);
+    LOG_MESSAGE("<img src=%s>\n", png_file);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static void AST_node_content_dump(const AST_node *const node, const size_t node_index, FILE *const stream)
 {
-    log_assert(node   != nullptr);
-    log_assert(stream != nullptr);
+    LOG_ASSERT(node   != nullptr);
+    LOG_ASSERT(stream != nullptr);
 
-    GRAPHVIZ_COLOR color      = GRAPHVIZ_COLOR_BLACK;
-    GRAPHVIZ_COLOR color_fill = GRAPHVIZ_COLOR_BLACK;
+    GRAPHVIZ_COLOR_T color      = GRAPHVIZ_COLOR_BLACK;
+    GRAPHVIZ_COLOR_T color_fill = GRAPHVIZ_COLOR_BLACK;
     AST_node_get_dump_color(node, &color, &color_fill);
 
     char value_dump[100] = "";
@@ -280,12 +280,12 @@ static void AST_node_content_dump(const AST_node *const node, const size_t node_
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void AST_node_get_dump_color(const AST_node *const node, GRAPHVIZ_COLOR *const color,
-                                                                GRAPHVIZ_COLOR *const color_fill)
+static void AST_node_get_dump_color(const AST_node *const node, GRAPHVIZ_COLOR_T *const color,
+                                                                GRAPHVIZ_COLOR_T *const color_fill)
 {
-    log_assert(node       != nullptr);
-    log_assert(color      != nullptr);
-    log_assert(color_fill != nullptr);
+    LOG_ASSERT(node       != nullptr);
+    LOG_ASSERT(color      != nullptr);
+    LOG_ASSERT(color_fill != nullptr);
 
     switch ($type)
     {
@@ -321,8 +321,8 @@ static void AST_node_get_dump_color(const AST_node *const node, GRAPHVIZ_COLOR *
 
 static void AST_node_get_dump_value(const AST_node *const node, char *const value_dump)
 {
-    log_assert(node       != nullptr);
-    log_assert(value_dump != nullptr);
+    LOG_ASSERT(node       != nullptr);
+    LOG_ASSERT(value_dump != nullptr);
 
     switch ($type)
     {
@@ -355,7 +355,7 @@ static void AST_node_get_dump_value(const AST_node *const node, char *const valu
 
 static inline void AST_edge_dump(const size_t src, const size_t dst, FILE *const stream)
 {
-    log_assert(stream != nullptr);
+    LOG_ASSERT(stream != nullptr);
 
     fprintf(stream, "node%lu->node%lu[color=\"black\"]\n", src, dst);
 }

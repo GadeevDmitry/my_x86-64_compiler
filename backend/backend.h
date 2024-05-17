@@ -1,7 +1,7 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
-#include "../lib/algorithm/algorithm.h"
+#include "../lib/include/algorithm.h"
 #include "../ast/ast.h"
 
 //================================================================================================================================

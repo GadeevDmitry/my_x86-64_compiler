@@ -10,7 +10,7 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../../../lib/logs/log.h"
+#include "../../../lib/include/log.h"
 
 #include "x64_info.h"
 

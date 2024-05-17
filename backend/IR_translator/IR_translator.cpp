@@ -8,9 +8,9 @@ vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
                                                   const size_t func_quantity, size_t *const main_func_id,
                                                                               size_t *const glob_var_quantity)
 {
-    log_verify(tree              != nullptr, nullptr);
-    log_verify(main_func_id      != nullptr, nullptr);
-    log_verify(glob_var_quantity != nullptr, nullptr);
+    LOG_VERIFY(tree              != nullptr, nullptr);
+    LOG_VERIFY(main_func_id      != nullptr, nullptr);
+    LOG_VERIFY(glob_var_quantity != nullptr, nullptr);
 
     prog_info *prog = prog_info_new(var_quantity, func_quantity);
 
@@ -48,11 +48,11 @@ vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
         return;
 
 #define ast_node_wrong_type_handler                                         \
-        log_verify_verbose(false, "wrong AST_node type", (void) 0);         \
+        LOG_VERIFY_VERBOSE(false, "wrong AST_node type", (void) 0);         \
         return;
 
 #define ast_node_wrong_operator_handler                                     \
-        log_verify_verbose(false, "wrong AST_node operator", (void) 0);     \
+        LOG_VERIFY_VERBOSE(false, "wrong AST_node operator", (void) 0);     \
         return;
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -67,8 +67,8 @@ vector *IR_translator(const AST_node *const tree, const size_t  var_quantity,
 
 #define translate_verify                                                    \
         {                                                                   \
-        log_verify(prog    != nullptr, (void) 0);                           \
-        log_verify(subtree != nullptr, (void) 0);                           \
+        LOG_VERIFY(prog    != nullptr, (void) 0);                           \
+        LOG_VERIFY(subtree != nullptr, (void) 0);                           \
         }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ prog_info_create_command(prog, type, is_reg, is_mem, is_imm, ##__VA_ARGS__)
     else if (prog_info_get_global_var_addr(prog, var_ind, &(var_addr))) create_command(ir_cmd, false, true, true,      (int) var_addr);         \
     else                                                                                                                                        \
     {                                                                                                                                           \
-        log_error("variable %lu is not declared yet\n", var_ind);                                                                               \
+        LOG_ERROR("variable %lu is not declared yet\n", var_ind);                                                                               \
         return;                                                                                                                                 \
     }                                                                                                                                           \
 }
@@ -192,9 +192,9 @@ static void translate_if(prog_info *const prog, const AST_node *const subtree)
 {
     translate_verify;
 
-    log_assert($type == AST_NODE_OPERATOR_IF);
-    log_verify($L != nullptr, (void) 0);
-    log_verify($R != nullptr, (void) 0);
+    LOG_ASSERT($type == AST_NODE_OPERATOR_IF);
+    LOG_VERIFY($L != nullptr, (void) 0);
+    LOG_VERIFY($R != nullptr, (void) 0);
 
     translate_expression(prog, $L);                                         // <condition>
 
@@ -232,8 +232,8 @@ static void translate_while(prog_info *const prog, const AST_node *const subtree
 {
     translate_verify;
 
-    log_assert($type == AST_NODE_OPERATOR_WHILE);
-    log_verify($L != nullptr, (void) 0);
+    LOG_ASSERT($type == AST_NODE_OPERATOR_WHILE);
+    LOG_VERIFY($L != nullptr, (void) 0);
 
     size_t label_cond = next_command();                                     // cond:
     translate_expression(prog, $L);                                         // <condition>
@@ -261,7 +261,7 @@ static void translate_while(prog_info *const prog, const AST_node *const subtree
 static void translate_func_call_ret_val_ignored(prog_info *const prog, const AST_node *const subtree)
 {
     translate_verify;
-    log_assert($type == AST_NODE_CALL_FUNC);
+    LOG_ASSERT($type == AST_NODE_CALL_FUNC);
 
     translate_func_call_ret_val_used(prog, subtree);
     create_command(IR_CMD_POP, true, false, false, RAX); // удаление возвращаемого значения функции из стека
@@ -272,13 +272,13 @@ static void translate_func_call_ret_val_ignored(prog_info *const prog, const AST
 static void translate_func_call_ret_val_used(prog_info *const prog, const AST_node *const subtree)
 {
     translate_verify;
-    log_assert($type == AST_NODE_CALL_FUNC);
+    LOG_ASSERT($type == AST_NODE_CALL_FUNC);
 
     size_t  func_addr = 0UL;
 
     if (!prog_info_get_func_addr(prog, $func_ind, &func_addr))
     {
-        log_error("function %lu is not declared yet\n", $func_ind);
+        LOG_ERROR("function %lu is not declared yet\n", $func_ind);
         return;
     }
 
@@ -300,8 +300,8 @@ static void translate_func_call_ret_val_used(prog_info *const prog, const AST_no
 
 static size_t translate_params(prog_info *const prog, const AST_node *const subtree)
 {
-    log_verify(prog    != nullptr, 0UL);
-    log_verify(subtree != nullptr, 0UL);
+    LOG_VERIFY(prog    != nullptr, 0UL);
+    LOG_VERIFY(subtree != nullptr, 0UL);
 
     switch ($type)
     {
@@ -329,8 +329,8 @@ static void translate_return(prog_info *const prog, const AST_node *const subtre
 {
     translate_verify;
 
-    log_assert($type == AST_NODE_OPERATOR_RETURN);
-    log_verify($L != nullptr, (void) 0);
+    LOG_ASSERT($type == AST_NODE_OPERATOR_RETURN);
+    LOG_VERIFY($L != nullptr, (void) 0);
 
     translate_expression(prog, $L);
 
@@ -345,7 +345,7 @@ static void translate_return(prog_info *const prog, const AST_node *const subtre
 static void translate_operator_independent(prog_info *const prog, const AST_node *const subtree)
 {
     translate_verify;
-    log_assert($type == AST_NODE_OPERATOR);
+    LOG_ASSERT($type == AST_NODE_OPERATOR);
 
     switch ($operator)
     {
@@ -365,13 +365,13 @@ static void translate_input(prog_info *const prog, const AST_node *const subtree
 {
     translate_verify;
 
-    log_assert($type     == AST_NODE_OPERATOR );
-    log_assert($operator == AST_OPERATOR_INPUT);
-    log_verify($L != nullptr, (void) 0);
+    LOG_ASSERT($type     == AST_NODE_OPERATOR );
+    LOG_ASSERT($operator == AST_OPERATOR_INPUT);
+    LOG_VERIFY($L != nullptr, (void) 0);
 
     create_command_no_args(IR_CMD_IN);
 
-    log_verify  ($L->type == AST_NODE_VARIABLE, (void) 0);
+    LOG_VERIFY  ($L->type == AST_NODE_VARIABLE, (void) 0);
     pop_variable($L->value.var_ind);
 }
 
@@ -383,9 +383,9 @@ static void translate_output(prog_info *const prog, const AST_node *const subtre
 {
     translate_verify;
 
-    log_assert($type     == AST_NODE_OPERATOR  );
-    log_assert($operator == AST_OPERATOR_OUTPUT);
-    log_verify($L != nullptr, (void) 0);
+    LOG_ASSERT($type     == AST_NODE_OPERATOR  );
+    LOG_ASSERT($operator == AST_OPERATOR_OUTPUT);
+    LOG_VERIFY($L != nullptr, (void) 0);
 
     translate_expression(prog, $L);
 
@@ -400,15 +400,15 @@ static void translate_assignment_independent(prog_info *const prog, const AST_no
 {
     translate_verify;
 
-    log_assert($type     == AST_NODE_OPERATOR);
-    log_assert($operator == AST_OPERATOR_ASSIGNMENT);
+    LOG_ASSERT($type     == AST_NODE_OPERATOR);
+    LOG_ASSERT($operator == AST_OPERATOR_ASSIGNMENT);
 
-    log_verify($L != nullptr, (void) 0);
-    log_verify($R != nullptr, (void) 0);
+    LOG_VERIFY($L != nullptr, (void) 0);
+    LOG_VERIFY($R != nullptr, (void) 0);
 
     translate_expression(prog, $R);
 
-    log_verify  ($L->type == AST_NODE_VARIABLE, (void) 0);
+    LOG_VERIFY  ($L->type == AST_NODE_VARIABLE, (void) 0);
     pop_variable($L->value.var_ind);
 }
 
@@ -418,15 +418,15 @@ static void translate_assignment_dependent(prog_info *const prog, const AST_node
 {
     translate_verify;
 
-    log_assert($type     == AST_NODE_OPERATOR);
-    log_assert($operator == AST_OPERATOR_ASSIGNMENT);
+    LOG_ASSERT($type     == AST_NODE_OPERATOR);
+    LOG_ASSERT($operator == AST_OPERATOR_ASSIGNMENT);
 
-    log_verify($L != nullptr, (void) 0);
-    log_verify($R != nullptr, (void) 0);
+    LOG_VERIFY($L != nullptr, (void) 0);
+    LOG_VERIFY($R != nullptr, (void) 0);
 
     translate_expression(prog, $R);
 
-    log_verify   ($L->type == AST_NODE_VARIABLE, (void) 0);
+    LOG_VERIFY   ($L->type == AST_NODE_VARIABLE, (void) 0);
     pop_variable ($L->value.var_ind);
     push_variable($L->value.var_ind);
 }
@@ -458,9 +458,9 @@ static void translate_immediate_int_operand(prog_info *const prog, const AST_nod
 {
     translate_verify;
 
-    log_assert($type == AST_NODE_IMM_INT );
-    log_verify($L    == nullptr, (void) 0);
-    log_verify($R    == nullptr, (void) 0);
+    LOG_ASSERT($type == AST_NODE_IMM_INT );
+    LOG_VERIFY($L    == nullptr, (void) 0);
+    LOG_VERIFY($R    == nullptr, (void) 0);
 
     create_command(IR_CMD_PUSH, false, false, true, SCALE * $imm_int);  // все переменные и промежуточные значения храняться, умноженными
                                                                         // на SCALE = 10^n, чтобы сымитировать десятичные дроби
@@ -474,9 +474,9 @@ static void translate_variable_operand(prog_info *const prog, const AST_node *co
 {
     translate_verify;
 
-    log_assert($type == AST_NODE_VARIABLE);
-    log_verify($L    == nullptr, (void) 0);
-    log_verify($R    == nullptr, (void) 0);
+    LOG_ASSERT($type == AST_NODE_VARIABLE);
+    LOG_VERIFY($L    == nullptr, (void) 0);
+    LOG_VERIFY($R    == nullptr, (void) 0);
 
     push_variable($var_ind);
 }
@@ -488,7 +488,7 @@ static void translate_variable_operand(prog_info *const prog, const AST_node *co
 static void translate_operator_dependent(prog_info *const prog, const AST_node *const subtree)
 {
     translate_verify;
-    log_assert($type == AST_NODE_OPERATOR);
+    LOG_ASSERT($type == AST_NODE_OPERATOR);
 
     switch ($operator)
     {
@@ -507,8 +507,8 @@ static void translate_operator_unary(prog_info *const prog, const AST_node *cons
 {
     translate_verify;
 
-    log_assert($type == AST_NODE_OPERATOR);
-    log_verify($L    != nullptr, (void) 0);
+    LOG_ASSERT($type == AST_NODE_OPERATOR);
+    LOG_VERIFY($L    != nullptr, (void) 0);
 
     translate_expression(prog, $L);
 
@@ -528,9 +528,9 @@ static void translate_operator_binary(prog_info *const prog, const AST_node *con
 {
     translate_verify;
 
-    log_assert($type == AST_NODE_OPERATOR);
-    log_verify($L    != nullptr, (void) 0);
-    log_verify($R    != nullptr, (void) 0);
+    LOG_ASSERT($type == AST_NODE_OPERATOR);
+    LOG_VERIFY($L    != nullptr, (void) 0);
+    LOG_VERIFY($R    != nullptr, (void) 0);
 
     translate_expression(prog, $L);
     translate_expression(prog, $R);

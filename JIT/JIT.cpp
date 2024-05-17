@@ -6,7 +6,7 @@
 
 bool JIT_run(const char *const source_code)
 {
-    log_verify(source_code != nullptr, false);
+    LOG_VERIFY(source_code != nullptr, false);
 
     JIT *run = JIT_init(source_code);
     if (run == nullptr) return false;
@@ -23,12 +23,12 @@ bool JIT_run(const char *const source_code)
 
 static JIT *JIT_init(const char *const source_code)
 {
-    log_assert(source_code != nullptr);
+    LOG_ASSERT(source_code != nullptr);
 
-    JIT *run = (JIT *) log_calloc(1, sizeof(JIT));
-    log_verify(run != nullptr, nullptr);
+    JIT *run = (JIT *) LOG_CALLOC(1, sizeof(JIT));
+    LOG_VERIFY(run != nullptr, nullptr);
 
-    if (!JIT_init(run, source_code)) { log_free(run); return nullptr; }
+    if (!JIT_init(run, source_code)) { LOG_FREE(run); return nullptr; }
     return run;
 }
 
@@ -36,17 +36,17 @@ static JIT *JIT_init(const char *const source_code)
 
 static bool JIT_init(JIT *const run, const char *const source_code)
 {
-    log_assert(run         != nullptr);
-    log_assert(source_code != nullptr);
+    LOG_ASSERT(run         != nullptr);
+    LOG_ASSERT(source_code != nullptr);
 
-    $RAM    = (type_t *) log_calloc(1, 10000UL /* RAM size */);
+    $RAM    = (type_t *) LOG_CALLOC(1, 10000UL /* RAM size */);
     $exe    = nullptr;
 
     $sqrt   = JIT_sqrt;
     $input  = JIT_input;
     $output = JIT_output;
 
-    log_verify($RAM != nullptr, false);
+    LOG_VERIFY($RAM != nullptr, false);
 
     size_t  var_quantity = 0UL,
            func_quantity = 0UL;
@@ -57,14 +57,14 @@ static bool JIT_init(JIT *const run, const char *const source_code)
     ast = frontend(source_code, &var_quantity, &func_quantity, &$main_pc); if (ast == nullptr) { JIT_dtor(run); return false; }
     exe = backend (ast        ,  var_quantity,  func_quantity, &$main_pc, &$glob_data_size);
 
-    $exe = mmap(NULL, exe->buff_size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-    log_verify($exe != nullptr, false);
+    $exe = mmap(NULL, exe->size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    LOG_VERIFY($exe != nullptr, false);
 
-    memcpy($exe, exe->buff_beg, exe->buff_size);
+    memcpy($exe, exe->beg, exe->size);
     $main_pc += (size_t) $exe;
 
     AST_tree_delete(ast);
-    buffer_free    (exe);
+    buffer_delete  (exe);
 
     return true;
 }
@@ -78,7 +78,7 @@ static void JIT_delete(JIT *const run)
     if (run == nullptr) return;
 
     JIT_dtor(run);
-    log_free(run);
+    LOG_FREE(run);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ static void JIT_dtor(JIT *const run)
 {
     if (run == nullptr) return;
 
-    log_free($RAM);
+    LOG_FREE($RAM);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -204,8 +204,8 @@ static void JIT_output(type_t number)
 
 static void JIT_output_not_scaled(type_t number, bool is_fractional)
 {
-    size_t buff_sz = 100;
-    size_t index   = buff_sz - 2;
+    const size_t buff_sz = 100;
+    size_t       index   = buff_sz - 2;
 
     bool is_neg = false;
     char out_buff[buff_sz] = {};
@@ -242,7 +242,7 @@ static void JIT_output_not_scaled(type_t number, bool is_fractional)
 
 static void JIT_dump(const JIT *const run)
 {
-    log_verify(run != nullptr, (void) 0);
+    LOG_VERIFY(run != nullptr, (void) 0);
 
     JIT_header_dump(run);
     JIT_fields_dump(run);
@@ -253,9 +253,9 @@ static void JIT_dump(const JIT *const run)
 
 static void JIT_header_dump(const JIT *const run)
 {
-    log_assert(run != nullptr);
+    LOG_ASSERT(run != nullptr);
 
-    log_tab_service_message("JIT (addr: %p)\n"
+    LOG_TAB_SERVICE_MESSAGE("JIT (addr: %p)\n"
                             "{", "\n", run);
     LOG_TAB++;
 }
@@ -264,20 +264,20 @@ static void JIT_header_dump(const JIT *const run)
 
 static void JIT_fields_dump(const JIT *const run)
 {
-    log_assert(run != nullptr);
+    LOG_ASSERT(run != nullptr);
 
-    usual_field_dump("RAM             ", "%p" , $RAM);
-    usual_field_dump("exe             ", "%p" , $exe);
-    usual_field_dump("global_data_size", "%lu", $glob_data_size);
-    usual_field_dump("main_func_pc    ", "%lx", $main_pc);
+    USUAL_FIELD_DUMP("RAM             ", "%p" , $RAM);
+    USUAL_FIELD_DUMP("exe             ", "%p" , $exe);
+    USUAL_FIELD_DUMP("global_data_size", "%lu", $glob_data_size);
+    USUAL_FIELD_DUMP("main_func_pc    ", "%lx", $main_pc);
 
-    log_message("\n");
+    LOG_MESSAGE("\n");
 
-    usual_field_dump("JIT_sqrt  ", "%p", $sqrt);
-    usual_field_dump("JIT_input ", "%p", $input);
-    usual_field_dump("JIT_output", "%p", $output);
+    USUAL_FIELD_DUMP("JIT_sqrt  ", "%p", $sqrt);
+    USUAL_FIELD_DUMP("JIT_input ", "%p", $input);
+    USUAL_FIELD_DUMP("JIT_output", "%p", $output);
 
-    log_message("\n");
+    LOG_MESSAGE("\n");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -285,5 +285,5 @@ static void JIT_fields_dump(const JIT *const run)
 static void JIT_ending_dump()
 {
     LOG_TAB--;
-    log_tab_service_message("}", "\n\n");
+    LOG_TAB_SERVICE_MESSAGE("}", "\n\n");
 }

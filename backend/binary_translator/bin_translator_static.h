@@ -10,8 +10,8 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../../lib/logs/log.h"
-#include "../../lib/array/array.h"
+#include "../../lib/include/log.h"
+#include "../../lib/include/array.h"
 
 #include "../x64/x64.h"
 #include "../binary/bin.h"

@@ -16,8 +16,8 @@
 
 bool token_arr_pass_ctor(token_arr_pass *const tkn_pass, const vector *const tkn_arr)
 {
-    log_verify(tkn_pass != nullptr, false);
-    vec_verify(tkn_arr            , false);
+    LOG_VERIFY   (tkn_pass != nullptr, false);
+    VECTOR_VERIFY(tkn_arr            , false);
 
     $pos = (token *) vector_begin(tkn_arr);
     $end = (token *) vector_end  (tkn_arr) - 1; // последний токен - фиктивный
@@ -29,10 +29,10 @@ bool token_arr_pass_ctor(token_arr_pass *const tkn_pass, const vector *const tkn
 
 token_arr_pass *token_arr_pass_new(const vector *const tkn_arr)
 {
-    token_arr_pass *tkn_pass_new = (token_arr_pass *) log_calloc(1, sizeof(token_arr_pass));
-    log_verify     (tkn_pass_new != nullptr, nullptr);
+    token_arr_pass *tkn_pass_new = (token_arr_pass *) LOG_CALLOC(1, sizeof(token_arr_pass));
+    LOG_VERIFY     (tkn_pass_new != nullptr, nullptr);
 
-    if (!token_arr_pass_ctor(tkn_pass_new, tkn_arr)) { log_free(tkn_pass_new); return nullptr; }
+    if (!token_arr_pass_ctor(tkn_pass_new, tkn_arr)) { LOG_FREE(tkn_pass_new); return nullptr; }
     return tkn_pass_new;
 }
 
@@ -43,7 +43,7 @@ token_arr_pass *token_arr_pass_new(const vector *const tkn_arr)
 void token_arr_pass_delete(token_arr_pass *const tkn_pass)
 {
     if (tkn_pass == nullptr) return;
-    log_free(tkn_pass);
+    LOG_FREE(tkn_pass);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -71,8 +71,8 @@ bool var_info_ctor(var_info *const var, const char  *name,
                                         const size_t name_size,
                                         const size_t frame)
 {
-    log_verify(var  != nullptr, false);
-    log_verify(name != nullptr, false);
+    LOG_VERIFY(var  != nullptr, false);
+    LOG_VERIFY(name != nullptr, false);
 
     $name      = name;
     $name_size = name_size;
@@ -89,12 +89,12 @@ var_info *var_info_new(const char  *name,
                        const size_t name_size,
                        const size_t frame)
 {
-    log_verify(name != nullptr, nullptr);
+    LOG_VERIFY(name != nullptr, nullptr);
 
-    var_info  *var_new = (var_info *) log_calloc(1, sizeof(var_info));
-    log_verify(var_new != nullptr, nullptr);
+    var_info  *var_new = (var_info *) LOG_CALLOC(1, sizeof(var_info));
+    LOG_VERIFY(var_new != nullptr, nullptr);
 
-    if (!var_info_ctor(var_new, name, name_size, frame)) { log_free(var_new); return nullptr; }
+    if (!var_info_ctor(var_new, name, name_size, frame)) { LOG_FREE(var_new); return nullptr; }
     return var_new;
 }
 
@@ -102,9 +102,9 @@ var_info *var_info_new(const char  *name,
 
 bool var_info_ctor(var_info *const var, const token *const tkn, const size_t frame)
 {
-    log_verify(var != nullptr, false);
-    log_verify(tkn != nullptr, false);
-    log_verify($tkn_type == TOKEN_NAME, false);
+    LOG_VERIFY(var != nullptr, false);
+    LOG_VERIFY(tkn != nullptr, false);
+    LOG_VERIFY($tkn_type == TOKEN_NAME, false);
 
     return var_info_ctor(var, $tkn_name, $tkn_size, frame);
 }
@@ -113,8 +113,8 @@ bool var_info_ctor(var_info *const var, const token *const tkn, const size_t fra
 
 var_info *var_info_new(const token *const tkn, const size_t frame)
 {
-    log_verify(tkn != nullptr, nullptr);
-    log_verify($tkn_type == TOKEN_NAME, nullptr);
+    LOG_VERIFY(tkn != nullptr, nullptr);
+    LOG_VERIFY($tkn_type == TOKEN_NAME, nullptr);
 
     return var_info_new($tkn_name, $tkn_size, frame);
 }
@@ -128,7 +128,7 @@ void var_info_dtor(void *const _var)
     if (_var == nullptr) return;
 
     var_info *const var = (var_info *) _var;
-    stack_free($frame);
+    stack_delete($frame);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -136,7 +136,7 @@ void var_info_dtor(void *const _var)
 void var_info_delete(void *const _var)
 {
     var_info_dtor(_var);
-    log_free     (_var);
+    LOG_FREE     (_var);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ void var_info_delete(void *const _var)
 
 bool var_info_frame_delete(var_info *const var, const size_t frame)
 {
-    log_verify(var != nullptr, false);
+    LOG_VERIFY(var != nullptr, false);
 
     if (stack_is_empty($frame)) return true;
 
@@ -162,9 +162,9 @@ bool var_info_frame_delete(var_info *const var, const size_t frame)
 
 bool var_info_is_name_equal(const var_info *const var, const token *const tkn)
 {
-    log_verify(var != nullptr, false);
-    log_verify(tkn != nullptr, false);
-    log_verify($tkn_type == TOKEN_NAME, false);
+    LOG_VERIFY(var != nullptr, false);
+    LOG_VERIFY(tkn != nullptr, false);
+    LOG_VERIFY($tkn_type == TOKEN_NAME, false);
 
     if ($tkn_size == $name_size && strncmp($name, $tkn_name, $name_size) == 0) return true;
     return false;
@@ -174,7 +174,7 @@ bool var_info_is_name_equal(const var_info *const var, const token *const tkn)
 
 bool var_info_is_exist_local(const var_info *const var, const size_t loc_frame)
 {
-    log_verify(var != nullptr, false);
+    LOG_VERIFY(var != nullptr, false);
 
     if (!var_info_is_exist(var)) return false;
 
@@ -206,8 +206,8 @@ bool func_info_ctor(func_info *const func, const char  *name,
                                            const size_t name_size,
                                            const size_t args_quantity /* = 0UL */)
 {
-    log_verify(func != nullptr, false);
-    log_verify(name != nullptr, false);
+    LOG_VERIFY(func != nullptr, false);
+    LOG_VERIFY(name != nullptr, false);
 
     $name      = name;
     $name_size = name_size;
@@ -222,12 +222,12 @@ func_info *func_info_new(const char  *name,
                          const size_t name_size,
                          const size_t args_quantity /* = 0UL */)
 {
-    log_verify(name != nullptr, nullptr);
+    LOG_VERIFY(name != nullptr, nullptr);
 
-    func_info *func_new = (func_info *) log_calloc(1, sizeof(func_info));
-    log_verify(func_new != nullptr, nullptr);
+    func_info *func_new = (func_info *) LOG_CALLOC(1, sizeof(func_info));
+    LOG_VERIFY(func_new != nullptr, nullptr);
 
-    if (!func_info_ctor(func_new, name, name_size, args_quantity)) { log_free(func_new); return nullptr; }
+    if (!func_info_ctor(func_new, name, name_size, args_quantity)) { LOG_FREE(func_new); return nullptr; }
     return func_new;
 }
 
@@ -235,8 +235,8 @@ func_info *func_info_new(const char  *name,
 
 bool func_info_ctor(func_info *const func, const token *const tkn)
 {
-    log_verify(func != nullptr, false);
-    log_verify(tkn  != nullptr, false);
+    LOG_VERIFY(func != nullptr, false);
+    LOG_VERIFY(tkn  != nullptr, false);
 
     return func_info_ctor(func, $tkn_name, $tkn_size);
 }
@@ -245,7 +245,7 @@ bool func_info_ctor(func_info *const func, const token *const tkn)
 
 func_info *func_info_new(const token *const tkn)
 {
-    log_verify(tkn != nullptr, nullptr);
+    LOG_VERIFY(tkn != nullptr, nullptr);
 
     return func_info_new($tkn_name, $tkn_size);
 }
@@ -254,7 +254,7 @@ func_info *func_info_new(const token *const tkn)
 
 void func_info_delete(void *const _func)
 {
-    log_free(_func);
+    LOG_FREE(_func);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -263,8 +263,8 @@ void func_info_delete(void *const _func)
 
 bool func_info_is_equal(const func_info *const func, const func_info *const pattern)
 {
-    log_verify(func    != nullptr, false);
-    log_verify(pattern != nullptr, false);
+    LOG_VERIFY(func    != nullptr, false);
+    LOG_VERIFY(pattern != nullptr, false);
 
     if (pattern->args_quantity == $args      &&
         pattern->name_size     == $name_size &&
@@ -277,8 +277,8 @@ bool func_info_is_equal(const func_info *const func, const func_info *const patt
 
 bool func_info_is_name_equal(const func_info *const func, const token *const tkn)
 {
-    log_verify(func != nullptr, false);
-    log_verify(tkn  != nullptr, false);
+    LOG_VERIFY(func != nullptr, false);
+    LOG_VERIFY(tkn  != nullptr, false);
 
     if ($tkn_size == $name_size && strncmp($name, $tkn_name, $name_size) == 0) return true;
     return false;
@@ -308,14 +308,14 @@ bool func_info_is_name_equal(const func_info *const func, const token *const tkn
 
 bool prog_info_ctor(prog_info *const prog, const char *const main_func_name)
 {
-    log_verify(prog != nullptr, false);
-    log_verify(main_func_name != nullptr, false);
+    LOG_VERIFY(prog != nullptr, false);
+    LOG_VERIFY(main_func_name != nullptr, false);
 
     $v_store = vector_new(sizeof(var_info ), nullptr,  var_info_dtor);
     $f_store = vector_new(sizeof(func_info), nullptr);
 
-    if ($v_store == nullptr) { vector_free($f_store); return false; }
-    if ($f_store == nullptr) { vector_free($v_store); return false; }
+    if ($v_store == nullptr) { vector_delete($f_store); return false; }
+    if ($f_store == nullptr) { vector_delete($v_store); return false; }
 
     var_info_ctor(&$main_info, main_func_name, strlen(main_func_name), 0UL);
 
@@ -330,10 +330,10 @@ bool prog_info_ctor(prog_info *const prog, const char *const main_func_name)
 
 prog_info *prog_info_new(const char *const main_func_name)
 {
-    prog_info *prog_new = (prog_info *) log_calloc(1, sizeof(prog_info));
-    log_verify(prog_new != nullptr, nullptr);
+    prog_info *prog_new = (prog_info *) LOG_CALLOC(1, sizeof(prog_info));
+    LOG_VERIFY(prog_new != nullptr, nullptr);
 
-    if (!prog_info_ctor(prog_new, main_func_name)) { log_free(prog_new); return nullptr; }
+    if (!prog_info_ctor(prog_new, main_func_name)) { LOG_FREE(prog_new); return nullptr; }
     return prog_new;
 }
 
@@ -345,8 +345,8 @@ void prog_info_dtor(prog_info *const prog)
 {
     if (prog == nullptr) return;
 
-    vector_free  ($v_store);
-    vector_free  ($f_store);
+    vector_delete  ($v_store);
+    vector_delete  ($f_store);
 
     var_info_dtor(&$main_info);
 }
@@ -356,7 +356,7 @@ void prog_info_dtor(prog_info *const prog)
 void prog_info_delete(prog_info *const prog)
 {
     prog_info_dtor(prog);
-    log_free      (prog);
+    LOG_FREE      (prog);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -365,9 +365,9 @@ void prog_info_delete(prog_info *const prog)
 
 bool prog_info_is_var_exist(const prog_info *const prog, const token *const tkn)
 {
-    log_verify(prog != nullptr, false);
-    log_verify(tkn  != nullptr, false);
-    log_verify($tkn_type == TOKEN_NAME, false);
+    LOG_VERIFY(prog != nullptr, false);
+    LOG_VERIFY(tkn  != nullptr, false);
+    LOG_VERIFY($tkn_type == TOKEN_NAME, false);
 
     var_info *v_cur = (var_info *) vector_begin($v_store);
     var_info *v_end = (var_info *) vector_end  ($v_store);
@@ -385,9 +385,9 @@ bool prog_info_is_var_exist(const prog_info *const prog, const token *const tkn)
 
 bool prog_info_is_var_exist_local(const prog_info *const prog, const token *const tkn)
 {
-    log_verify(prog != nullptr, false);
-    log_verify(tkn  != nullptr, false);
-    log_verify($tkn_type == TOKEN_NAME, false);
+    LOG_VERIFY(prog != nullptr, false);
+    LOG_VERIFY(tkn  != nullptr, false);
+    LOG_VERIFY($tkn_type == TOKEN_NAME, false);
 
     var_info *v_cur = (var_info *) vector_begin($v_store);
     var_info *v_end = (var_info *) vector_end  ($v_store);
@@ -405,8 +405,8 @@ bool prog_info_is_var_exist_local(const prog_info *const prog, const token *cons
 
 bool prog_info_is_func_exist(const prog_info *const prog, const func_info *const func)
 {
-    log_verify(prog != nullptr, false);
-    log_verify(func != nullptr, false);
+    LOG_VERIFY(prog != nullptr, false);
+    LOG_VERIFY(func != nullptr, false);
 
     func_info *f_cur = (func_info *) vector_begin($f_store);
     func_info *f_end = (func_info *) vector_end  ($f_store);
@@ -421,8 +421,8 @@ bool prog_info_is_func_exist(const prog_info *const prog, const func_info *const
 
 bool prog_info_is_func_name_exist(const prog_info *const prog, const token *const tkn)
 {
-    log_verify(prog != nullptr, false);
-    log_verify(tkn  != nullptr, false);
+    LOG_VERIFY(prog != nullptr, false);
+    LOG_VERIFY(tkn  != nullptr, false);
 
     func_info *f_cur = (func_info *) vector_begin($f_store);
     func_info *f_end = (func_info *) vector_end  ($f_store);
@@ -439,9 +439,9 @@ bool prog_info_is_func_name_exist(const prog_info *const prog, const token *cons
 
 size_t prog_info_get_var_index(const prog_info *const prog, const token *const tkn)
 {
-    log_verify(prog != nullptr, -1UL);
-    log_verify(tkn  != nullptr, -1UL);
-    log_verify(tkn->type == TOKEN_NAME, -1UL);
+    LOG_VERIFY(prog != nullptr, -1UL);
+    LOG_VERIFY(tkn  != nullptr, -1UL);
+    LOG_VERIFY(tkn->type == TOKEN_NAME, -1UL);
 
     var_info *v_cur = (var_info *) vector_begin($v_store);
     var_info *v_end = (var_info *) vector_end  ($v_store);
@@ -460,8 +460,8 @@ size_t prog_info_get_var_index(const prog_info *const prog, const token *const t
 
 size_t prog_info_get_func_index(const prog_info *const prog, const func_info *const func)
 {
-    log_verify(prog != nullptr, -1UL);
-    log_verify(func != nullptr, -1UL);
+    LOG_VERIFY(prog != nullptr, -1UL);
+    LOG_VERIFY(func != nullptr, -1UL);
 
     func_info *f_cur = (func_info *) vector_begin($f_store);
     func_info *f_end = (func_info *) vector_end  ($f_store);
@@ -482,9 +482,9 @@ size_t prog_info_get_func_index(const prog_info *const prog, const func_info *co
 
 size_t prog_info_var_push(prog_info *const prog, const token *const tkn)
 {
-    log_verify(prog != nullptr, -1UL);
-    log_verify(tkn  != nullptr, -1UL);
-    log_verify(tkn->type == TOKEN_NAME, -1UL);
+    LOG_VERIFY(prog != nullptr, -1UL);
+    LOG_VERIFY(tkn  != nullptr, -1UL);
+    LOG_VERIFY(tkn->type == TOKEN_NAME, -1UL);
 
     size_t var_index = prog_info_get_var_index(prog, tkn);
     if    (var_index != -1UL)
@@ -506,8 +506,8 @@ size_t prog_info_var_push(prog_info *const prog, const token *const tkn)
 
 size_t prog_info_func_push(prog_info *const prog, const func_info *const func)
 {
-    log_verify(prog != nullptr, -1UL);
-    log_verify(func != nullptr, -1UL);
+    LOG_VERIFY(prog != nullptr, -1UL);
+    LOG_VERIFY(func != nullptr, -1UL);
 
     size_t func_index = prog_info_get_func_index(prog, func);
     if    (func_index != -1UL) return func_index;
@@ -524,7 +524,7 @@ size_t prog_info_func_push(prog_info *const prog, const func_info *const func)
 
 void prog_info_scope_close(prog_info *const prog)
 {
-    log_verify(prog != nullptr, (void) 0);
+    LOG_VERIFY(prog != nullptr, (void) 0);
 
     var_info *v_cur = (var_info *) vector_begin($v_store);
     var_info *v_end = (var_info *) vector_end  ($v_store);
@@ -541,7 +541,7 @@ void prog_info_scope_close(prog_info *const prog)
 
 bool prog_info_func_exit(prog_info *const prog)
 {
-    log_assert(prog != nullptr);
+    LOG_ASSERT(prog != nullptr);
 
     const func_info *func    = (const func_info *) vector_end($f_store) - 1;
     const size_t     func_id = $f_store->size - 1;

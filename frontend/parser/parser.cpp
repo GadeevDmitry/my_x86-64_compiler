@@ -9,10 +9,10 @@ AST_node *parser(vector *token_arr, size_t *const main_func_id,
                                     size_t *const func_quantity)
 {
 $i
-$   vec_verify(token_arr, nullptr);
-    log_verify(main_func_id  != nullptr, nullptr);
-    log_verify(var_quantity  != nullptr, nullptr);
-    log_verify(func_quantity != nullptr, nullptr);
+$   VECTOR_VERIFY(token_arr, nullptr);
+    LOG_VERIFY   (main_func_id  != nullptr, nullptr);
+    LOG_VERIFY   (var_quantity  != nullptr, nullptr);
+    LOG_VERIFY   (func_quantity != nullptr, nullptr);
 
 $   prog_info      *program  = prog_info_new(MAIN_FUNC_NAME);
 $   token_arr_pass *tkn_pass = token_arr_pass_new(token_arr);
@@ -46,9 +46,9 @@ $o return result;
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #define parse_start $i                                                                                                          \
-        log_verify(prog     != nullptr, false);                                                                                 \
-        log_verify(tkn_pass != nullptr, false);                                                                                 \
-        log_verify(subtree  != nullptr, false);                                                                                 \
+        LOG_VERIFY(prog     != nullptr, false);                                                                                 \
+        LOG_VERIFY(tkn_pass != nullptr, false);                                                                                 \
+        LOG_VERIFY(subtree  != nullptr, false);                                                                                 \
         *subtree = nullptr;
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -196,7 +196,7 @@ $   AST_node_hang_right(*subtree, child);
 static bool parse_args(prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree, func_info *const func)
 {
     parse_start;
-    log_verify(func != nullptr, false);
+    LOG_VERIFY(func != nullptr, false);
 
     size_t args_quantity = 0UL;
 
@@ -216,7 +216,7 @@ $   func_info_set_arg(func, args_quantity);
 static bool parse_args_only(prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree, size_t *const args_quantity)
 {
     parse_start;
-    log_verify(args_quantity != nullptr, false);
+    LOG_VERIFY(args_quantity != nullptr, false);
 
     AST_node *arg_cur  = nullptr;
     AST_node *arg_next = nullptr;
@@ -349,7 +349,7 @@ $   switch ($tkn_pos->value.key)
         case KEY_ELSE  : parse_error("operator can't start with keyword \"else\"")      break;
 
         case KEY_UNDEF :
-        default        : log_assert_verbose(false, "undefined token key_type");         break;
+        default        : LOG_ASSERT_VERBOSE(false, "undefined token key_type");         break;
     }
 
     parse_success;
@@ -445,7 +445,7 @@ $   AST_node_hang_left(*subtree, child);
 static bool parse_params(prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree, func_info *const func)
 {
     parse_start;
-    log_verify(func != nullptr, false);
+    LOG_VERIFY(func != nullptr, false);
 
     size_t params_quantity = 0UL;
 
@@ -464,7 +464,7 @@ $   if (!prog_info_is_func_exist(prog, func)) parse_error("wrong parameters quan
 static bool parse_params_only(prog_info *const prog, token_arr_pass *const tkn_pass, AST_node **const subtree, size_t *const params_quantity)
 {
     parse_start;
-    log_verify(params_quantity != nullptr, false);
+    LOG_VERIFY(params_quantity != nullptr, false);
 
     AST_node *adapter = nullptr;
     AST_node *child   = nullptr;
@@ -707,7 +707,7 @@ $   AST_node_hang_right(expr_cur, expr_next);
 static bool parse_is_assignment(token_arr_pass *const tkn_pass)
 {
 $i
-    log_verify(tkn_pass != nullptr, false);
+    LOG_VERIFY(tkn_pass != nullptr, false);
 
     const token *const tkn_entry = $tkn_pos;
 
@@ -745,8 +745,8 @@ static bool   parse_op_pattern(prog_info *const prog, token_arr_pass *const tkn_
 {
     parse_start;
 
-    log_verify(parse_op_lower != nullptr, false);
-    log_verify(parse_op_token != nullptr, false);
+    LOG_VERIFY(parse_op_lower != nullptr, false);
+    LOG_VERIFY(parse_op_token != nullptr, false);
 
     AST_node *node_op       = nullptr;
     AST_node *node_op_lower = nullptr;
@@ -779,8 +779,8 @@ static __always_inline bool parse_log_or(prog_info *const prog, token_arr_pass *
 static bool parse_log_or_token(token_arr_pass *const tkn_pass, AST_node **const subtree)
 {
 $i
-    log_verify(tkn_pass != nullptr, false);
-    log_verify(subtree  != nullptr, false);
+    LOG_VERIFY(tkn_pass != nullptr, false);
+    LOG_VERIFY(subtree  != nullptr, false);
 
 $   if (is_passed || !token_op_is_log_or($tkn_pos)) { $o return false; }
     next;
@@ -804,8 +804,8 @@ static __always_inline bool parse_log_and(prog_info *const prog, token_arr_pass 
 static bool parse_log_and_token(token_arr_pass *const tkn_pass, AST_node **const subtree)
 {
 $i
-    log_verify(tkn_pass != nullptr, false);
-    log_verify(subtree  != nullptr, false);
+    LOG_VERIFY(tkn_pass != nullptr, false);
+    LOG_VERIFY(subtree  != nullptr, false);
 
 $   if (is_passed || !token_op_is_log_and($tkn_pos)) { $o return false; }
     next;
@@ -829,8 +829,8 @@ static __always_inline bool parse_equal(prog_info *const prog, token_arr_pass *c
 static bool parse_equal_token(token_arr_pass *const tkn_pass, AST_node **const subtree)
 {
 $i
-    log_verify(tkn_pass != nullptr, false);
-    log_verify(subtree  != nullptr, false);
+    LOG_VERIFY(tkn_pass != nullptr, false);
+    LOG_VERIFY(subtree  != nullptr, false);
 
 $   if      (is_passed) { $o return false; }
     else if (token_op_is_are_equal($tkn_pos)) { $ *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_ARE_EQUAL); }
@@ -856,8 +856,8 @@ static __always_inline bool parse_cmp(prog_info *const prog, token_arr_pass *con
 static bool parse_cmp_token(token_arr_pass *const tkn_pass, AST_node **const subtree)
 {
 $i
-    log_verify(tkn_pass != nullptr, false);
-    log_verify(subtree  != nullptr, false);
+    LOG_VERIFY(tkn_pass != nullptr, false);
+    LOG_VERIFY(subtree  != nullptr, false);
 
 $   if (is_passed || !token_type_is_op($tkn_pos)) { $o return false; }
 
@@ -894,8 +894,8 @@ static __always_inline bool parse_add_sub(prog_info *const prog, token_arr_pass 
 static bool parse_add_sub_token(token_arr_pass *const tkn_pass, AST_node **const subtree)
 {
 $i
-    log_verify(tkn_pass != nullptr, false);
-    log_verify(subtree  != nullptr, false);
+    LOG_VERIFY(tkn_pass != nullptr, false);
+    LOG_VERIFY(subtree  != nullptr, false);
 
 $   if      (is_passed) { $o return false; }
     else if (token_op_is_add($tkn_pos)) { $ *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_ADD); }
@@ -921,8 +921,8 @@ static __always_inline bool parse_mul_div(prog_info *const prog, token_arr_pass 
 static bool parse_mul_div_token(token_arr_pass *const tkn_pass, AST_node **const subtree)
 {
 $i
-    log_verify(tkn_pass != nullptr, false);
-    log_verify(subtree  != nullptr, false);
+    LOG_VERIFY(tkn_pass != nullptr, false);
+    LOG_VERIFY(subtree  != nullptr, false);
 
 $   if      (is_passed) { $o return false; }
     else if (token_op_is_mul($tkn_pos)) { $ *subtree = AST_node_new(AST_NODE_OPERATOR, AST_OPERATOR_MUL); }

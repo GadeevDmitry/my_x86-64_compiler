@@ -12,10 +12,10 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../../lib/logs/log.h"
-#include "../../lib/algorithm/algorithm.h"
-#include "../../lib/stack/stack.h"
-#include "../../lib/vector/vector.h"
+#include "../../lib/include/log.h"
+#include "../../lib/include/algorithm.h"
+#include "../../lib/include/stack.h"
+#include "../../lib/include/vector.h"
 
 #include "tokenizer.h"
 
@@ -107,7 +107,7 @@ static inline void token_name_fill_all()
 
 static void token_name_fill_arr(token_name elem[], size_t elem_size)
 {
-    log_assert(elem != nullptr);
+    LOG_ASSERT(elem != nullptr);
 
     for (size_t index = 0; index * sizeof(token_name) < elem_size; ++index)
     {

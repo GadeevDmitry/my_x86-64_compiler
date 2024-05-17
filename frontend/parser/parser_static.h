@@ -12,10 +12,10 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../../lib/logs/log.h"
-#include "../../lib/algorithm/algorithm.h"
-#include "../../lib/stack/stack.h"
-#include "../../lib/vector/vector.h"
+#include "../../lib/include/log.h"
+#include "../../lib/include/algorithm.h"
+#include "../../lib/include/stack.h"
+#include "../../lib/include/vector.h"
 
 #include "../tokenizer/tokenizer.h"
 

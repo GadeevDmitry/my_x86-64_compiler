@@ -2,7 +2,7 @@
 #define X64_TRANSLATOR_H
 
 #include <stdlib.h>
-#include "../../lib/vector/vector.h"
+#include "../../lib/include/vector.h"
 
 //================================================================================================================================
 // X64_TRANSLATOR

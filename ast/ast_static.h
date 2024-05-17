@@ -13,9 +13,9 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../lib/logs/log.h"
-#include "../lib/algorithm/algorithm.h"
-#include "../lib/graphviz_const/graphviz_const.h"
+#include "../lib/include/log.h"
+#include "../lib/include/algorithm.h"
+#include "../lib/include/graphviz_const.h"
 
 #include "ast.h"
 
@@ -82,7 +82,7 @@ static      size_t AST_tree_content_dump(const AST_node *const node, const size_
 static        void AST_node_content_dump(const AST_node *const node, const size_t node_index, FILE *const stream);
 static        void AST_tree_ending_dump (const char       *txt_file, const char    *png_file, FILE *const stream);
 
-static        void AST_node_get_dump_color(const AST_node *const node, GRAPHVIZ_COLOR *const color, GRAPHVIZ_COLOR *const color_fill);
+static        void AST_node_get_dump_color(const AST_node *const node, GRAPHVIZ_COLOR_T *const color, GRAPHVIZ_COLOR_T *const color_fill);
 static        void AST_node_get_dump_value(const AST_node *const node, char *const value_dump);
 
 static inline void AST_edge_dump(const size_t src, const size_t dst, FILE *const stream);

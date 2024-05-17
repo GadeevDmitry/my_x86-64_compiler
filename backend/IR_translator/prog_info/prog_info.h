@@ -3,8 +3,10 @@
 
 #include <stdlib.h>
 
-#include "../../../lib/array/array.h"
-#include "../../../lib/vector/vector.h"
+#include "../../../lib/include/array.h"
+#include "../../../lib/include/vector.h"
+
+#include "../../IR/IR.h"
 
 //================================================================================================================================
 // STRUCT

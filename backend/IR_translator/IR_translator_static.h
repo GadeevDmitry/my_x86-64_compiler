@@ -7,7 +7,7 @@
 
 #define LOG_NTRACE
 #define LOG_NLEAK
-#include "../../lib/logs/log.h"
+#include "../../lib/include/log.h"
 
 #include "../IR/IR.h"
 

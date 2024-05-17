@@ -2,7 +2,9 @@
 #define TOKENIZER_H
 
 #include <stdlib.h>
-#include "../../lib/vector/vector.h"
+
+#include "../../lib/include/vector.h"
+#include "../../lib/include/algorithm.h"
 
 //================================================================================================================================
 // TOKENIZER

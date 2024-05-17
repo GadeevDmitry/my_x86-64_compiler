@@ -12,8 +12,8 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../../lib/logs/log.h"
-#include "../../lib/algorithm/algorithm.h"
+#include "../../lib/include/log.h"
+#include "../../lib/include/algorithm.h"
 
 #include "IR.h"
 

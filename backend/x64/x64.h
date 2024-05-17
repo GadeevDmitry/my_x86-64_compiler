@@ -7,7 +7,7 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../../lib/logs/log.h"
+#include "../../lib/include/log.h"
 
 //================================================================================================================================
 // GLOBAL
@@ -135,7 +135,7 @@ static char x64_operand_get_scl(const x64_operand *const operand)               
 
 static __always_inline bool x64_operand_set_reg(x64_operand *const operand, const GPR reg)
 {
-    log_verify(operand != nullptr, false);
+    LOG_VERIFY(operand != nullptr, false);
 
     $reg = reg;
 
@@ -146,7 +146,7 @@ static __always_inline bool x64_operand_set_reg(x64_operand *const operand, cons
 
 static __always_inline bool x64_operand_set_imm(x64_operand *const operand, const int imm)
 {
-    log_verify(operand != nullptr, false);
+    LOG_VERIFY(operand != nullptr, false);
 
     $imm = imm;
 
@@ -157,8 +157,8 @@ static __always_inline bool x64_operand_set_imm(x64_operand *const operand, cons
 
 static __always_inline bool x64_operand_set_scl(x64_operand *const operand, const char scale_factor)
 {
-    log_verify(operand != nullptr, false);
-    log_verify_verbose((scale_factor == 1) ||
+    LOG_VERIFY(operand != nullptr, false);
+    LOG_VERIFY_VERBOSE((scale_factor == 1) ||
                        (scale_factor == 2) ||
                        (scale_factor == 4) ||
                        (scale_factor == 8), "wrong scale factor", false);
@@ -172,7 +172,7 @@ static __always_inline bool x64_operand_set_scl(x64_operand *const operand, cons
 
 static __always_inline GPR x64_operand_get_reg(const x64_operand *const operand)
 {
-    log_verify(operand != nullptr, GPR_UNDEF);
+    LOG_VERIFY(operand != nullptr, GPR_UNDEF);
 
     return $reg;
 }
@@ -181,7 +181,7 @@ static __always_inline GPR x64_operand_get_reg(const x64_operand *const operand)
 
 static __always_inline int x64_operand_get_imm(const x64_operand *const operand)
 {
-    log_verify(operand != nullptr, -1);
+    LOG_VERIFY(operand != nullptr, -1);
 
     return $imm;
 }
@@ -190,7 +190,7 @@ static __always_inline int x64_operand_get_imm(const x64_operand *const operand)
 
 static __always_inline char x64_operand_get_scl(const x64_operand *const operand)
 {
-    log_verify(operand != nullptr, -1);
+    LOG_VERIFY(operand != nullptr, -1);
 
     return $scl;
 }
@@ -264,7 +264,7 @@ void x64_node_dump(const void *const _node);
 
 static __always_inline bool x64_node_set_operand_1_scl(x64_node *const node, const char scale_factor)
 {
-    log_verify(node != nullptr, false);
+    LOG_VERIFY(node != nullptr, false);
 
     return x64_operand_set_scl(&$op_1, scale_factor);
 }
@@ -274,7 +274,7 @@ static __always_inline bool x64_node_set_operand_1_scl(x64_node *const node, con
 
 static __always_inline bool x64_node_set_operand_2_scl(x64_node *const node, const char scale_factor)
 {
-    log_verify(node != nullptr, false);
+    LOG_VERIFY(node != nullptr, false);
 
     return x64_operand_set_scl(&$op_2, scale_factor);
 }

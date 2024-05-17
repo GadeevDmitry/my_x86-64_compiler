@@ -10,14 +10,14 @@
 
 prog_info *prog_info_new(const size_t var_quantity, const size_t func_quantity)
 {
-    prog_info *prog_new = (prog_info *) log_calloc(1, sizeof(prog_info));
+    prog_info *prog_new = (prog_info *) LOG_CALLOC(1, sizeof(prog_info));
     if (prog_new == nullptr)
     {
-        log_error("log_calloc(1, sizeof(prog_info) = %lu) returns nullptr\n", sizeof(prog_info));
+        LOG_ERROR("LOG_CALLOC(1, sizeof(prog_info) = %lu) returns nullptr\n", sizeof(prog_info));
         return nullptr;
     }
 
-    if (!prog_info_ctor(prog_new, var_quantity, func_quantity)) { log_free(prog_new); return nullptr; }
+    if (!prog_info_ctor(prog_new, var_quantity, func_quantity)) { LOG_FREE(prog_new); return nullptr; }
     return prog_new;
 }
 
@@ -26,7 +26,7 @@ prog_info *prog_info_new(const size_t var_quantity, const size_t func_quantity)
 bool prog_info_ctor(prog_info *const prog, const size_t  var_quantity,
                                            const size_t func_quantity)
 {
-    log_verify(prog != nullptr, false);
+    LOG_VERIFY(prog != nullptr, false);
 
     $IR = vector_new(sizeof(IR_node), nullptr, nullptr, IR_node_dump);
 
@@ -46,7 +46,7 @@ bool prog_info_ctor(prog_info *const prog, const size_t  var_quantity,
 
 static bool loc_addr_ctor(array *const loc_addr)
 {
-    log_assert(loc_addr != nullptr);
+    LOG_ASSERT(loc_addr != nullptr);
 
     stack *const loc_addr_begin = (stack *) array_begin(loc_addr);
     stack *const loc_addr_end   = (stack *) array_end  (loc_addr);
@@ -69,11 +69,11 @@ vector *prog_info_dtor_no_IR(void *const _prog)
 
     prog_info *const prog = (prog_info *) _prog;
 
-    array_free($func);
-    array_free($glob);
-    array_free($loc);
+    array_delete($func);
+    array_delete($glob);
+    array_delete($loc);
 
-    stack_free($scope);
+    stack_delete($scope);
 
     return $IR;
 }
@@ -87,7 +87,7 @@ void prog_info_dtor(void *const _prog)
     prog_info_dtor_no_IR(_prog);
     prog_info *const prog = (prog_info *) _prog;
 
-    vector_free($IR);
+    vector_delete($IR);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ void prog_info_dtor(void *const _prog)
 vector *prog_info_delete_no_IR(void *const _prog)
 {
     vector *IR = prog_info_dtor_no_IR(_prog);
-    log_free(_prog);
+    LOG_FREE(_prog);
 
     return IR;
 }
@@ -105,7 +105,7 @@ vector *prog_info_delete_no_IR(void *const _prog)
 void prog_info_delete(void *const _prog)
 {
     prog_info_dtor(_prog);
-    log_free(_prog);
+    LOG_FREE(_prog);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -114,11 +114,11 @@ void prog_info_delete(void *const _prog)
 
 bool prog_info_set_global_var_addr(prog_info *const prog, const size_t var_ind)
 {
-    log_verify(prog   != nullptr    , false);
-    log_verify(var_ind < $glob->size, false);
+    LOG_VERIFY(prog   != nullptr    , false);
+    LOG_VERIFY(var_ind < $glob->size, false);
 
     size_t *var_cell = ((size_t *) array_begin($glob)) + var_ind;
-    log_verify_verbose(*var_cell == -1UL, "global variable is already declared", false);
+    LOG_VERIFY_VERBOSE(*var_cell == -1UL, "global variable is already declared", false);
 
     *var_cell = $rel;
     $rel++;
@@ -130,9 +130,9 @@ bool prog_info_set_global_var_addr(prog_info *const prog, const size_t var_ind)
 
 bool prog_info_add_local_var_addr(prog_info *const prog, const size_t var_ind)
 {
-    log_verify(prog != nullptr     , false);
-    log_verify(var_ind < $loc->size, false);
-    log_verify_verbose(!prog_info_is_local_var_redeclared(prog, var_ind),
+    LOG_VERIFY(prog != nullptr     , false);
+    LOG_VERIFY(var_ind < $loc->size, false);
+    LOG_VERIFY_VERBOSE(!prog_info_is_local_var_redeclared(prog, var_ind),
                        "local variable is already declared in this scope", false);
 
     stack *var_cell = ((stack *) array_begin($loc)) + var_ind;
@@ -147,9 +147,9 @@ bool prog_info_add_local_var_addr(prog_info *const prog, const size_t var_ind)
 
 static bool prog_info_is_local_var_redeclared(prog_info *const prog, const size_t var_ind)
 {
-    log_assert(prog != nullptr);
-    log_assert(var_ind < $loc->size);
-    log_verify(!stack_is_empty($scope), false);
+    LOG_ASSERT(prog != nullptr);
+    LOG_ASSERT(var_ind < $loc->size);
+    LOG_VERIFY(!stack_is_empty($scope), false);
 
     stack *var_cell = ((stack *) array_begin($loc)) + var_ind;
 
@@ -168,9 +168,9 @@ static bool prog_info_is_local_var_redeclared(prog_info *const prog, const size_
 
 bool prog_info_get_global_var_addr(prog_info *const prog, const size_t var_ind, size_t *const var_addr)
 {
-    log_verify(prog     != nullptr  , false);
-    log_verify(var_ind < $glob->size, false);
-    log_verify(var_addr != nullptr  , false);
+    LOG_VERIFY(prog     != nullptr  , false);
+    LOG_VERIFY(var_ind < $glob->size, false);
+    LOG_VERIFY(var_addr != nullptr  , false);
 
     *var_addr = ((size_t *) array_begin($glob))[var_ind];
     return *var_addr != -1UL;
@@ -180,9 +180,9 @@ bool prog_info_get_global_var_addr(prog_info *const prog, const size_t var_ind, 
 
 bool prog_info_get_local_var_addr(prog_info *const prog, const size_t var_ind, size_t *const var_addr)
 {
-    log_verify(prog     != nullptr , false);
-    log_verify(var_ind < $loc->size, false);
-    log_verify(var_addr != nullptr , false);
+    LOG_VERIFY(prog     != nullptr , false);
+    LOG_VERIFY(var_ind < $loc->size, false);
+    LOG_VERIFY(var_addr != nullptr , false);
 
     stack *var_cell = ((stack *) array_begin($loc)) + var_ind;
 
@@ -196,11 +196,11 @@ bool prog_info_get_local_var_addr(prog_info *const prog, const size_t var_ind, s
 
 bool prog_info_func_begin(prog_info *const prog, const size_t func_ind)
 {
-    log_verify(prog != nullptr       , false);
-    log_verify(func_ind < $func->size, false);
+    LOG_VERIFY(prog != nullptr       , false);
+    LOG_VERIFY(func_ind < $func->size, false);
 
     size_t *func_cell = ((size_t *) array_begin($func)) + func_ind;
-    log_verify_verbose(*func_cell == -1UL, "function is already declared", false);
+    LOG_VERIFY_VERBOSE(*func_cell == -1UL, "function is already declared", false);
 
     *func_cell = $IR->size;
 
@@ -215,11 +215,11 @@ bool prog_info_func_begin(prog_info *const prog, const size_t func_ind)
 
 bool prog_info_func_end(prog_info *const prog)
 {
-    log_verify(prog != nullptr, false);
+    LOG_VERIFY(prog != nullptr, false);
 
-    log_verify(!stack_is_empty($scope), false);
+    LOG_VERIFY(!stack_is_empty($scope), false);
     stack_pop($scope);          // удаление из стека адреса начала области видимости
-    log_verify(!stack_is_empty($scope), false);
+    LOG_VERIFY(!stack_is_empty($scope), false);
     stack_pop($scope, &$rel);   // удаление номера свободной ячейки для следующей глобальной переменной (see "prog_info_func_begin")
 
     stack *const loc_begin = (stack *) array_begin($loc);
@@ -230,7 +230,7 @@ bool prog_info_func_end(prog_info *const prog)
         if (stack_is_empty(var)) continue;
 
         stack_pop(var);
-        log_assert_verbose(stack_is_empty(var), "local variable is redeclared somewhere in the function");
+        LOG_ASSERT_VERBOSE(stack_is_empty(var), "local variable is redeclared somewhere in the function");
     }
 
     return true;
@@ -242,9 +242,9 @@ bool prog_info_func_end(prog_info *const prog)
 
 bool prog_info_get_func_addr(prog_info *const prog, const size_t func_ind, size_t *const func_addr)
 {
-    log_verify(prog      != nullptr  , false);
-    log_verify(func_ind < $func->size, false);
-    log_verify(func_addr != nullptr  , false);
+    LOG_VERIFY(prog      != nullptr  , false);
+    LOG_VERIFY(func_ind < $func->size, false);
+    LOG_VERIFY(func_addr != nullptr  , false);
 
     *func_addr = ((size_t *) array_begin($func))[func_ind];
     return *func_addr != -1UL;
@@ -256,7 +256,7 @@ bool prog_info_get_func_addr(prog_info *const prog, const size_t func_ind, size_
 
 bool prog_info_scope_in(prog_info *const prog)
 {
-    log_verify(prog != nullptr, false);
+    LOG_VERIFY(prog != nullptr, false);
 
     return stack_push($scope, &$rel);
 }
@@ -265,8 +265,8 @@ bool prog_info_scope_in(prog_info *const prog)
 
 bool prog_info_scope_out(prog_info *const prog)
 {
-    log_verify(prog != nullptr        , false);
-    log_verify(!stack_is_empty($scope), false);
+    LOG_VERIFY(prog != nullptr        , false);
+    LOG_VERIFY(!stack_is_empty($scope), false);
 
     stack_pop($scope, &$rel);
 
@@ -294,7 +294,7 @@ size_t prog_info_create_command(prog_info *const prog, const IR_CMD type, const 
                                                                           const bool is_mem,
                                                                           const bool is_imm, ...)
 {
-    log_verify(prog != nullptr, -1UL);
+    LOG_VERIFY(prog != nullptr, -1UL);
 
     va_list  ap;
     va_start(ap, is_imm);
@@ -314,7 +314,7 @@ size_t prog_info_create_command(prog_info *const prog, const IR_CMD type, const 
 
 size_t prog_info_get_next_command_num(const prog_info *const prog)
 {
-    log_verify(prog != nullptr, -1UL);
+    LOG_VERIFY(prog != nullptr, -1UL);
 
     return $IR->size;
 }
@@ -323,9 +323,9 @@ size_t prog_info_get_next_command_num(const prog_info *const prog)
 
 bool prog_info_fixup_jmp_addr(prog_info *const prog, const size_t jmp_cmd_num, const size_t label_num)
 {
-    log_verify(prog != nullptr, false);
-    log_verify(jmp_cmd_num <= $IR->size, false);
-    log_verify(label_num   <= $IR->size, false);
+    LOG_VERIFY(prog != nullptr, false);
+    LOG_VERIFY(jmp_cmd_num <= $IR->size, false);
+    LOG_VERIFY(label_num   <= $IR->size, false);
 
     IR_node *jmp_cmd = ((IR_node *) vector_begin($IR)) + jmp_cmd_num;
     IR_node_set_imm_val(jmp_cmd, (int) label_num);

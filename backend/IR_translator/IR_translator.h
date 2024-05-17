@@ -2,7 +2,7 @@
 #define IR_TRANSLATOR_H
 
 #include "../../ast/ast.h"
-#include "../../lib/vector/vector.h"
+#include "../../lib/include/vector.h"
 
 //================================================================================================================================
 // IR_TRANSLATOR

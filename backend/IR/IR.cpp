@@ -21,7 +21,7 @@ bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_reg,
                                                           const bool is_mem,
                                                           const bool is_imm, va_list ap)
 {
-    log_assert(node != nullptr);
+    LOG_ASSERT(node != nullptr);
 
     $type = type;
 
@@ -41,7 +41,7 @@ bool IR_node_ctor(IR_node *const node, const IR_CMD type, const bool is_reg,
                                                           const bool is_mem,
                                                           const bool is_imm, ...)
 {
-    log_verify(node != nullptr, false);
+    LOG_VERIFY(node != nullptr, false);
 
     va_list  ap;
     va_start(ap, is_imm);
@@ -58,15 +58,15 @@ IR_node *IR_node_new(const IR_CMD type, const bool is_reg,
                                         const bool is_mem,
                                         const bool is_imm, ...)
 {
-    IR_node   *node_new = (IR_node *) log_calloc(1, sizeof(IR_node));
-    log_verify(node_new != nullptr, nullptr);
+    IR_node   *node_new = (IR_node *) LOG_CALLOC(1, sizeof(IR_node));
+    LOG_VERIFY(node_new != nullptr, nullptr);
 
     va_list  ap;
     va_start(ap, is_imm);
 
     if (IR_node_ctor(node_new, type, is_reg, is_mem, is_imm, ap)) { va_end(ap); return node_new; }
 
-    log_free(node_new);
+    LOG_FREE(node_new);
     va_end(ap);
     return nullptr;
 }
@@ -75,7 +75,7 @@ IR_node *IR_node_new(const IR_CMD type, const bool is_reg,
 
 void IR_node_delete(void *const _node)
 {
-    log_free(_node);
+    LOG_FREE(_node);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ void IR_node_delete(void *const _node)
 
 bool IR_node_set_imm_val(IR_node *const node, const int imm_val)
 {
-    log_verify(node != nullptr, false);
+    LOG_VERIFY(node != nullptr, false);
 
     $imm_val = imm_val;
 
@@ -95,7 +95,7 @@ bool IR_node_set_imm_val(IR_node *const node, const int imm_val)
 
 bool IR_node_set_reg_num(IR_node *const node, const int reg_num)
 {
-    log_verify(node != nullptr, false);
+    LOG_VERIFY(node != nullptr, false);
 
     $reg_num = (unsigned char) reg_num;
 
@@ -108,7 +108,7 @@ bool IR_node_set_reg_num(IR_node *const node, const int reg_num)
 
 void IR_node_dump(const void *const _node)
 {
-    log_verify(_node != nullptr, (void) 0);
+    LOG_VERIFY(_node != nullptr, (void) 0);
 
     const IR_node *const node = (const IR_node *) _node;
 
@@ -121,9 +121,9 @@ void IR_node_dump(const void *const _node)
 
 static __always_inline void IR_node_header_dump(const IR_node *const node)
 {
-    log_assert(node != nullptr);
+    LOG_ASSERT(node != nullptr);
 
-    log_tab_service_message("IR_node (address: %p)\n"
+    LOG_TAB_SERVICE_MESSAGE("IR_node (address: %p)\n"
                             "{", "\n",       node);
     LOG_TAB++;
 }
@@ -132,22 +132,22 @@ static __always_inline void IR_node_header_dump(const IR_node *const node)
 
 static void IR_node_fields_dump(const IR_node *const node)
 {
-    log_assert(node != nullptr);
+    LOG_ASSERT(node != nullptr);
 
-    usual_field_dump("type", "%s", IR_CMD_NAMES[$type]);
+    USUAL_FIELD_DUMP("type", "%s", IR_CMD_NAMES[$type]);
 
-    log_tab_service_message("\n"
+    LOG_TAB_SERVICE_MESSAGE("\n"
                             "is_arg\n"
                             "{",  "\n");
     LOG_TAB++;
-    usual_field_dump("is_reg_arg", "%d", $is_reg);
-    usual_field_dump("is_mem_arg", "%d", $is_mem);
-    usual_field_dump("is_imm_arg", "%d", $is_imm);
+    USUAL_FIELD_DUMP("is_reg_arg", "%d", $is_reg);
+    USUAL_FIELD_DUMP("is_mem_arg", "%d", $is_mem);
+    USUAL_FIELD_DUMP("is_imm_arg", "%d", $is_imm);
     LOG_TAB--;
-    log_tab_service_message("}", "\n\n");
+    LOG_TAB_SERVICE_MESSAGE("}", "\n\n");
 
-    if ($is_reg) usual_field_dump("reg_num", "%u", $reg_num);
-    if ($is_imm) usual_field_dump("imm_val", "%u", $imm_val);
+    if ($is_reg) USUAL_FIELD_DUMP("reg_num", "%u", $reg_num);
+    if ($is_imm) USUAL_FIELD_DUMP("imm_val", "%u", $imm_val);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -155,5 +155,5 @@ static void IR_node_fields_dump(const IR_node *const node)
 static __always_inline void IR_node_ending_dump()
 {
     LOG_TAB--;
-    log_tab_service_message("}", "\n");
+    LOG_TAB_SERVICE_MESSAGE("}", "\n");
 }
