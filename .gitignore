@@ -1,15 +1,6 @@
-#------------------------
-# COMMON
-#------------------------
-
-TEST/
-obj/
-
-*.html
+.cache/
+.clangd
+compile_commands.json
+build/
+log.html
 *.txt
-
-#------------------------
-# EXE
-#------------------------
-
-jit

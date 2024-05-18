@@ -94,33 +94,32 @@ static void JIT_dtor(JIT *const run)
 // execute
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-static void JIT_execute(/* rdi */ const size_t RAM,
-                        /* rsi */ const size_t main_pc, 
-                        /* rdx */ const size_t global_data_size, /* rcx */  type_t (*const jit_sqrt  )(type_t),
-                                                                 /* r8  */  type_t (*const jit_input )(),
-                                                                 /* r9  */  void   (*const jit_output)(type_t))
+static void JIT_execute(const size_t RAM,
+                        const size_t main_pc,
+                        const size_t global_data_size, type_t (*const jit_sqrt  )(type_t),
+                                                       type_t (*const jit_input )(),
+                                                       void   (*const jit_output)(type_t))
 {
-    asm(
+    register auto   RAM_              asm("r10") = RAM;
+    register auto   main_pc_          asm("rsi") = main_pc;
+    register auto   global_data_size_ asm("rdi") = global_data_size;
+    register auto   jit_sqrt_         asm("r11") = jit_sqrt;
+    register auto   jit_input_        asm("r8" ) = jit_input;
+    register auto   jit_output_       asm("r9" ) = jit_output;
+
+    register size_t SCALE_            asm("rcx") = SCALE;
+
+    asm volatile(
         ".intel_syntax noprefix\n"
 
-        "push rax\n"
         "push rbx\n"
         "push rbp\n"
         "push r12\n"
         "push r13\n"
         "push r14\n"
         "push r15\n"
-                         // r8  = input
-                         // r9  = output
-        "mov r11, rcx\n" // r11 = sqrt
-        "mov r10, rdi\n" // r10 = RAM
-        "mov rbp, rdx\n" // rbp = main frame offset
-        "mov rcx, 100\n" // rcx = SCALE
 
-//      "int 3\n"
+        "mov rbp, rdi\n" // rbp := main RAM offset
 
         "call rsi\n"
 
@@ -130,13 +129,12 @@ static void JIT_execute(/* rdi */ const size_t RAM,
         "pop r12\n"
         "pop rbp\n"
         "pop rbx\n"
-        "pop rax\n"
 
         ".att_syntax prefix\n"
-    );
+    :
+    : "r"(RAM_), "r"(main_pc_), "r"(global_data_size_), "r"(jit_sqrt_), "r"(jit_input_), "r"(jit_output_), "r"(SCALE_)
+    : "cc", "memory");
 }
-
-#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // lib
@@ -158,7 +156,7 @@ static type_t JIT_sqrt(type_t number)
 
 static type_t JIT_input()
 {
-    fprintf(stderr, "INPUT : ");
+    fprintf(stdout, "INPUT : ");
 
     type_t number = 0;
     type_t digit  = 0;
@@ -188,7 +186,7 @@ static type_t JIT_input()
 
 static void JIT_output(type_t number)
 {
-    fprintf(stderr, "OUTPUT: ");
+    fprintf(stdout, "OUTPUT: ");
 
     type_t integer    = number / SCALE; number = (number < 0) ? -1 * number : number;
     type_t fractional = number % SCALE;
