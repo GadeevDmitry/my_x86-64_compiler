@@ -156,82 +156,24 @@ static type_t JIT_sqrt(type_t number)
 
 static type_t JIT_input()
 {
-    fprintf(stdout, "INPUT : ");
+    printf("INPUT : ");
 
-    type_t number = 0;
-    type_t digit  = 0;
-    type_t  sign  = 1;
-    bool is_sign  = false;
+    char input_buf[100] = {};
+    scanf("%99s", input_buf);
 
-    for (digit = getc(stdin); digit != EOF && digit != '\n' && digit != '\0'; digit = getc(stdin))
-    {
-        if (digit == '-')
-        {
-            if (!is_sign) { is_sign = true; sign = -1; }
-            continue;
-        }
-        if (!isdigit((int) digit)) continue;
+    long long real_number = 0;
+    sscanf(input_buf, "%lld", &real_number);
 
-        number *= 10;
-        number += digit - '0';
-    }
-
-    number *= sign;
-    number *= SCALE;
-
-    return number;
+    type_t converted_number = (real_number * SCALE);
+    return converted_number;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void JIT_output(type_t number)
+static void JIT_output(type_t converted_number)
 {
-    fprintf(stdout, "OUTPUT: ");
-
-    type_t integer    = number / SCALE; number = (number < 0) ? -1 * number : number;
-    type_t fractional = number % SCALE;
-
-    JIT_output_not_scaled(integer, false);
-    putc(',', stdout);
-
-    JIT_output_not_scaled(fractional, true);
-    putc('\n', stdout);
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static void JIT_output_not_scaled(type_t number, bool is_fractional)
-{
-    const size_t buff_sz = 100;
-    size_t       index   = buff_sz - 2;
-
-    bool is_neg = false;
-    char out_buff[buff_sz] = {};
-
-    if (number < 0)
-    {
-        is_neg = true;
-        number *= -1;
-    }
-
-    do
-    {
-        out_buff[index--] = (char) (number % 10) + '0';
-        number /= 10;
-    }
-    while (number != 0 && index < buff_sz - 2);
-
-    if  (is_neg) out_buff[index] = '-';
-    else         index++;
-
-    if (!is_fractional) for (; out_buff[index] != '\0'; ++index) putc(out_buff[index], stdout);
-    else
-    {
-        if (index == buff_sz - 2) out_buff[buff_sz - 3] = '0';
-
-        putc(out_buff[buff_sz - 3], stdout);
-        putc(out_buff[buff_sz - 2], stdout);
-    }
+    double real_number = (double) converted_number / SCALE;
+    printf("OUTPUT: %.2lf\n", real_number);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

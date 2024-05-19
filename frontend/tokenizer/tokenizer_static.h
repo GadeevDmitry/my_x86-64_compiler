@@ -47,7 +47,7 @@ struct token_name
 
 static token_name KEY_NAMES[] =
 {
-    {"TRABLE"            , "long"    , 0},
+    {"TREBLE"            , "long"    , 0},
 
     {"CHAMPIONS_LEAGUE"  , "if"      , 0},
     {"PREMIER_LEAGUE"    , "else"    , 0},

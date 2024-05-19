@@ -1,4 +1,4 @@
-TRABLE factorial ( TRABLE n )
+TREBLE factorial ( TREBLE n )
 {
     CHAMPIONS_LEAGUE ( n <  0 )           { MANCHESTER_IS_BLUE 0 ; }
     CHAMPIONS_LEAGUE ( n == 0 || n == 1 ) { MANCHESTER_IS_BLUE 1 ; }
@@ -6,8 +6,8 @@ TRABLE factorial ( TRABLE n )
     MANCHESTER_IS_BLUE n * factorial ( n - 1 ) ;
 }
 
-TRABLE N ;
-TRABLE MAN_CITY ( )
+TREBLE N ;
+TREBLE MAN_CITY ( )
 {
     DE_BRUYNE  N ;
     RODRI factorial ( N ) ;
