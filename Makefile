@@ -95,9 +95,9 @@ LIB_BUILD_DIR := $(ROOT_BUILD_DIR)lib/
 .PHONY: lib_obj
 lib_obj:
 ifeq ($(debug), 1)
-	$(MAKE) BUILD_DIR:='$(ROOT_BUILD_DIR)' PREFIX:='$(ROOT_PREFIX)lib/' -f lib/Makefile mode=verify
+	$(MAKE) BUILD_DIR:='$(ROOT_BUILD_DIR)' PREFIX:='$(ROOT_PREFIX)lib/' -f lib/Makefile verify=1
 else
-	$(MAKE) BUILD_DIR:='$(ROOT_BUILD_DIR)' PREFIX:='$(ROOT_PREFIX)lib/' -f lib/Makefile mode=release
+	$(MAKE) BUILD_DIR:='$(ROOT_BUILD_DIR)' PREFIX:='$(ROOT_PREFIX)lib/' -f lib/Makefile release=1
 endif
 
 LIB_OBJS := $(shell find $(LIB_BUILD_DIR) -name "*.o" 2>/dev/null)
