@@ -278,14 +278,15 @@ static void src_line_tracking_upd(src_line_tracking_t *self, const char *cur_ptr
     LOG_ASSERT(cur_ptr != nullptr);
 
     const char *new_line_ptr = nullptr;
-    stack_front(&self->new_line_ptrs, &new_line_ptr);
-
-    while (new_line_ptr <= cur_ptr && !stack_is_empty(&self->new_line_ptrs))
+    while (!stack_is_empty(&self->new_line_ptrs))
     {
-        ++self->cur_src_line;
-
-        stack_pop  (&self->new_line_ptrs);
         stack_front(&self->new_line_ptrs, &new_line_ptr);
+
+        if (new_line_ptr > cur_ptr)
+            break;
+
+        ++self->cur_src_line;
+        stack_pop(&self->new_line_ptrs);
     }
 }
 
