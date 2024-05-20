@@ -9,8 +9,8 @@
 #define NDEBUG
 #define NVERIFY
 
-#include "../../lib/include/log.h"
-#include "../../lib/include/algorithm.h"
+#include "lib/include/log.h"
+#include "lib/include/buffer.h"
 
 #include "../x64/x64.h"
 

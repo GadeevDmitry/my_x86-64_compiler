@@ -1,8 +1,8 @@
 #ifndef BIN_TRANSLATOR_H
 #define BIN_TRANSLATOR_H
 
-#include "../../lib/include/algorithm.h"
-#include "../../lib/include/vector.h"
+#include "lib/include/buffer.h"
+#include "lib/include/vector.h"
 
 //================================================================================================================================
 // BINARY_TRANSLATOR

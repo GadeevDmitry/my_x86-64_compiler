@@ -1,19 +1,9 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
-#include <stdlib.h>
+#include "lib/include/vector.h"
+#include "lib/include/buffer.h"
 
-#include "../../lib/include/vector.h"
-#include "../../lib/include/algorithm.h"
-
-//================================================================================================================================
-// TOKENIZER
-//================================================================================================================================
-
-vector *tokenizer(buffer *const source);
-
-//================================================================================================================================
-// TOKEN
 //================================================================================================================================
 
 enum KEY_TYPE
@@ -94,24 +84,16 @@ struct token
     value;
 };
 
-//--------------------------------------------------------------------------------------------------------------------------------
-// token define
-//--------------------------------------------------------------------------------------------------------------------------------
+//================================================================================================================================
 
-#define $type       (tkn->type)
-#define $size       (tkn->size)
-#define $line       (tkn->line)
+vector *tokenizer (buffer *const source);
+void    token_dump(const void *const _tkn);
 
-#define $name       (tkn->value.name)
-#define $imm_int    (tkn->value.imm_int)
-#define $key        (tkn->value.key)
-#define $op         (tkn->value.op)
-
-//--------------------------------------------------------------------------------------------------------------------------------
+//================================================================================================================================
 
 #define     token_type_is_smth(token_type, TOKEN_TYPE_name)                                                                     \
 inline bool token_type_is_ ##  token_type(const token *const tkn);                                                              \
-inline bool token_type_is_ ##  token_type(const token *const tkn) { return $type == TOKEN_TYPE_name; }
+inline bool token_type_is_ ##  token_type(const token *const tkn) { return tkn->type == TOKEN_TYPE_name; }
 
 token_type_is_smth(name, TOKEN_NAME    )
 token_type_is_smth(int , TOKEN_INT     )
@@ -124,7 +106,7 @@ token_type_is_smth(op  , TOKEN_OPERATOR)
 
 #define     token_op_is_smth(op_type, OP_TYPE_name)                                                                             \
 inline bool token_op_is_ ##  op_type(const token *const tkn);                                                                   \
-inline bool token_op_is_ ##  op_type(const token *const tkn) { return token_type_is_op(tkn) && $op == OP_TYPE_name; }
+inline bool token_op_is_ ##  op_type(const token *const tkn) { return token_type_is_op(tkn) && tkn->value.op == OP_TYPE_name; }
 
 token_op_is_smth(log_and        , OPERATOR_LOG_AND       )
 token_op_is_smth(log_or         , OPERATOR_LOG_OR        )
@@ -160,7 +142,7 @@ token_op_is_smth(r_scope_circle , OPERATOR_R_SCOPE_CIRCLE)
 
 #define     token_key_is_smth(token_key, KEY_TYPE_name)                                                                         \
 inline bool token_key_is_  ## token_key(const token *const tkn);                                                                \
-inline bool token_key_is_  ## token_key(const token *const tkn) { return token_type_is_key(tkn) && $key == KEY_TYPE_name; }
+inline bool token_key_is_  ## token_key(const token *const tkn) { return token_type_is_key(tkn) && tkn->value.key == KEY_TYPE_name; }
 
 token_key_is_smth(int   , KEY_INT   )
 
@@ -174,22 +156,5 @@ token_key_is_smth(input , KEY_INPUT )
 token_key_is_smth(output, KEY_OUTPUT)
 
 #undef token_key_is_smth
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#undef $type
-#undef $size
-#undef $line
-
-#undef $name
-#undef $imm_int
-#undef $key
-#undef $op
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// dump
-//--------------------------------------------------------------------------------------------------------------------------------
-
-void token_dump(const void *const _tkn);
 
 #endif //TOKENIZER_H

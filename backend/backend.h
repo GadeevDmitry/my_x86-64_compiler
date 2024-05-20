@@ -1,8 +1,8 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
-#include "../lib/include/algorithm.h"
-#include "../ast/ast.h"
+#include "lib/include/buffer.h"
+#include "ast/ast.h"
 
 //================================================================================================================================
 // BACKEND
