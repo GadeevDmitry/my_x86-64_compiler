@@ -5,6 +5,6 @@ PREFIX    := $(ROOT_PREFIX)JIT/llvm/
 BUILD_DIR := $(ROOT_BUILD_DIR)
 
 INCLUDES := -I$(ROOT_PREFIX) -I$(ROOT_PREFIX)JIT/llvm/ -I$(ROOT_PREFIX)ast/llvm/ -I$(ROOT_PREFIX)frontend/llvm/
-CFLAGS   += -mstackrealign
+CFLAGS   += `llvm-config --cxxflags`
 
 include $(ROOT_PREFIX)makefiles/auto_deps.mk

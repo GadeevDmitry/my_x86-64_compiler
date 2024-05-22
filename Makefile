@@ -196,7 +196,7 @@ LLVM_JIT_EXE_OBJS := $(AST_LLVM_OBJS) $(TOKENIZER_OBJS) $(FRONTEND_LLVM_OBJS) $(
 
 .PHONY: LlvmJIT_exe_linkage
 LlvmJIT_exe_linkage:
-	$(CC) $(CFLAGS) $(LLVM_JIT_EXE_OBJS) -o $(ROOT_BUILD_DIR)LlvmJIT
+	$(CC) $(CFLAGS) `llvm-config --ldflags --system-libs --libs core` $(LLVM_JIT_EXE_OBJS) -o $(ROOT_BUILD_DIR)LlvmJIT
 
 .PHONY: LlvmJIT_exe
 LlvmJIT_exe:

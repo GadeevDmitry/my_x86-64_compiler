@@ -1,8 +1,16 @@
 #ifndef LLVM_AST_HPP
 #define LLVM_AST_HPP
 
+#include <map>
+#include <stack>
 #include <vector>
 #include <memory>
+
+#include "llvm/IR/Value.h"
+
+//================================================================================================================================
+
+struct codegen_manager_t;
 
 //================================================================================================================================
 
@@ -11,9 +19,10 @@ class LLVM_AST_expression_node
 // member functions
 public:
     LLVM_AST_expression_node(size_t src_line);
-
     virtual ~LLVM_AST_expression_node() = default;
-    virtual void dump() const;
+
+    virtual void         dump   ()                           const;
+    virtual llvm::Value *codegen(codegen_manager_t &manager) const = 0;
 
 // member data
 public:
@@ -49,7 +58,9 @@ class LLVM_AST_value_imm_node: public LLVM_AST_value_node
 // member functions
 public:
     LLVM_AST_value_imm_node(size_t src_line, int value);
-    void dump() const override;
+
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -63,7 +74,9 @@ class LLVM_AST_value_var_node: public LLVM_AST_value_node
 // member functions
 public:
     LLVM_AST_value_var_node(size_t src_line, const char *name);
-    void dump() const override;
+
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -77,7 +90,9 @@ class LLVM_AST_value_func_call_node: public LLVM_AST_value_node
 // member functions
 public:
     LLVM_AST_value_func_call_node(size_t src_line, const char *name);
-    void dump() const override;
+
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -110,7 +125,9 @@ private:
 // member functions
 public:
     LLVM_AST_operator_unary_node(size_t src_line, LLVM_AST_UNARY_OPERATOR_TYPE type, std::unique_ptr<LLVM_AST_value_node> &&operand);
-    void dump() const override;
+
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -170,7 +187,8 @@ public:
         std::unique_ptr<LLVM_AST_value_node> &&lhs,
         std::unique_ptr<LLVM_AST_value_node> &&rhs);
 
-    void dump() const override;
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -189,7 +207,8 @@ public:
         size_t src_line,
         std::unique_ptr<LLVM_AST_value_node> &&cond);
 
-    void dump() const override;
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -208,7 +227,8 @@ public:
         size_t src_line,
         std::unique_ptr<LLVM_AST_value_node> &&cond);
 
-    void dump() const override;
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -223,7 +243,9 @@ class LLVM_AST_statement_var_decl_node: public LLVM_AST_statement_node
 // member functions
 public:
     LLVM_AST_statement_var_decl_node(size_t src_line, const char *name);
-    void dump() const override;
+
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -237,7 +259,9 @@ class LLVM_AST_statement_func_decl_node: public LLVM_AST_statement_node
 // member functions
 public:
     LLVM_AST_statement_func_decl_node(size_t src_line, const char *name);
-    void dump() const override;
+
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -256,7 +280,8 @@ public:
         size_t src_line,
         std::unique_ptr<LLVM_AST_value_node> &&value);
 
-    void dump() const override;
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -273,7 +298,8 @@ public:
         size_t src_line,
         std::unique_ptr<LLVM_AST_value_node> &&lvalue);
 
-    void dump() const override;
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:
@@ -290,7 +316,8 @@ public:
         size_t src_line,
         std::unique_ptr<LLVM_AST_value_node> &&value);
 
-    void dump() const override;
+    void         dump   ()                           const override;
+    llvm::Value *codegen(codegen_manager_t &manager) const override;
 
 // member data
 public:

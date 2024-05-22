@@ -1,7 +1,9 @@
 #include <stdio.h>
 
 #include "frontend.hpp"
+
 #include "parser/parser.hpp"
+#include "IR/IR_translator.hpp"
 #include "frontend/tokenizer/tokenizer.h"
 
 #include "lib/include/log.h"
@@ -28,8 +30,13 @@ void frontend(const char *source_code)
         return;
     }
 
-    std::unique_ptr<LLVM_AST_module_node> result = module_parser(source_code, token_arr);
-    if (result) result->dump();
+    std::unique_ptr<LLVM_AST_module_node> ast = module_parser(source_code, token_arr);
+    if (!ast) return;
+    ast->dump();
+
+    std::unique_ptr<llvm::Module> ir = module_translator(ast.get());
+    if (!ir) return;
+//  ir->dump();
 
     buffer_dtor  (&source);
     vector_delete(token_arr);

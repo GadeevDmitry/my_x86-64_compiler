@@ -9,8 +9,9 @@ TREBLE factorial ( TREBLE n )
 TREBLE N ;
 TREBLE MAN_CITY ( )
 {
-    DE_BRUYNE  N ;
-    RODRI factorial ( N ) ;
+#   DE_BRUYNE  N ;
+#   RODRI
+    factorial ( N ) ;
 
     MANCHESTER_IS_BLUE 0 ;
 }
