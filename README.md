@@ -3,7 +3,7 @@ ManCityLang - C-подобный язык программирования, по
 
 ## Запуск компилятора
 
-Для сборки м запуска компилятора выполните следующие команды:
+Для сборки и запуска компилятора выполните следующие команды:
 ```
 git clone --recursive https://github.com/GadeevDmitry/my_x86-64_compiler.git
 cd my_x86-64_compiler
@@ -117,7 +117,7 @@ make jit
 
   Последний этап - генерация бинарного кода для дальнейшей конвертации в файл или исполнения.
 
-## IR
+#### IR
 
 В данной реализации IR рассчитан на абстрактный стековый процессор и представляет собой массив структур [IR_node](backend/IR/IR.h), в котором каждый элемент соответствует отдельной команде IR:
 
@@ -155,5 +155,105 @@ struct IR_node
 *  В бинарных операторах на вершине стека находится правый (второй) операнд.
 *  В описании под словом стек подразумевается абстрактный стек - на его реализацию ограничений не накладывается.
 
-## Структура ELF файла
-//TODO
+## LLVM-frontend
+
+В дополнение к компилятору был написан [llvm](https://github.com/llvm/llvm-project)-frontend, который преобразует исходный код в [llvm IR](https://llvm.org/docs/LangRef.html) - стандартизированное промежуточное представление.
+
+### Запуск
+Для сборки и запуска llvm-frontend выполните следующие команды:
+```
+make LlvmJit
+./LlvmJit [source filename] 2> [output filename]
+```
+В выходном файле появится сгенерированный llvm-ir в текстовом представлении.
+
+### Устройство llvm-frontend
+llvm-frontend состоит из двух частей: [parser](frontend/llvm/parser/) и [IR-translator](frontend/llvm/IR/).
+
+#### Parser
+Для реализации llvm-frontend было принято решение написать новый парсер, который лучше предыдущего по следующим причинам:
+  * [Архитектура AST](ast/llvm/) реализована с помощью техники ООП - это позволяет использовать разные производные классы AST-вершин для разных синтаксических конструкций, вместо одной структуры с union-ом внутри.
+
+  * Для парсинга бинарных выражений была использована техника ["Operator-precedence parser"](https://en.wikipedia.org/wiki/Operator-precedence_parser). Она хорошо ложиться на синтаксис бинарных выражений данного языка и проще в реализации, чем рекурсивный спуск. Пример использования данной техники с пояснениями также можно найти в [llvm-Kaleidoscope](https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/LangImpl02.html).
+
+  * Также, AST-вершины хранят имена объектов - это облегчает взаимодействие с llvm-таблицами символов, и текстовое представление IR cодержит те же имена, что и в исходном коде.
+
+#### IR
+Генерация IR осуществляется с помощью (библиотеки llvm)[https://llvm.org/doxygen/]. Вот как может выглядеть IR для следующего исходного кода:
+```
+TREBLE factorial ( TREBLE n )
+{
+    CHAMPIONS_LEAGUE ( n <  0 )           { MANCHESTER_IS_BLUE 0 ; }
+    CHAMPIONS_LEAGUE ( n == 0 || n == 1 ) { MANCHESTER_IS_BLUE 1 ; }
+
+    MANCHESTER_IS_BLUE n * factorial ( n - 1 ) ;
+}
+
+TREBLE N ;
+TREBLE MAN_CITY ( )
+{
+#   DE_BRUYNE  N ;
+#   RODRI
+    factorial ( N ) ;
+
+    MANCHESTER_IS_BLUE 0 ;
+}
+
+```
+```
+define internal double @factorial(double %n) {
+entry:
+  %n1 = alloca double, align 8
+  %n2 = load double, double* %n1, align 8
+  %"<" = fcmp ult double %n2, 0.000000e+00
+  %0 = uitofp i1 %"<" to double
+  %"if cond" = fcmp one double %0, 0.000000e+00
+  br i1 %"if cond", label %then, label %"if cont"
+
+then:                                             ; preds = %entry
+  ret double 0.000000e+00
+
+1:                                                ; No predecessors!
+  br label %"if cont"
+
+"if cont":                                        ; preds = %1, %entry
+  %n3 = load double, double* %n1, align 8
+  %"==" = fcmp ueq double %n3, 0.000000e+00
+  %2 = uitofp i1 %"==" to double
+  %n4 = load double, double* %n1, align 8
+  %"==5" = fcmp ueq double %n4, 1.000000e+00
+  %3 = uitofp i1 %"==5" to double
+  %"lhs: double to int" = fptoui double %2 to i1
+  %"rhs: double to int" = fptoui double %2 to i1
+  %"||" = select i1 %"lhs: double to int", i1 true, i1 %"rhs: double to int"
+  %4 = uitofp i1 %"||" to double
+  %"if cond6" = fcmp one double %4, 0.000000e+00
+  br i1 %"if cond6", label %then7, label %"if cont8"
+
+then7:                                            ; preds = %"if cont"
+  ret double 1.000000e+00
+
+5:                                                ; No predecessors!
+  br label %"if cont8"
+
+"if cont8":                                       ; preds = %5, %"if cont"
+  %n9 = load double, double* %n1, align 8
+  %n10 = load double, double* %n1, align 8
+  %- = sub double %n10, 1.000000e+00
+  %factorial = call double @factorial(double %-)
+  %"*" = mul double %n9, %factorial
+  ret double %"*"
+
+6:                                                ; No predecessors!
+}
+
+@N = external global double
+define internal double @MAN_CITY() {
+entry:
+  %N = load double, double* @N, align 8
+  %factorial = call double @factorial(double %N)
+  ret double 0.000000e+00
+
+0:                                                ; No predecessors!
+}
+```
